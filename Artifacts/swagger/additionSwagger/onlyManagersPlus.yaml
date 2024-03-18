@@ -1,0 +1,1691 @@
+openapi: 3.0.3
+info:
+  title: Swagger Applicant - OpenAPI 3.0
+  description: |-
+
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: https://applicant.swagger.io/api/v3
+tags:
+  - name: user
+    description: ''
+  - name: applicant
+    description: ''
+  - name: entrance
+    description: ''
+  - name: faculty
+    description: ' '
+paths:
+
+
+  /user/register:
+    post:
+      tags:
+        - user
+      summary: Регистрация пользователя в системе
+      description: Пользователь может зарегитрироваться в системе.
+      operationId: createUser
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegister'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/UserRegister'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRegister'
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRegister'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/UserRegister'
+                
+                
+                
+  /user/login:
+    post:
+      tags:
+        - user
+      summary: Авторизация пользователя в системе.
+      description: Пользователь может войти в существующий аккаунт.
+      operationId: loginUser
+      requestBody:
+        description: Logged user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/xml:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid username/password supplied
+          
+          
+          
+  /user/logout:
+    post:
+      tags:
+        - user
+      summary: Выход пользовтаеля из системы(Нужна авторизация)
+      description: ''
+      operationId: logoutUser
+      responses:
+        default:
+          description: successful operation
+      security:
+        - bearerAuth: []
+          
+          
+          
+          
+  /user/profile:
+    get:
+      tags:
+        - user
+      summary: Получение информации о пользователе.(Нужна авторизация)
+      description: Пользователь может получить информацию о себе.
+      operationId: getUserProfile
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserProfile'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/GetUserProfile'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []          
+          
+    patch:
+      tags:
+        - user
+      summary: Изменить информации о пользователе.(Нужна авторизация)
+      description: Пользователь может изменить информацию о себе.
+      operationId: putUserProfile
+      requestBody:
+        description: Update an existent pet in the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditUserProfile'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/EditUserProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EditUserProfile'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditUserProfile'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/EditUserProfile'
+        '400':
+          description: Invalid ID supplied
+        '422':
+          description: Validation exception
+      security:
+        - bearerAuth: [] 
+          
+          
+          
+  /user/role/{userId}:
+    put:
+      tags:
+        - user
+      summary: Изменить роль пользователю.(Нужна авторизация)
+      description: Можно поменять роль пользователю.
+      operationId: editUserRole
+      parameters:
+        - name: userId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: roles
+          in: query
+          description: ''
+          required: false
+          explode: true
+          schema:
+            type: string
+            default: available
+            enum:
+              - manager
+              - mainManager
+              - applicant
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []
+          
+          
+    get:
+      tags:
+        - user
+      summary: Получить роль пользователю.(Нужна авторизация)
+      description: Можно получить роль пользователю.
+      operationId: getUserRole
+      parameters:
+        - name: userId
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: integer
+            format: int64 
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Roles'          
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Roles'
+        '400':
+          description: Invalid ID supplied
+        '404':  
+          description: Order not found
+      security:
+        - bearerAuth: []          
+          
+
+          
+          
+          
+          
+  /applicant/profile/{applicantId}:
+    patch:
+      tags:
+        - applicant
+      summary: Изменить профиль опредленного абитуриента(Нужна авторизация)
+      description: Получить информацию .
+      operationId: patchApplicantInformation
+      parameters:
+        - name: applicantId
+          in: path
+          description: ' '
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditApplicantProfile'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/EditApplicantProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EditApplicantProfile'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditApplicantProfile'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/EditApplicantProfile'
+        '400':
+          description: Invalid ID supplied
+        '422':
+          description: Validation exception
+      security:
+        - bearerAuth: []    
+    get:
+      tags:
+        - applicant
+      summary: Получить профиль определенного абитуриента (Нужна авторизация)
+      description: Получить информацию .
+      operationId: getApplicantInformation
+      parameters:
+        - name: applicantId
+          in: path
+          description: ' '
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetApplicantProfile'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/GetApplicantProfile'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []              
+          
+
+  /document/{type}/{applicantId}/upload:
+    post:
+      tags:
+        - applicant
+      summary: Загрузить скан опредленному абитуриенту (Нужна авторизация)
+      description: Получить информацию .
+      operationId: uploadApplicantDocument
+      parameters:
+      - name: type
+        in: path
+        description: ''
+        required: true
+        explode: true
+        schema:
+          $ref: '#/components/schemas/DocumentType'
+      - name: applicantId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []
+  /document/{type}/{applicantId}/unload:
+    post:
+      tags:
+        - applicant
+      summary: Скачать скан документа опредленного абитуриента(Нужна авторизация)
+      description: Получить информацию .
+      operationId: unloadApplicantDocument
+      parameters:
+      - name: type
+        in: path
+        description: ''
+        required: true
+        explode: true
+        schema:
+          $ref: '#/components/schemas/DocumentType'
+      - name: applicantId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []
+  /document/{type}/{applicantId}:
+    put:
+      tags:
+        - applicant
+      summary: Изменить скан определенного документа у абитуриента (Нужна авторизация)
+      description: Получить информацию .
+      operationId: editApplicantDocument
+      parameters:
+      - name: type
+        in: path
+        description: ''
+        required: true
+        explode: true
+        schema:
+          $ref: '#/components/schemas/DocumentType'
+      - name: applicantId
+        in: path
+        description: ''
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - applicant
+      summary: Удалить скан у определенного абитуриента(Нужна авторизация)
+      description: Получить информацию .
+      operationId: deleteApplicantDocument
+      parameters:
+      - name: type
+        in: path
+        description: ''
+        required: true
+        explode: true
+        schema:
+          $ref: '#/components/schemas/DocumentType'
+      - name: applicantId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []
+  /document/{applicantId}:
+    get:
+      tags:
+        - applicant
+      summary: Получить информацию о документе опредленного абитуриента (Нужна авторизация)
+      description: Получить информацию .
+      operationId: getApplicantDocument
+      parameters:
+      - name: applicantId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []          
+  /document/passport/information/{applicantId}:
+    patch:
+      tags:
+        - applicant
+      summary: Изменить информацию о паспорте определенного абитуриента (Нужна авторизация)
+      description: Получить информацию .
+      operationId: patchCurrentApplicantPassportInformation
+      parameters:
+      - name: applicantId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostPassportInformation'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/PostPassportInformation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostPassportInformation'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostPassportInformation'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/PostPassportInformation'
+        '400':
+          description: Invalid ID supplied
+        '422':
+          description: Validation exception
+      security:
+        - bearerAuth: []
+    get:
+      tags:
+        - applicant
+      summary: Получить информацию о паспорте определенного абитуриента (Нужна авторизация)
+      description: Получить информацию .
+      operationId: getCurrentApplicantPassportInformation
+      parameters:
+      - name: applicantId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostPassportInformation'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/PostPassportInformation'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - applicant
+      summary: Удалить информацию о паспорте определенного абитуриента (Нужна авторизация)
+      description: Получить информацию .
+      operationId: deleteCurrentApplicantPassportInformation
+      parameters:
+      - name: applicantId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []          
+
+  /document/education/information/{applicantId}:
+    patch:
+      tags:
+        - applicant
+      summary: Изменить информацию о документе об образовании определенного абитуриента(Нужна авторизация)
+      description: Получить информацию .
+      operationId: patchCurrentApplicantEducationInformation
+      parameters:
+      - name: applicantId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EducationInformation'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/EducationInformation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EducationInformation'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EducationInformation'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/EducationInformation'
+        '400':
+          description: Invalid ID supplied
+        '422':
+          description: Validation exception
+      security:
+        - bearerAuth: []
+    get:
+      tags:
+        - applicant
+      summary:  Получить информацию о документе об образовании определенного абитуриента(Нужна авторизация)
+      description: Получить информацию .
+      operationId: getCurrentApplicantEducationInformation
+      parameters:
+      - name: applicantId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostPassportInformation'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/PostPassportInformation'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - applicant
+      summary:  Удалить информацию о документе об образовании определенного абитуриента(Нужна авторизация)
+      description: Получить информацию .
+      operationId: deleteCurrentApplicantEducationInformation
+      parameters:
+      - name: applicantId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []
+          
+
+                
+  /statement/take/{statementId}:
+    post:
+      tags:
+        - entrance
+      summary: Взять определенную заявку (Нужна авторизация)
+      description: Получить информацию .
+      operationId: takeStatement
+      parameters:
+      - name: statementId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TakeStatement'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/TakeStatement'
+      security:
+        - bearerAuth: []                
+
+  /statement/reject/{statementId}:
+    post:
+      tags:
+        - entrance
+      summary: Отправить в общий пулл заявку (Нужна авторизация)
+      description: Получить информацию .
+      operationId: rejectStatement
+      parameters:
+      - name: statementId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TakeStatement'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/TakeStatement'
+      security:
+        - bearerAuth: []                  
+                
+  /applicants/statements:                
+    get:
+      tags:
+          - entrance
+      summary: Получить все заявки (Нужна авторизация)
+      description: Получить информацию.
+      operationId: getApplicantsStatements
+      parameters:
+      - name: name_contains
+        in: query
+        description: Фильтрация по части имени
+        required: false
+        schema:
+          type: string
+      - name: program
+        in: query
+        description: Фильтрация по программе
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            format: uuid
+      - name: faculty
+        in: query
+        description: Мультиселект для фильтрации по факультету
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            format: uuid
+      - name: entranceStatus
+        in: query
+        description: Фильтрация по статусу
+        required: false
+        schema:
+          type: string
+          enum:
+            - created
+            - underConsideration
+            - approved
+            - rejected
+            - closed
+      - name: managerNull
+        in: query
+        description: Фильтрация у кого нет менеджера
+        required: false
+        schema:
+          type: boolean
+      - name: managerHave
+        in: query
+        description: Фильтрация у кого есть менеджер
+        required: false
+        schema:
+          type: boolean
+      - name: editDate
+        in: query
+        description: Фильтрация по дате изменения
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: page
+        in: query
+        description: ' '
+        required: true
+        schema:
+          type: string
+      - name: current
+        in: query
+        description: ' '
+        required: true
+        schema:
+          type: string
+      - name: size
+        in: query
+        description: ' '
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetStatements'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/GetStatements'
+      security:
+        - bearerAuth: []  
+
+  /statement/status/{statementId}:
+    put:
+      tags:
+        - entrance
+      summary: Изменить статус заявки (Нужна авторизация)
+      description: Получить информацию .
+      operationId: editStatementStatus
+      parameters:
+      - name: status
+        in: query
+        description: ''
+        required: true
+        explode: true
+        schema:
+          $ref: '#/components/schemas/EntranceStatus'
+      - name: statementId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []  
+          
+  /statement/{applicantId}:
+    get:
+      tags:
+        - entrance
+      summary: Получить заявку определенного абитуриента(Нужна авторизация)
+      description: Получить информацию .
+      operationId: getApplicantStatement
+      parameters:
+      - name: applicantId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateStatementDTO'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/CreateStatementDTO'
+      security:
+        - bearerAuth: []  
+
+  /statement/{statementId}/programm/priority:
+    patch:
+      tags:
+        - entrance
+      summary: Изменить приоритет программы в заявке (Нужна авторизация)
+      description: Получить информацию .
+      operationId: patchProgrammPriority
+      parameters:
+      - name: statementId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: programId
+        in: query
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: priority
+        in: query
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []            
+          
+          
+
+  /statement/{statementId}/{programmId}:
+    delete:
+      tags:
+        - entrance
+      summary: Удалить программу из заявки (Нужна авторизация)
+      description: Получить информацию .
+      operationId: deleteProgrammPriority
+      parameters:
+      - name: statementId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: programmId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []  
+  /faculties:                
+    get:
+      tags:
+          - faculty
+      summary: Получить список факультетов(Нужна авторизация)
+      description: Получить информацию.
+      operationId: getAllFaculties
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetFaculties'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/GetFaculties'
+      security:
+        - bearerAuth: []                
+  /faculty/programms:                
+    get:
+      tags:
+          - faculty
+      summary: Получить список программ(Нужна авторизация)
+      description: Получить информацию.
+      operationId: getAllPrograms
+      parameters:
+      - name: faculty
+        in: query
+        description: Фильтрация по факультету
+        required: false
+        schema:
+          type: string
+      - name: educationLevel
+        in: query
+        description: Фильтрация по уровню образования
+        required: false
+        schema:
+          type: string
+      - name: educationForm
+        in: query
+        description: Фильтрация по форме обучения
+        required: false
+        schema:
+          type: string
+      - name: educationLanguage
+        in: query
+        description: Фильтрация по языку
+        required: false
+        schema:
+          type: string
+      - name: program
+        in: query
+        description: Фильтрация по коду программы
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: ' '
+        required: true
+        schema:
+          type: string
+      - name: current
+        in: query
+        description: ' '
+        required: true
+        schema:
+          type: string
+      - name: size
+        in: query
+        description: ' '
+        required: true
+        schema:
+          type: string
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPrograms'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/GetPrograms'
+      security:
+        - bearerAuth: []
+                
+                
+                
+  /faculty/documnet_types:                
+    get:
+      tags:
+          - faculty
+      summary: Получить типы документов (Нужна авторизация)
+      description: Получить информацию.
+      operationId: getAllDocumentTypes
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentTypesDTO'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/DocumentTypesDTO'
+      security:
+        - bearerAuth: []
+                
+                
+  /faculty/education_levels:                
+    get:
+      tags:
+          - faculty
+      summary: Получить уровни образования (Нужна авторизация)
+      description: Получить информацию.
+      operationId: getAllEducationLevels
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetEducationLevels'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/GetEducationLevels'
+      security:
+        - bearerAuth: []
+   
+                
+  /faculty/managers:                
+    get:
+      tags:
+          - faculty
+      summary: Получить всех менеджеров (Нужна авторизация)
+      description: Получить информацию.
+      operationId: getAllManagers
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetManager'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/GetManager'
+      security:
+        - bearerAuth: []
+                
+  /statement/setManager/{managerId}/{statementId}:                
+    put:
+      tags:
+        - entrance
+      summary: Назначить менеджера на заявку(Нужна авторизация)
+      description: Получить информацию .
+      operationId: setManagerToStatement
+      parameters:
+      - name: managerId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: statementId
+        in: path
+        description: ' '
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []
+        
+  /faculty/import/{type}:
+    post:
+      tags:
+        - faculty
+      summary: Импортировать информацию (Нужна авторизация)
+      description: Получить информацию .
+      operationId: importDictionary
+      parameters:
+      - name: type
+        in: path
+        description: ''
+        required: true
+        explode: true
+        schema:
+          $ref: '#/components/schemas/DictionaryType'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+      security:
+        - bearerAuth: []
+  /faculty/import/status:
+    get:
+      tags:
+        - faculty
+      summary: Получить статус импортирования.(Нужна авторизация)
+      description: Можно получить роль пользователю.
+      operationId: getImportStatus
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ImportStatus'          
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ImportStatus'
+        '400':
+          description: ''
+        '404':  
+          description: ''
+      security:
+        - bearerAuth: []            
+  /statement/{managerId}:
+    delete:
+      tags:
+        - faculty
+      summary: Удалить менеджера(Нужна авторизация)
+      description: Получить информацию .
+      operationId: deleteMagaer
+      parameters:
+      - name: managerId
+        in: path
+        description: ''
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found  
+      security:
+        - bearerAuth: []   
+components:
+  schemas:
+  
+    UserRegister:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: Руслан
+        lastName:
+          type: string
+          example: Максютов
+        patronymic:
+          type: string
+          example: Александрович
+        email:
+          type: string
+          example: ruslan2004@email.com
+        phone:
+          type: string
+          example: '12345'
+        birthdate: 
+          type: string
+          format: date
+        password:
+          type: string
+          example: '12345'
+        confitmPassword:
+          type: string
+          example: '12345'
+      xml:
+        name: user
+        
+        
+        
+    UserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: '12345'
+      xml:
+        name: user
+        
+        
+    GetUserProfile:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: Руслан
+        lastName:
+          type: string
+          example: Максютов
+        patronymic:
+          type: string
+          example: Александрович
+        email:
+          type: string
+          example: ruslan2004@email.com
+        phone:
+          type: string
+          example: '12345'
+        birthdate: 
+          type: string
+          format: date
+      xml:
+        name: user 
+        
+        
+    CreateStatementDTO:
+      type: object
+      properties:
+        passportId:
+          type: string
+          format: uuid 
+        educationId:
+          type: string 
+          format: uuid
+        programms:
+          type: array
+          items:
+            type: object
+            properties:
+              programId:
+                type: string
+                format: uuid
+              priority:
+                type: integer
+                minimum: 1
+          minItems: 1  
+      xml:
+        name: applicant
+        
+    EntranceStatus:  
+      type: string
+      enum:
+        - created
+        - underConsideration
+        - approved
+        - rejected
+        - closed
+
+    GetStatements:
+      type: object
+      properties:
+        statements:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: 'Рус'
+              applicantId:
+                type: string
+                format: uuid
+              facultyId:
+                type: string
+                format: uuid              
+              entranceStatus:
+                $ref: '#/components/schemas/EntranceStatus'
+              programId:
+                type: string
+                format: uuid
+              magagerId:
+                type: string
+                format: uuid
+              lastEditDate:
+                type: string
+                format: date
+          minItems: 1 
+        pagination:
+          type: object
+          properties:
+            size:
+              type: integer
+            count:
+              type: integer
+            current:
+              type: integer
+      xml:
+        name: applicant
+        
+    GetPrograms:
+      type: object
+      properties:
+        programs:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              createTime:
+                type: string
+                format: date-time
+              name:
+                type: string
+              code:
+                type: string
+              language:
+                type: string
+              educationForm:
+                type: string
+              faculty:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  createTime:
+                    type: string
+                    format: date-time
+                  name:
+                    type: string
+              educationLevel:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+        pagination:
+          type: object
+          properties:
+            size:
+              type: integer
+            count:
+              type: integer
+            current:
+              type: integer
+      xml:
+        name: applicant
+
+
+    GetFaculties:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+          name:
+            type: string
+          createTime:
+            type: string
+            format: date-time
+      minItems: 1
+      xml:
+        name: applicant
+
+    GetManager:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+          name:
+            type: string
+          role:
+            type: string
+            enum:
+            - mainManager
+            - manager
+      minItems: 1
+      xml:
+        name: applicant
+
+        
+
+    TakeStatement:
+      type: object
+      properties:
+        applicantId:
+          type: string
+          format: uuid 
+      xml:
+        name: applicant
+        
+    EditProgrammPriority:
+      type: object
+      properties:
+        applicantId:
+          type: string
+          format: uuid
+        statementId:
+          type: string
+          format: uuid 
+        programmId:
+          type: string
+          format: uuid
+        programmPriority:
+          type: number
+          format: '1'
+      xml:
+        name: applicant
+
+
+        
+        
+    EditUserProfile:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: Руслан
+        lastName:
+          type: string
+          example: Максютов
+        patronymic:
+          type: string
+          example: Александрович
+        email:
+          type: string
+          example: ruslan2004@email.com
+        phone:
+          type: string
+          example: '12345'
+        birthdate: 
+          type: string
+          format: date
+      xml:
+        name: user
+    DocumentTypesDTO:
+      type: object
+      properties:
+        documents:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              createTime:
+                type: string
+                format: date-time
+              name:
+                type: string
+              educationLevel:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+              nextEducationLevel:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+        pagination:
+          type: object
+          properties:
+            size:
+              type: integer
+            count:
+              type: integer
+            current:
+              type: integer
+      xml:
+        name: applicant
+
+
+    GetEducationLevels:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+          name:
+            type: string
+      minItems: 1
+      xml:
+        name: applicant        
+        
+        
+    GetApplicantProfile:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: Руслан
+        lastName:
+          type: string
+          example: Максютов
+        patronymic:
+          type: string
+          example: Александрович
+        nationality:
+          type: string
+          example: Российская Федерация
+        email:
+          type: string
+          example: ruslan2004@email.com
+        phone:
+          type: string
+          example: '12345'
+        birthdate: 
+          type: string
+          format: date
+      xml:
+        name: user
+
+    EditApplicantProfile:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: Руслан
+        lastName:
+          type: string
+          example: Максютов
+        patronymic:
+          type: string
+          example: Александрович
+        nationality:
+          type: string
+          example: Российская Федерация
+        email:
+          type: string
+          example: ruslan2004@email.com
+        phone:
+          type: string
+          example: '12345'
+        birthdate: 
+          type: string
+          format: date
+      xml:
+        name: user
+        
+    PostPassportInformation:
+      type: object
+      properties:
+        passportNumber:
+          type: string
+          example: '89484984895654'
+        birthPlace:
+          type: string
+          example: Томск
+        issuedWhen:
+          type: string
+          format: date
+        issuedWhom:
+          type: string
+          example: МВД
+      xml:
+        name: passport   
+
+    EducationInformation:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Бакалавриат'
+      xml:
+        name: education 
+        
+        
+    Roles:
+      type: string
+      enum:
+      - administrator
+      - applicant
+      - manager
+      - mainManager
+      
+      
+    DocumentType:
+      type: string
+      enum:
+      - passport
+      - educationDocument
+      
+    DictionaryType:
+      type: string
+      enum:
+      - educationLevels
+      - documentTypes     
+      - faculties
+      - programs
+      
+      
+    ImportStatus:
+      type: string
+      enum:
+      - imported
+      - stopped     
+      
+        
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
