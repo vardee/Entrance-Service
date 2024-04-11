@@ -1,40 +1,20 @@
-*.swp
-*.*~
-project.lock.json
-.DS_Store
-*.pyc
-nupkg/
-appsettings.Development.json
-appsettings.Develop.json
+﻿################################################################################
+# Данный GITIGNORE-файл был автоматически создан Microsoft(R) Visual Studio.
+################################################################################
 
-# Visual Studio Code
-.vscode
-
-# Rider
-.idea
-
-# User-specific files
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# Build results
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-build/
-bld/
-[Bb]in/
-[Oo]bj/
-[Oo]ut/
-msbuild.log
-msbuild.err
-msbuild.wrn
-
-# Visual Studio 2015
-.vs/
-*.leu
+/.vs/adv_Backend_Entrance/config
+/.vs/adv_Backend_Entrance/DesignTimeBuild
+/.vs/adv_Backend_Entrance/FileContentIndex
+/.vs/ProjectEvaluation
+/adv_Backend_Entrance/obj
+/adv_Backend_Entrance.Common/obj
+/adv_Backend_Entrance.Common/bin/Debug/net8.0
+/adv_Backend_Entrance.JWT/obj
+/adv_Backend_Entrance.JWT
+/adv_Backend_Entrance.UserService/bin/Debug/net8.0
+/adv_Backend_Entrance.UserService/obj
+/adv_Backend_Entrance.UserService.DAL/obj
+/adv_Backend_Entrance.UserService.DAL/bin/Debug/net8.0
+/adv_Backend_Entrance.UserService.BL/obj
+/adv_Backend_Entrance.UserService.BL/bin/Debug/net8.0
+/.vs/adv_Backend_Entrance/v17
