@@ -18,3 +18,10 @@
 /adv_Backend_Entrance.UserService.BL/obj
 /adv_Backend_Entrance.UserService.BL/bin/Debug/net8.0
 /.vs/adv_Backend_Entrance/v17
+/adv_Backend_Entrance.FacultyService/obj
+/adv_Backend_Entrance.FacultyService.BL/bin/Debug/net8.0
+/adv_Backend_Entrance.FacultyService.BL/obj
+/adv_Backend_Entrance.FacultyService.DAL/bin/Debug/net8.0
+/adv_Backend_Entrance.FacultyService.DAL/obj
+/adv_Backend_Entrance.FacultyService.MVCPanel/bin/Debug/net8.0
+/adv_Backend_Entrance.FacultyService.MVCPanel/obj
