@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace adv_Backend_Entrance.Common.Enums
 {
-    public enum RoleType
+    public enum ImportStatus
     {
-        Admin,
-        Manager,
-        MainManager,
-        Applicant,
+        Imported,
+        Failed
     }
 }
+

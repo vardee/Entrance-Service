@@ -31,6 +31,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
         private readonly AuthDbContext _authDBContext;
         private readonly IConfiguration _configuration;
 
+
         public UsersService(UserManager<User> userManager, SignInManager<User> signInManager, AuthDbContext authDbContext, IConfiguration configuration, RoleManager<IdentityRole<Guid>> roleManager)
         {
             _userManager = userManager;
@@ -112,7 +113,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
 
 
-            var tokenRefresh = this.GenerateRefreshToken();
+            var tokenRefresh = GenerateRefreshToken();
 
             user.RefreshToken = tokenRefresh;
             var refreshTokenLifetimeInDays = _configuration.GetSection("Jwt").GetValue<int>("RefreshTokenLifetimeInDays");
@@ -160,7 +161,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
 
 
-            var tokenRefresh = this.GenerateRefreshToken();
+            var tokenRefresh = GenerateRefreshToken();
 
             user.RefreshToken = tokenRefresh;
             var refreshTokenLifetimeInDays = _configuration.GetSection("Jwt").GetValue<int>("RefreshTokenLifetimeInDays");
@@ -304,7 +305,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
         public async Task<GetMyRolesDTO> GetMyRoles(string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId =  GetUserIdFromToken(token);
             if(userId != null)
             {
                 var user = await _userManager.FindByIdAsync(userId);
@@ -341,9 +342,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 throw new BadRequestException($"Failed to add user to role '{roleName}'.");
             }
         }
-
-
-        private string? GetUserIdFromToken(string token)
+        public string? GetUserIdFromToken(string token)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Secret").Value));
 
@@ -373,17 +372,15 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 return null;
             }
         }
-
-
-        private string GenerateRefreshToken()
+        public string GenerateRefreshToken()
         {
             var randomValues = new byte[128];
-            using(var numberGenerator = RandomNumberGenerator.Create()) { 
+            using (var numberGenerator = RandomNumberGenerator.Create())
+            {
                 numberGenerator.GetBytes(randomValues);
             }
             return Convert.ToBase64String(randomValues);
         }
-
         private async Task<ClaimsIdentity> CheckBasedUserInformation(string email, string password)
         {
             Console.WriteLine(email);

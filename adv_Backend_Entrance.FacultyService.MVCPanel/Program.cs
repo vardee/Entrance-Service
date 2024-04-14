@@ -1,15 +1,9 @@
-using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers.TokenRequirment;
 using adv_Backend_Entrance.Common.JWT;
 using adv_Backend_Entrance.Common.Middlewares;
-using adv_Backend_Entrance.UserService.BL.Configurations;
-using adv_Backend_Entrance.UserService.DAL;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using adv_Backend_Entrance.FacultyService.BL.Configurations;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Filters;
-using System.Reflection;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,10 +16,8 @@ builder.Services.AddControllers().AddJsonOptions(opts =>
 });
 
 // Add business logic service dependencies
-builder.Services.AddAuthBlServiceDependencies(builder.Configuration);
+builder.Services.AddFacultyBlServiceDependencies(builder.Configuration);
 
-// Add Identity dependencies configuration
-builder.Services.AddIdentityDependenciesConfiguration();
 
 // Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -64,7 +56,8 @@ builder.Services.AddAuthorization(services =>
 });
 builder.Services.AddSingleton<IAuthorizationHandler, TokenInBlackListHandler>();
 builder.Services.CreateJWT(builder.Configuration);
-
+// Add HttpClient
+builder.Services.AddHttpClient();
 // Create JWT
 // Build the application
 var app = builder.Build();
@@ -88,17 +81,6 @@ app.UseAuthorization();
 
 // Map controllers
 app.MapControllers();
-
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    var roles = Enum.GetNames(typeof(RoleType)); 
-    foreach (var roleName in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(roleName))
-            await roleManager.CreateAsync(new IdentityRole<Guid>(roleName));
-    }
-}
 
 
 // Run the application

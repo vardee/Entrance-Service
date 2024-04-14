@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "adv_Backend_Entrance.FacultyService.DAL": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:49345;http://localhost:49346"
+    }
+  }
+}
