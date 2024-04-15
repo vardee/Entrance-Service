@@ -12,8 +12,8 @@ using adv_Backend_Entrance.FacultyService.MVCPanel.Data;
 namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
 {
     [DbContext(typeof(FacultyDBContext))]
-    [Migration("20240414173708_Programs")]
-    partial class Programs
+    [Migration("20240415031020_InitDictionary")]
+    partial class InitDictionary
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

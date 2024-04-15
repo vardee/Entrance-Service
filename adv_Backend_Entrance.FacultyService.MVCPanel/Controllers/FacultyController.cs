@@ -20,8 +20,8 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
             _tokenHelper = tokenHelper;
         }
 
-        [HttpGet]
-        [Route("get/educationlevels")]
+        [HttpPost]
+        [Route("import/dictionary")]
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]

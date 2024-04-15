@@ -7,11 +7,11 @@ using adv_Backend_Entrance.Common.DTO;
 using adv_Backend_Entrance.Common.Interfaces;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.FacultyService.DAL.Data.Models;
-using adv_Backend_Entrance.FacultyService.DAL.Migrations;
 using adv_Backend_Entrance.FacultyService.MVCPanel.Data;
 using adv_Backend_Entrance.FacultyService.MVCPanel.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using adv_Backend_Entrance.Common.Enums;
 
 namespace adv_Backend_Entrance.FacultyService.BL.Services
 {
@@ -62,7 +62,6 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                     }
                     else
                     {
-
                         Console.WriteLine($"Record with ID {level.id} already exists.");
                     }
                 }
@@ -71,9 +70,12 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             }
             else
             {
+                Console.WriteLine("Error occurred while fetching education levels.");
+                await AddImportStatus(ImportStatus.Failed);
                 throw new BadRequestException("Bad request bruh!");
             }
         }
+
         private async Task GetDocumentType()
         {
             string endpoint = "document_types";
@@ -83,7 +85,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             if (response.IsSuccessStatusCode)
             {
                 string responseBody = await response.Content.ReadAsStringAsync();
-                
+
                 var documentTypes = JsonSerializer.Deserialize<List<GetDocumentTypesDTO>>(responseBody);
 
                 Console.WriteLine(responseBody);
@@ -127,9 +129,12 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             }
             else
             {
+                Console.WriteLine("Error occurred while fetching document types.");
+                await AddImportStatus(ImportStatus.Failed);
                 throw new BadRequestException("Bad request bruh!");
             }
         }
+
         private async Task GetFaculties()
         {
             string endpoint = "faculties";
@@ -159,7 +164,6 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                     }
                     else
                     {
-
                         Console.WriteLine($"Record with ID {faculty.id} already exists.");
                     }
                 }
@@ -168,10 +172,13 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             }
             else
             {
+                Console.WriteLine("Error occurred while fetching faculties.");
+                await AddImportStatus(ImportStatus.Failed);
                 throw new BadRequestException("Bad request bruh!");
             }
 
         }
+
         private async Task GetPrograms()
         {
             string endpoint = "programs?page=1&size=10";
@@ -217,14 +224,36 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             }
             else
             {
+                Console.WriteLine("Error occurred while fetching programs.");
+                await AddImportStatus(ImportStatus.Failed);
                 throw new BadRequestException("Bad request bruh!");
             }
         }
-        public async Task GetDictionary()
-        {
 
+        private async Task AddImportStatus(ImportStatus status)
+        {
+            var import = new Import { Id = Guid.NewGuid(), Status = status };
+            _facultyDBContext.Imports.Add(import);
+            await _facultyDBContext.SaveChangesAsync();
         }
 
-
+        public async Task GetDictionary()
+        {
+            try
+            {
+                await GetEducationLevels();
+                await GetDocumentType();
+                await GetFaculties();
+                await GetPrograms();
+                Console.WriteLine("ImportStatus: Imported");
+                await AddImportStatus(ImportStatus.Imported);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error occurred during data import: {ex.Message}");
+                Console.WriteLine("ImportStatus: Failed");
+                await AddImportStatus(ImportStatus.Failed);
+            }
+        }
     }
 }
