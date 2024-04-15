@@ -13,6 +13,7 @@ namespace adv_Backend_Entrance.FacultyService.DAL.Data.Models
         public EducationDocumentTypeModel EducationDocumentType { get; set; }
 
         public int EducationLevelId { get; set; }
+        public string EducationLevelName { get; set; }
         public EducationLevelModel EducationLevel { get; set; }
     }
 }

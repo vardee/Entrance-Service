@@ -12,6 +12,7 @@ using adv_Backend_Entrance.FacultyService.MVCPanel.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using adv_Backend_Entrance.Common.Enums;
+using System.Xml.Linq;
 
 namespace adv_Backend_Entrance.FacultyService.BL.Services
 {
@@ -54,11 +55,19 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                     var existingLevel = await _facultyDBContext.EducationLevelModels.FindAsync(level.id);
                     if (existingLevel == null)
                     {
-                        _facultyDBContext.EducationLevelModels.Add(new EducationLevelModel
+                        if (EducationChecker.TryParseEducationLevel(level.name, out EducationLevel enumValue))
                         {
-                            Id = level.id,
-                            Name = level.name
-                        });
+                            _facultyDBContext.EducationLevelModels.Add(new EducationLevelModel
+                            {
+                                Id = level.id,
+                                Name = level.name,
+                                EducationLevelName = enumValue 
+                            });
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Failed to parse EducationLevel from: {level.name}");
+                        }
                     }
                     else
                     {
@@ -96,27 +105,37 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                     var existingDocumentType = await _facultyDBContext.EducationDocumentTypes.FindAsync(documentType.id);
                     if (existingDocumentType == null)
                     {
-                        var newDocumentType = new EducationDocumentTypeModel
+                        if (EducationChecker.TryParseEducationLevel(documentType.educationLevel.name, out EducationLevel enumValue))
                         {
-                            Id = documentType.id,
-                            Name = documentType.name,
-                            CreateTime = createTimeUtc,
-                            EducationLevelId = documentType.educationLevel.id,
-                        };
-
-                        _facultyDBContext.EducationDocumentTypes.Add(newDocumentType);
-
-                        foreach (var nextLevel in documentType.nextEducationLevels)
-                        {
-                            var educationLevel = await _facultyDBContext.EducationLevelModels.FindAsync(nextLevel.id);
-                            if (educationLevel != null)
+                            var newDocumentType = new EducationDocumentTypeModel
                             {
-                                _facultyDBContext.EducationDocumentTypeNextEducationLevels.Add(new EducationDocumentTypeNextEducationLevel
+                                Id = documentType.id,
+                                Name = documentType.name,
+                                CreateTime = createTimeUtc,
+                                EducationLevelId = documentType.educationLevel.id,
+                                EducationLevelName = documentType.educationLevel.name,
+                                EducationLevelEnum = enumValue 
+                            };
+
+                            _facultyDBContext.EducationDocumentTypes.Add(newDocumentType);
+
+                            foreach (var nextLevel in documentType.nextEducationLevels)
+                            {
+                                var educationLevel = await _facultyDBContext.EducationLevelModels.FindAsync(nextLevel.id);
+                                if (educationLevel != null)
                                 {
-                                    EducationDocumentTypeId = documentType.id,
-                                    EducationLevelId = nextLevel.id
-                                });
+                                    _facultyDBContext.EducationDocumentTypeNextEducationLevels.Add(new EducationDocumentTypeNextEducationLevel
+                                    {
+                                        EducationDocumentTypeId = documentType.id,
+                                        EducationLevelId = nextLevel.id,
+                                        EducationLevelName = nextLevel.name,
+                                    });
+                                }
                             }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Failed to parse EducationLevel from: {documentType.educationLevel.name}");
                         }
                     }
                     else
@@ -181,7 +200,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
 
         private async Task GetPrograms()
         {
-            string endpoint = "programs?page=1&size=10";
+            string endpoint = "programs?page=1&size=10000";
             string _apiUrl = _baseUrl + endpoint;
             HttpResponseMessage response = await _httpClient.GetAsync(_apiUrl);
 
@@ -198,21 +217,37 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                     Console.WriteLine($"Id: {program.id}, Name: {program.name}");
 
                     DateTime createTimeUtc = program.createTime.ToUniversalTime();
+                    DateTime createFacultyTime = program.faculty.createTime.ToUniversalTime();
 
                     var existingProgram = await _facultyDBContext.EducationProgrammModels.FindAsync(program.id);
                     if (existingProgram == null)
                     {
-                        _facultyDBContext.EducationProgrammModels.Add(new EducationProgrammModel
+                        if (EducationChecker.TryParseEducationLanguage(program.language, out EducationLanguage languageEnum) &&
+                            EducationChecker.TryParseEducationForm(program.educationForm, out EducationForm formEnum) 
+                            && EducationChecker.TryParseEducationLevel(program.educationLevel.name, out EducationLevel enumValue))
                         {
-                            Id = program.id,
-                            CreateTime = createTimeUtc,
-                            Name = program.name,
-                            Code = program.code,
-                            Language = program.language,
-                            EducationForm = program.educationForm,
-                            FacultyId = program.faculty.id,
-                            EducationLevelId = program.educationLevel.id
-                        });
+                            _facultyDBContext.EducationProgrammModels.Add(new EducationProgrammModel
+                            {
+                                Id = program.id,
+                                CreateTime = createTimeUtc,
+                                Name = program.name,
+                                Code = program.code,
+                                Language = program.language,
+                                LanguageEnum = languageEnum,
+                                EducationForm = program.educationForm,
+                                EducationFormEnum = formEnum,
+                                FacultyId = program.faculty.id,
+                                EducationLevelId = program.educationLevel.id,
+                                EducationLevelEnum = enumValue,
+                                EducationLevelName = program.educationLevel.name,
+                                FacultyCreateTime = createFacultyTime,
+                                FacultyName = program.faculty.name
+                            });
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Failed to parse language or education form for program ID {program.id}");
+                        }
                     }
                     else
                     {
@@ -224,7 +259,6 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             }
             else
             {
-                Console.WriteLine("Error occurred while fetching programs.");
                 await AddImportStatus(ImportStatus.Failed);
                 throw new BadRequestException("Bad request bruh!");
             }
@@ -245,13 +279,10 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                 await GetDocumentType();
                 await GetFaculties();
                 await GetPrograms();
-                Console.WriteLine("ImportStatus: Imported");
                 await AddImportStatus(ImportStatus.Imported);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error occurred during data import: {ex.Message}");
-                Console.WriteLine("ImportStatus: Failed");
                 await AddImportStatus(ImportStatus.Failed);
             }
         }

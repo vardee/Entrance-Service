@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class InitDictionary : Migration
+    public partial class AddedAdditionalFields : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,9 @@ namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    EducationLevelId = table.Column<int>(type: "integer", nullable: false)
+                    EducationLevelId = table.Column<int>(type: "integer", nullable: false),
+                    EducationLevelName = table.Column<string>(type: "text", nullable: false),
+                    EducationLevelEnum = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,7 +32,8 @@ namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    EducationLevelName = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -46,9 +49,15 @@ namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: false),
                     Language = table.Column<string>(type: "text", nullable: false),
+                    LanguageEnum = table.Column<int>(type: "integer", nullable: false),
                     EducationForm = table.Column<string>(type: "text", nullable: false),
+                    EducationFormEnum = table.Column<int>(type: "integer", nullable: false),
                     FacultyId = table.Column<Guid>(type: "uuid", nullable: false),
-                    EducationLevelId = table.Column<int>(type: "integer", nullable: false)
+                    EducationLevelId = table.Column<int>(type: "integer", nullable: false),
+                    EducationLevelEnum = table.Column<int>(type: "integer", nullable: false),
+                    FacultyName = table.Column<string>(type: "text", nullable: false),
+                    FacultyCreateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EducationLevelName = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,7 +94,8 @@ namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
                 columns: table => new
                 {
                     EducationDocumentTypeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    EducationLevelId = table.Column<int>(type: "integer", nullable: false)
+                    EducationLevelId = table.Column<int>(type: "integer", nullable: false),
+                    EducationLevelName = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {

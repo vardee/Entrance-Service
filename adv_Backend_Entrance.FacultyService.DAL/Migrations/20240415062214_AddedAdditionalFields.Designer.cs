@@ -12,8 +12,8 @@ using adv_Backend_Entrance.FacultyService.MVCPanel.Data;
 namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
 {
     [DbContext(typeof(FacultyDBContext))]
-    [Migration("20240415031020_InitDictionary")]
-    partial class InitDictionary
+    [Migration("20240415062214_AddedAdditionalFields")]
+    partial class AddedAdditionalFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,10 @@ namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
 
                     b.Property<int>("EducationLevelId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("EducationLevelName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("EducationDocumentTypeId", "EducationLevelId");
 
@@ -63,8 +67,15 @@ namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("EducationLevelEnum")
+                        .HasColumnType("integer");
+
                     b.Property<int>("EducationLevelId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("EducationLevelName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -78,6 +89,9 @@ namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
             modelBuilder.Entity("adv_Backend_Entrance.FacultyService.MVCPanel.Data.Models.EducationLevelModel", b =>
                 {
                     b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EducationLevelName")
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
@@ -106,15 +120,35 @@ namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("EducationFormEnum")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EducationLevelEnum")
+                        .HasColumnType("integer");
+
                     b.Property<int>("EducationLevelId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("EducationLevelName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("FacultyCreateTime")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("FacultyId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("FacultyName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("LanguageEnum")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -17,9 +17,8 @@ namespace adv_Backend_Entrance.FacultyService.BL.Configurations
             services.AddDbContext<FacultyDBContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("FacultyDatabasePostgres")));
             services.AddScoped<IFacultyService, FacultyInformationService>();
+            services.AddScoped<IFacultyInteractionsService, FacultyInteractionsService>();
             services.AddSingleton<TokenHelper>();
-
-            // Регистрация IHttpContextAccessor
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             return services;
