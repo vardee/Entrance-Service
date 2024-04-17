@@ -27,4 +27,4 @@
 		<ProjectReference Include="..\adv_Backend_Entrance.FacultyService.BL\adv_Backend_Entrance.FacultyService.BL.csproj" />
 	</ItemGroup>
 
-</Project>
+</Project> 

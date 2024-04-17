@@ -1,4 +1,5 @@
-﻿using adv_Backend_Entrance.Common.Helpers;
+﻿using adv_Backend_Entrance.Common.Data;
+using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces;
 using adv_Backend_Entrance.UserService.BL.Services;
 using adv_Backend_Entrance.UserService.DAL.Data;
@@ -15,9 +16,13 @@ namespace adv_Backend_Entrance.UserService.BL.Configurations
         {
             services.AddDbContext<AuthDbContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("AuthDatabasePostgres")));
+            services.AddSingleton<RedisDBContext>(provider =>
+            {
+                var connectionString = configuration.GetConnectionString("RedisDBContext");
+                return new RedisDBContext(connectionString);
+            });
             services.AddScoped<IUserService, UsersService>();
             services.AddSingleton<TokenHelper>();
-            services.AddScoped<IAuthDbContext, AuthDbContext>();
             return services;
         }
     }

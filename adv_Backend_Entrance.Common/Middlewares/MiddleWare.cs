@@ -1,5 +1,4 @@
-﻿using adv_Backend_Entrance.Common.Models;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-using Error = adv_Backend_Entrance.Common.Models.Error;
+using Error = adv_Backend_Entrance.Common.Data.Models.Error;
 
 namespace adv_Backend_Entrance.Common.Middlewares
 {

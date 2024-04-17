@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace adv_Backend_Entrance.Common.Models
+namespace adv_Backend_Entrance.Common.Data.Models
 {
     public class BlackToken
     {

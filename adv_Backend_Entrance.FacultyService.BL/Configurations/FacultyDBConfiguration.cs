@@ -1,4 +1,5 @@
-﻿using adv_Backend_Entrance.Common.Helpers;
+﻿using adv_Backend_Entrance.Common.Data;
+using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces;
 using adv_Backend_Entrance.FacultyService.BL.Services;
 using adv_Backend_Entrance.FacultyService.MVCPanel.Data;
@@ -16,6 +17,11 @@ namespace adv_Backend_Entrance.FacultyService.BL.Configurations
         {
             services.AddDbContext<FacultyDBContext>(options =>
                 options.UseNpgsql(configuration.GetConnectionString("FacultyDatabasePostgres")));
+            services.AddSingleton<RedisDBContext>(provider =>
+            {
+                var connectionString = configuration.GetConnectionString("RedisDBContext");
+                return new RedisDBContext(connectionString);
+            });
             services.AddScoped<IFacultyService, FacultyInformationService>();
             services.AddScoped<IFacultyInteractionsService, FacultyInteractionsService>();
             services.AddSingleton<TokenHelper>();

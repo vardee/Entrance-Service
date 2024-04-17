@@ -1,9 +1,9 @@
-﻿using adv_Backend_Entrance.Common.DTO;
+﻿using adv_Backend_Entrance.Common.Data.Models;
+using adv_Backend_Entrance.Common.DTO;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces;
 using adv_Backend_Entrance.Common.Middlewares;
-using adv_Backend_Entrance.Common.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
@@ -27,6 +27,8 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
 
         [HttpPost]
         [Route("import/dictionary")]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Authorize(Roles = "Admin")]
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]
@@ -39,6 +41,8 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
 
         [HttpGet]
         [Route("document_types")]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Authorize(Roles = "Admin,Applicant,Manager,MainManager")]
         [ProducesResponseType(typeof(List<GetDocumentTypesDTO>), 200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]
@@ -50,6 +54,8 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
         }
         [HttpGet]
         [Route("faculties")]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Authorize(Roles = "Admin,Applicant,Manager,MainManager")]
         [ProducesResponseType(typeof(List<GetFacultiesDTO>), 200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]
@@ -61,6 +67,8 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
         }
         [HttpGet]
         [Route("education_levels")]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Authorize(Roles = "Admin,Applicant,Manager,MainManager")]
         [ProducesResponseType(typeof(List<GetEducationLevelsDTO>), 200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]
@@ -72,6 +80,8 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
         }
         [HttpGet]
         [Route("programs")]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Authorize(Roles = "Admin,Applicant,Manager,MainManager")]
         [ProducesResponseType(typeof(GetQuerybleProgramsDTO), 200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]

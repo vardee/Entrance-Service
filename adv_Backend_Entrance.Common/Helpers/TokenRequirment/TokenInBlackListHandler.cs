@@ -1,4 +1,5 @@
-﻿using adv_Backend_Entrance.Common.Interfaces;
+﻿using adv_Backend_Entrance.Common.Data;
+using adv_Backend_Entrance.Common.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,24 +21,25 @@ namespace adv_Backend_Entrance.Common.Helpers.TokenRequirment
             _serviceProvider = serviceProvider;
         }
 
-        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, TokenBlackListRequirment requirement)
+        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, TokenBlackListRequirment requirement)
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<IAuthDbContext>();
+                var db = scope.ServiceProvider.GetRequiredService<RedisDBContext>();
+                var httpContextAccessor = _serviceProvider.GetRequiredService<IHttpContextAccessor>();
 
-                string authorizationHeader = _serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                var authorizationHeader = httpContextAccessor.HttpContext.Request.Headers["Authorization"].FirstOrDefault();
 
                 if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer "))
                 {
                     var token = authorizationHeader.Substring("Bearer ".Length);
 
-                    var blackToken = db.BlackListTokens.FirstOrDefault(b => b.BadToken == token);
+                    var blacklisted = await db.IsBlackToken(token);
 
-                    if (blackToken != null)
+                    if (blacklisted)
                     {
                         context.Fail();
-                        _serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                        httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     }
                     else
                     {
@@ -47,11 +49,10 @@ namespace adv_Backend_Entrance.Common.Helpers.TokenRequirment
                 else
                 {
                     context.Fail();
-                    _serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    httpContextAccessor.HttpContext.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 }
             }
-
-            return Task.CompletedTask;
         }
+
     }
 }

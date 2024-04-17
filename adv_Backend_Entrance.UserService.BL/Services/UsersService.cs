@@ -1,8 +1,9 @@
-﻿using adv_Backend_Entrance.Common.DTO;
+﻿using adv_Backend_Entrance.Common.Data;
+using adv_Backend_Entrance.Common.Data.Models;
+using adv_Backend_Entrance.Common.DTO;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Interfaces;
 using adv_Backend_Entrance.Common.Middlewares;
-using adv_Backend_Entrance.Common.Models;
 using adv_Backend_Entrance.UserService.DAL.Data;
 using adv_Backend_Entrance.UserService.DAL.Data.Entities;
 using AutoMapper.Configuration.Annotations;
@@ -29,16 +30,18 @@ namespace adv_Backend_Entrance.UserService.BL.Services
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
         private readonly AuthDbContext _authDBContext;
+        private readonly RedisDBContext _redisDBContext;
         private readonly IConfiguration _configuration;
 
 
-        public UsersService(UserManager<User> userManager, SignInManager<User> signInManager, AuthDbContext authDbContext, IConfiguration configuration, RoleManager<IdentityRole<Guid>> roleManager)
+        public UsersService(UserManager<User> userManager, SignInManager<User> signInManager, AuthDbContext authDbContext, IConfiguration configuration, RoleManager<IdentityRole<Guid>> roleManager, RedisDBContext redisDBContext)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
             _authDBContext = authDbContext;
             _configuration = configuration;
+            _redisDBContext = redisDBContext;
         }
 
         public async Task<TokenResponseDTO> UserRegister(UserRegisterDTO userRegisterDTO)
@@ -52,7 +55,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             {
                 throw new BadRequestException("Password is empty");
             }
-            if(userRegisterDTO.Password != userRegisterDTO.ConfirmPassword)
+            if (userRegisterDTO.Password != userRegisterDTO.ConfirmPassword)
             {
                 throw new BadRequestException("Passwords don't match");
             }
@@ -98,55 +101,19 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             {
                 throw new NotFoundException("User not found");
             }
-            Console.WriteLine(_configuration.GetSection("Jwt")["Issuer"]);
-            var jwt = new JwtSecurityToken(
-                issuer: _configuration.GetSection("Jwt")["Issuer"],
-                audience: _configuration.GetSection("Jwt")["Audience"],
-                notBefore: DateTime.UtcNow,
-                claims: veryfiedUser.Claims,
-                expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(_configuration.GetSection("Jwt")
-                    .GetValue<int>("AccessTokenLifetimeInMinutes"))),
-                signingCredentials: new SigningCredentials(
-                    new SymmetricSecurityKey(
-                        Encoding.ASCII.GetBytes(_configuration.GetSection("Jwt")["Secret"] ?? string.Empty)),
-                    SecurityAlgorithms.HmacSha256));
 
+            var roles = await _userManager.GetRolesAsync(user);
 
+            var claims = new List<Claim>
+{
+    new Claim(ClaimTypes.Email, user.Id.ToString())
+};
 
-            var tokenRefresh = GenerateRefreshToken();
-
-            user.RefreshToken = tokenRefresh;
-            var refreshTokenLifetimeInDays = _configuration.GetSection("Jwt").GetValue<int>("RefreshTokenLifetimeInDays");
-            var refreshTokenExpiry = DateTime.UtcNow.AddDays(refreshTokenLifetimeInDays);
-            user.RefreshTokenExpiry = refreshTokenExpiry;
-
-
-            await _authDBContext.SaveChangesAsync();
-
-            return new TokenResponseDTO
+            foreach (var role in roles)
             {
-                AccessToken = new JwtSecurityTokenHandler().WriteToken(jwt),
-                RefreshToken = tokenRefresh
-            };
-        }
-
-        public async Task<TokenResponseDTO> RefreshToken(RefreshTokenRequestDTO refreshTokenRequestDTO)
-        {
-
-            var principal = GetUserIdFromToken(refreshTokenRequestDTO.AccessToken);
-
-            if(principal == null)
-            {
-                throw new ForbiddenException("This account is not authorized");
+                claims.Add(new Claim(ClaimTypes.Role, role));
             }
-             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id.ToString() == principal);
-            Console.WriteLine(principal);
-            if (user == null)
-            {
-                throw new NotFoundException("User not found");
-            }
-            Console.WriteLine(_configuration.GetSection("Jwt")["Issuer"]);
-            var claims = new List<Claim> { new Claim(ClaimTypes.Email, user.Id.ToString()) };
+
             var jwt = new JwtSecurityToken(
                 issuer: _configuration.GetSection("Jwt")["Issuer"],
                 audience: _configuration.GetSection("Jwt")["Audience"],
@@ -178,23 +145,81 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             };
         }
 
+        public async Task<TokenResponseDTO> RefreshToken(RefreshTokenRequestDTO refreshTokenRequestDTO)
+        {
+
+            var principal = GetUserIdFromToken(refreshTokenRequestDTO.AccessToken);
+
+            if (principal == null)
+            {
+                throw new ForbiddenException("This account is not authorized");
+            }
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id.ToString() == principal);
+            Console.WriteLine(principal);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var claims = new List<Claim>
+{
+    new Claim(ClaimTypes.Email, user.Id.ToString())
+};
+
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var jwt = new JwtSecurityToken(
+                issuer: _configuration.GetSection("Jwt")["Issuer"],
+                audience: _configuration.GetSection("Jwt")["Audience"],
+                notBefore: DateTime.UtcNow,
+                claims: claims,
+                expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(_configuration.GetSection("Jwt")
+                    .GetValue<int>("AccessTokenLifetimeInMinutes"))),
+                signingCredentials: new SigningCredentials(
+                    new SymmetricSecurityKey(
+                        Encoding.ASCII.GetBytes(_configuration.GetSection("Jwt")["Secret"] ?? string.Empty)),
+                    SecurityAlgorithms.HmacSha256));
+
+
+
+            var tokenRefresh = GenerateRefreshToken();
+
+            user.RefreshToken = tokenRefresh;
+            var refreshTokenLifetimeInDays = _configuration.GetSection("Jwt").GetValue<int>("RefreshTokenLifetimeInDays");
+            var refreshTokenExpiry = DateTime.UtcNow.AddDays(refreshTokenLifetimeInDays);
+            user.RefreshTokenExpiry = refreshTokenExpiry;
+
+
+            await _authDBContext.SaveChangesAsync();
+
+            return new TokenResponseDTO
+            {
+                AccessToken = new JwtSecurityTokenHandler().WriteToken(jwt),
+                RefreshToken = tokenRefresh
+            };
+        }
+
+
         public async Task Logout(string token)
         {
-            if(token == null)
+            if (token == null)
             {
                 throw new UnauthorizedException("User is not authorized");
             }
-            await _authDBContext.BlackListTokens.AddAsync(new BlackToken { BadToken = token });
-            await _authDBContext.SaveChangesAsync();
+            await _redisDBContext.AddToken(token);
         }
 
         public async Task<UserGetProfileDTO> GetProfile(string token)
         {
             var userId = GetUserIdFromToken(token);
-            if(userId != null)
+            if (userId != null)
             {
                 var user = await _userManager.FindByIdAsync(userId);
-                if(user != null)
+                if (user != null)
                 {
                     return new UserGetProfileDTO
                     {
@@ -232,19 +257,19 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                     {
                         user.LastName = editUserProfileDTO.LastName;
                     }
-                    if(editUserProfileDTO.Email != "")
+                    if (editUserProfileDTO.Email != "")
                     {
                         user.Email = editUserProfileDTO.Email;
                     }
-                    if(editUserProfileDTO.Phone != "")
+                    if (editUserProfileDTO.Phone != "")
                     {
                         user.PhoneNumber = editUserProfileDTO.Phone;
                     }
-                    if(editUserProfileDTO.BirthDate != null)
+                    if (editUserProfileDTO.BirthDate != null)
                     {
                         user.BirthDate = (DateTime)editUserProfileDTO.BirthDate;
                     }
-                    if(editUserProfileDTO.Patronymic != "")
+                    if (editUserProfileDTO.Patronymic != "")
                     {
                         user.Patronymic = editUserProfileDTO.Patronymic;
                     }
@@ -285,7 +310,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                         {
                             throw new ForbiddenException("MainManager can only assign the Manager role.");
                         }
-                    } 
+                    }
                     else
                     {
                         throw new ForbiddenException("You dont have permissions to assign roles.");
@@ -305,12 +330,13 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
         public async Task<GetMyRolesDTO> GetMyRoles(string token)
         {
-            var userId =  GetUserIdFromToken(token);
-            if(userId != null)
+            var userId = GetUserIdFromToken(token);
+            if (userId != null)
             {
                 var user = await _userManager.FindByIdAsync(userId);
                 var roles = await _userManager.GetRolesAsync(user);
-                if(roles != null){
+                if (roles != null)
+                {
                     return new GetMyRolesDTO
                     {
                         Roles = roles
