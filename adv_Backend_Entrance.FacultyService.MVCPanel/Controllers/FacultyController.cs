@@ -1,5 +1,5 @@
 ﻿using adv_Backend_Entrance.Common.Data.Models;
-using adv_Backend_Entrance.Common.DTO;
+using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces;
@@ -95,6 +95,7 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
             var result = await _interactionService.GetQueryblePrograms(size,page,LanguageEnum,EducationLevelEnum, EducationFormEnum,FacultyId,Id);
             return Ok(result);
         }
+
     }
 }
 

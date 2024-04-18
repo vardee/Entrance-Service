@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using adv_Backend_Entrance.Common.DTO;
 using adv_Backend_Entrance.Common.Interfaces;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.FacultyService.DAL.Data.Models;
@@ -13,6 +12,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using adv_Backend_Entrance.Common.Enums;
 using System.Xml.Linq;
+using adv_Backend_Entrance.Common.DTO.FacultyService;
+using RabbitMQ.Client;
+using adv_Backend_Entrance.Common.DTO.NotificationService;
 
 namespace adv_Backend_Entrance.FacultyService.BL.Services
 {
@@ -280,6 +282,22 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                 await GetFaculties();
                 await GetPrograms();
                 await AddImportStatus(ImportStatus.Imported);
+
+
+                var sendNotificationDTO = new SendNotificationDTO
+                {
+                    Message = "Импорт произошел успешно",
+                    SendTo = "admin@admin.com"
+                };
+
+                var factory = new ConnectionFactory() { HostName = "localhost" };
+                using (var connection = factory.CreateConnection())
+                using (var channel = connection.CreateModel())
+                {
+                    channel.QueueDeclare(queue: "notification-queue", durable: false, exclusive: false, autoDelete: false, arguments: null);
+                    var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(sendNotificationDTO));
+                    channel.BasicPublish(exchange: "", routingKey: "notification-queue", basicProperties: null, body: body);
+                }
             }
             catch (Exception ex)
             {

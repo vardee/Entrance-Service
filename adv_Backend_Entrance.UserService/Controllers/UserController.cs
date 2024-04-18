@@ -1,5 +1,5 @@
 ﻿using adv_Backend_Entrance.Common.Data.Models;
-using adv_Backend_Entrance.Common.DTO;
+using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces;
 using adv_Backend_Entrance.Common.Middlewares;

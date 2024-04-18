@@ -1,0 +1,14 @@
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.csproj.AssemblyReference.cache
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.AssemblyInfoInputs.cache
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.AssemblyInfo.cs
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.csproj.CoreCompileInputs.cache
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\bin\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.deps.json
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\bin\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.runtimeconfig.json
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\bin\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.dll
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\bin\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.pdb
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.dll
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\obj\Debug\net8.0\refint\adv_Backend_Entrance_Notification.DAL.dll
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.pdb
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.genruntimeconfig.cache
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.DAL\obj\Debug\net8.0\ref\adv_Backend_Entrance_Notification.DAL.dll

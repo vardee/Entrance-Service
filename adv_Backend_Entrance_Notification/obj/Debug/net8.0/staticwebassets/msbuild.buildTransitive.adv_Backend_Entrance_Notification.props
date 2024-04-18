@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\adv_Backend_Entrance_Notification.props" />
+</Project>

@@ -1,0 +1,17 @@
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.BL.csproj.AssemblyReference.cache
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.BL.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.BL.AssemblyInfoInputs.cache
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.BL.AssemblyInfo.cs
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.BL.csproj.CoreCompileInputs.cache
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\bin\Debug\net8.0\adv_Backend_Entrance_Notification.BL.deps.json
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\bin\Debug\net8.0\adv_Backend_Entrance_Notification.BL.dll
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\bin\Debug\net8.0\adv_Backend_Entrance_Notification.BL.pdb
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\bin\Debug\net8.0\adv_Backend_Entrance.Common.dll
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\bin\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.dll
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\bin\Debug\net8.0\adv_Backend_Entrance.Common.pdb
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\bin\Debug\net8.0\adv_Backend_Entrance_Notification.DAL.pdb
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\obj\Debug\net8.0\adv_Back.66338045.Up2Date
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.BL.dll
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\obj\Debug\net8.0\refint\adv_Backend_Entrance_Notification.BL.dll
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\obj\Debug\net8.0\adv_Backend_Entrance_Notification.BL.pdb
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification.BL\obj\Debug\net8.0\ref\adv_Backend_Entrance_Notification.BL.dll

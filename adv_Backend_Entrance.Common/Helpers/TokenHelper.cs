@@ -29,10 +29,9 @@ namespace adv_Backend_Entrance.Common.Helpers
         }
         public string GetTokenFromHeader()
         {
-            using (var scope = _serviceProvider.CreateScope())
+            using (
+                var scope = _serviceProvider.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<IAuthDbContext>(); 
-
                 string authorizationHeader = _serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext.Request.Headers["Authorization"].FirstOrDefault();
                 if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer "))
                 {
