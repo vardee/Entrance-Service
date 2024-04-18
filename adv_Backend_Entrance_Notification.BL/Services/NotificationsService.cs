@@ -40,7 +40,7 @@ namespace adv_Backend_Entrance_Notification.BL.Services
 
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    await Task.Delay(1000, stoppingToken);
+                    await Task.Delay(100, stoppingToken);
                 }
             }
         }

@@ -1,5 +1,7 @@
 ﻿using adv_Backend_Entrance.Common.Data;
 using adv_Backend_Entrance.Common.Data.Models;
+using adv_Backend_Entrance.Common.DTO.FacultyService;
+using adv_Backend_Entrance.Common.DTO;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Interfaces;
@@ -89,7 +91,6 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
         public async Task<TokenResponseDTO> UserLogin(UserLoginDTO userLoginDTO)
         {
-            Console.WriteLine(userLoginDTO.Email);
             var veryfiedUser = await CheckBasedUserInformation(userLoginDTO.Email, userLoginDTO.Password);
             if (veryfiedUser == null)
             {
@@ -145,6 +146,24 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             };
         }
 
+        public async Task ChangePassword(string token, changePasswordDTO changePasswordDTO)
+        {
+            var userId = GetUserIdFromToken(token);
+            var user  = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+            if(changePasswordDTO.Password != changePasswordDTO.ConfirmPassword)
+            {
+                throw new BadRequestException("Your new passswords dont sovpadat!");
+            }
+            var result = await _userManager.ChangePasswordAsync(user, changePasswordDTO.OldPasssword, changePasswordDTO.Password);
+            if (!result.Succeeded)
+            {
+                throw new BadRequestException(string.Join(", ", result.Errors.Select(x => x.Description)));
+            }
+        }
         public async Task<TokenResponseDTO> RefreshToken(RefreshTokenRequestDTO refreshTokenRequestDTO)
         {
 
@@ -397,6 +416,64 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             {
                 return null;
             }
+        }
+        public async Task<GetUsersPageDTO> GetQuerybleUsers(int page, int size, string token, string? email, string? Lastname, string? Firstname)
+        {
+            var userQuery =  _authDBContext.Users.AsQueryable();
+            var users = await userQuery.ToListAsync();
+            if (email != null)
+            {
+                userQuery = userQuery.Where(aR => aR.Email.Contains(email));
+            }
+            if (Lastname != null)
+            {
+                userQuery = userQuery.Where(aR => aR.LastName.Contains(Lastname));
+            }
+            if (Firstname != null)
+            {
+                userQuery = userQuery.Where(aR => aR.FullName.Contains(Firstname));
+            }
+            int sizeOfPage = size;
+            var countOfPages = (int)Math.Ceiling((double)userQuery.Count() / sizeOfPage);
+            if (page <= countOfPages)
+            {
+                var lowerBound = page == 1 ? 0 : (page - 1) * sizeOfPage;
+                if (page < countOfPages)
+                {
+                    userQuery = userQuery.Skip(lowerBound).Take(sizeOfPage);
+                }
+                else
+                {
+                    userQuery = userQuery.Skip(lowerBound).Take(userQuery.Count() - lowerBound);
+                }
+            }
+            else
+            {
+                throw new BadRequestException("Такой страницы нет");
+            }
+
+            var pagination = new PaginationInformation
+            {
+                Current = page,
+                Page = countOfPages,
+                Size = size
+            };
+
+            var usersDTO = new GetUsersPageDTO
+            {
+                Users = userQuery.Select(p => new GetUsersDTO
+                {
+                    Id = p.Id,
+                    FullName = p.FullName,
+                    LastName = p.LastName,
+                    Patronymic = p.Patronymic,
+                    Email = p.Email,
+                    BirthDate = p.BirthDate,
+                    Gender = p.Gender,
+                }).AsQueryable(),
+                Pagination = pagination
+            };
+            return usersDTO;
         }
         public string GenerateRefreshToken()
         {

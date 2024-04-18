@@ -1,4 +1,5 @@
 ﻿using adv_Backend_Entrance.Common.DTO.UserService;
+using adv_Backend_Entrance.Common.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,5 +19,9 @@ namespace adv_Backend_Entrance.Common.Interfaces
 
         Task AddUserRole(string token, AddUserRoleDTO addUserRoleDTO, Guid userId);
         Task<GetMyRolesDTO> GetMyRoles(string token);
+
+        Task ChangePassword(string token,changePasswordDTO changePasswordDTO);
+
+        Task <GetUsersPageDTO> GetQuerybleUsers(int page, int size, string token, string? email, string? Lastname, string? Firstname);
     }
 }

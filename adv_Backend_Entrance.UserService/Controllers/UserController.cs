@@ -1,5 +1,7 @@
 ﻿using adv_Backend_Entrance.Common.Data.Models;
+using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.DTO.UserService;
+using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces;
 using adv_Backend_Entrance.Common.Middlewares;
@@ -138,6 +140,41 @@ namespace adv_Backend_Entrance.UserService.Controllers
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
             return Ok(await _userService.GetMyRoles(token));
+        }
+        [HttpPut]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Route("password")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(Error), 400)]
+        [ProducesResponseType(typeof(Error), 401)]
+        [ProducesResponseType(typeof(Error), 500)]
+        public async Task<ActionResult> ChangePassword([FromBody] changePasswordDTO changePasswordDTO)
+        {
+            string token = _tokenHelper.GetTokenFromHeader();
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new UnauthorizedException("Данный пользователь не авторизован");
+            }
+            await _userService.ChangePassword(token, changePasswordDTO);
+            return Ok();
+        }
+        [HttpGet]
+        [Route("users")]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Authorize(Roles = "Admin")]
+        [ProducesResponseType(typeof(GetQuerybleProgramsDTO), 200)]
+        [ProducesResponseType(typeof(Error), 400)]
+        [ProducesResponseType(typeof(Error), 401)]
+        [ProducesResponseType(typeof(Error), 500)]
+        public async Task<ActionResult<List<GetEducationLevelsDTO>>> GetQueryblePrograms([FromQuery] string? email, string? Lastname, string? Firstname, [FromQuery] int size = 10, int page = 1)
+        {
+            string token = _tokenHelper.GetTokenFromHeader();
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new UnauthorizedException("Данный пользователь не авторизован");
+            }
+            var result = await _userService.GetQuerybleUsers(page, size, token, email, Lastname, Firstname);
+            return Ok(result);
         }
 
     }
