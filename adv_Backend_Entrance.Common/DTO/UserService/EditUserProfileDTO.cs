@@ -14,6 +14,6 @@ namespace adv_Backend_Entrance.Common.DTO.UserService
         public string? Email { get; set; }
         public string? Patronymic { get; set; }
         public string? Phone { get; set; }
-        public DateTime? BirthDate { get; set; }
+        public DateTime BirthDate { get; set; }
     }
 }

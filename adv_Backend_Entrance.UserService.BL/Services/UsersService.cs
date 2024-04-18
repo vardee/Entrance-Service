@@ -23,6 +23,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using adv_Backend_Entrance.Common.Helpers.Validators;
 
 namespace adv_Backend_Entrance.UserService.BL.Services
 {
@@ -60,6 +61,10 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             if (userRegisterDTO.Password != userRegisterDTO.ConfirmPassword)
             {
                 throw new BadRequestException("Passwords don't match");
+            }
+            if (!BirthDateValidator.ValidateDateOfBirth(userRegisterDTO.BirthDate))
+            {
+                throw new BadRequestException("Неверная дата рождения. Вам должно быть не менее 13 лет и не более 100 лет.");
             }
 
             var user = new User
@@ -285,6 +290,11 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                         user.PhoneNumber = editUserProfileDTO.Phone;
                     }
                     if (editUserProfileDTO.BirthDate != null)
+
+                        if (!BirthDateValidator.ValidateDateOfBirth(editUserProfileDTO.BirthDate))
+                        {
+                            throw new BadRequestException("Неверная дата рождения. Вам должно быть не менее 13 лет и не более 100 лет.");
+                        }
                     {
                         user.BirthDate = (DateTime)editUserProfileDTO.BirthDate;
                     }
