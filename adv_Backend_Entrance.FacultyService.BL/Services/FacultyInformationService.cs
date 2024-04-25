@@ -24,19 +24,23 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
 
-        private string _baseUrl = "https://1c-mockup.kreosoft.space/api/dictionary/";
-        private string _username = "student";
-        private string _password = "ny6gQnyn4ecbBrP9l1Fz";
-
+        private string _baseUrl;
+        private string _username;
+        private string _password;
         public FacultyInformationService(FacultyDBContext facultyDBContext, IConfiguration configuration, HttpClient httpClient)
         {
             _facultyDBContext = facultyDBContext;
             _configuration = configuration;
             _httpClient = httpClient;
+            _baseUrl = _configuration.GetValue<string>("BaseUrl");
+            _username = _configuration.GetValue<string>("Username");
+            _password = _configuration.GetValue<string>("Password");
+
 
             var base64Credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_username}:{_password}"));
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", base64Credentials);
         }
+
 
         private async Task GetEducationLevels()
         {
@@ -63,7 +67,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                             {
                                 Id = level.id,
                                 Name = level.name,
-                                EducationLevelName = enumValue 
+                                EducationLevelName = enumValue
                             });
                         }
                         else
@@ -116,7 +120,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                                 CreateTime = createTimeUtc,
                                 EducationLevelId = documentType.educationLevel.id,
                                 EducationLevelName = documentType.educationLevel.name,
-                                EducationLevelEnum = enumValue 
+                                EducationLevelEnum = enumValue
                             };
 
                             _facultyDBContext.EducationDocumentTypes.Add(newDocumentType);
@@ -225,7 +229,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                     if (existingProgram == null)
                     {
                         if (EducationChecker.TryParseEducationLanguage(program.language, out EducationLanguage languageEnum) &&
-                            EducationChecker.TryParseEducationForm(program.educationForm, out EducationForm formEnum) 
+                            EducationChecker.TryParseEducationForm(program.educationForm, out EducationForm formEnum)
                             && EducationChecker.TryParseEducationLevel(program.educationLevel.name, out EducationLevel enumValue))
                         {
                             _facultyDBContext.EducationProgrammModels.Add(new EducationProgrammModel
@@ -277,7 +281,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
         {
             try
             {
-                if(importTypes == null)
+                if (importTypes == null)
                 {
                     await GetEducationLevels();
                     await GetDocumentType();
@@ -285,7 +289,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                     await GetPrograms();
                     await AddImportStatus(ImportStatus.Imported);
                 }
-                else if(importTypes != null && importTypes.Contains(ImportType.DocumentTypes))
+                else if (importTypes != null && importTypes.Contains(ImportType.DocumentTypes))
                 {
                     await GetDocumentType();
                 }
