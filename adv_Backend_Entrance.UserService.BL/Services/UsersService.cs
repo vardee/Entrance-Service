@@ -1,6 +1,4 @@
 ﻿using adv_Backend_Entrance.Common.Data;
-using adv_Backend_Entrance.Common.Data.Models;
-using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.DTO;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Enums;
@@ -8,21 +6,13 @@ using adv_Backend_Entrance.Common.Interfaces;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.UserService.DAL.Data;
 using adv_Backend_Entrance.UserService.DAL.Data.Entities;
-using AutoMapper.Configuration.Annotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using adv_Backend_Entrance.Common.Helpers.Validators;
 
 namespace adv_Backend_Entrance.UserService.BL.Services
@@ -31,20 +21,20 @@ namespace adv_Backend_Entrance.UserService.BL.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
         private readonly AuthDbContext _authDBContext;
         private readonly RedisDBContext _redisDBContext;
         private readonly IConfiguration _configuration;
+        private readonly AdditionTokenService _additionTokenService;
 
 
-        public UsersService(UserManager<User> userManager, SignInManager<User> signInManager, AuthDbContext authDbContext, IConfiguration configuration, RoleManager<IdentityRole<Guid>> roleManager, RedisDBContext redisDBContext)
+        public UsersService(UserManager<User> userManager, SignInManager<User> signInManager, AuthDbContext authDbContext, IConfiguration configuration, RedisDBContext redisDBContext, AdditionTokenService additionTokenService)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _signInManager = signInManager;
             _authDBContext = authDbContext;
             _configuration = configuration;
             _redisDBContext = redisDBContext;
+            _additionTokenService = additionTokenService;
         }
 
         public async Task<TokenResponseDTO> UserRegister(UserRegisterDTO userRegisterDTO)
@@ -110,10 +100,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
             var roles = await _userManager.GetRolesAsync(user);
 
-            var claims = new List<Claim>
-{
-    new Claim(ClaimTypes.Email, user.Id.ToString())
-};
+            var claims = new List<Claim>{new Claim(ClaimTypes.Email, user.Id.ToString())};
 
             foreach (var role in roles)
             {
@@ -134,7 +121,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
 
 
-            var tokenRefresh = GenerateRefreshToken();
+            var tokenRefresh = _additionTokenService.GenerateRefreshToken();
 
             user.RefreshToken = tokenRefresh;
             var refreshTokenLifetimeInDays = _configuration.GetSection("Jwt").GetValue<int>("RefreshTokenLifetimeInDays");
@@ -153,7 +140,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
         public async Task ChangePassword(string token, changePasswordDTO changePasswordDTO)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _additionTokenService.GetUserIdFromToken(token);
             var user  = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
@@ -172,7 +159,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
         public async Task<TokenResponseDTO> RefreshToken(RefreshTokenRequestDTO refreshTokenRequestDTO)
         {
 
-            var principal = GetUserIdFromToken(refreshTokenRequestDTO.AccessToken);
+            var principal = _additionTokenService.GetUserIdFromToken(refreshTokenRequestDTO.AccessToken);
 
             if (principal == null)
             {
@@ -186,10 +173,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             }
             var roles = await _userManager.GetRolesAsync(user);
 
-            var claims = new List<Claim>
-{
-    new Claim(ClaimTypes.Email, user.Id.ToString())
-};
+            var claims = new List<Claim>{new Claim(ClaimTypes.Email, user.Id.ToString())};
 
             foreach (var role in roles)
             {
@@ -210,7 +194,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
 
 
-            var tokenRefresh = GenerateRefreshToken();
+            var tokenRefresh = _additionTokenService.GenerateRefreshToken();
 
             user.RefreshToken = tokenRefresh;
             var refreshTokenLifetimeInDays = _configuration.GetSection("Jwt").GetValue<int>("RefreshTokenLifetimeInDays");
@@ -239,7 +223,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
         public async Task<UserGetProfileDTO> GetProfile(string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _additionTokenService.GetUserIdFromToken(token);
             if (userId != null)
             {
                 var user = await _userManager.FindByIdAsync(userId);
@@ -267,7 +251,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
         }
         public async Task EditProfile(string token, EditUserProfileDTO editUserProfileDTO)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _additionTokenService.GetUserIdFromToken(token);
             if (userId != null)
             {
                 var user = await _userManager.FindByIdAsync(userId);
@@ -318,7 +302,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
         public async Task AddUserRole(string token, AddUserRoleDTO addUserRoleDTO, Guid Id)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _additionTokenService.GetUserIdFromToken(token);
             if (userId != null)
             {
                 var user = await _userManager.FindByIdAsync(userId);
@@ -327,13 +311,13 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                     var roles = await _userManager.GetRolesAsync(user);
                     if (roles.Contains("Admin"))
                     {
-                        await AddRoleToUser(addUserRoleDTO.Role, Id);
+                        await _additionTokenService.AddRoleToUser(addUserRoleDTO.Role, Id);
                     }
                     else if (roles.Contains("MainManager"))
                     {
                         if (addUserRoleDTO.Role == RoleType.Manager)
                         {
-                            await AddRoleToUser(addUserRoleDTO.Role, Id);
+                            await _additionTokenService.AddRoleToUser(addUserRoleDTO.Role, Id);
                         }
                         else
                         {
@@ -359,7 +343,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
         public async Task<GetMyRolesDTO> GetMyRoles(string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _additionTokenService.GetUserIdFromToken(token);
             if (userId != null)
             {
                 var user = await _userManager.FindByIdAsync(userId);
@@ -379,52 +363,6 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             else
             {
                 throw new UnauthorizedException("User is not authorized");
-            }
-        }
-        private async Task AddRoleToUser(RoleType role, Guid userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (!Enum.IsDefined(typeof(RoleType), role))
-            {
-                throw new BadRequestException($"Role '{role}' is not defined.");
-            }
-
-            var roleName = Enum.GetName(typeof(RoleType), role);
-
-            var result = await _userManager.AddToRoleAsync(user, roleName);
-            if (!result.Succeeded)
-            {
-                throw new BadRequestException($"Failed to add user to role '{roleName}'.");
-            }
-        }
-        public string? GetUserIdFromToken(string token)
-        {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Secret").Value));
-
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = securityKey,
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false
-            };
-
-            try
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var claimsPrincipal = handler.ValidateToken(token, validationParameters, out var validatedToken);
-
-                if (claimsPrincipal is null || !(validatedToken is JwtSecurityToken jwtSecurityToken))
-                    return null;
-
-                var emailClaim = claimsPrincipal.FindFirst(ClaimTypes.Email);
-
-                return emailClaim?.Value;
-            }
-            catch (Exception)
-            {
-                return null;
             }
         }
         public async Task<GetUsersPageDTO> GetQuerybleUsers(int page, int size, string token, string? email, string? Lastname, string? Firstname)
@@ -484,15 +422,6 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 Pagination = pagination
             };
             return usersDTO;
-        }
-        public string GenerateRefreshToken()
-        {
-            var randomValues = new byte[128];
-            using (var numberGenerator = RandomNumberGenerator.Create())
-            {
-                numberGenerator.GetBytes(randomValues);
-            }
-            return Convert.ToBase64String(randomValues);
         }
         private async Task<ClaimsIdentity> CheckBasedUserInformation(string email, string password)
         {

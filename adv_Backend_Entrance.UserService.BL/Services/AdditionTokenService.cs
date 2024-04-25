@@ -1,4 +1,4 @@
-﻿/*using adv_Backend_Entrance.UserService.DAL.Data.Entities;
+﻿using adv_Backend_Entrance.UserService.DAL.Data.Entities;
 using adv_Backend_Entrance.UserService.DAL.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +11,10 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using adv_Backend_Entrance.Common.Enums;
+using adv_Backend_Entrance.Common.Middlewares;
+using adv_Backend_Entrance.Common.DTO.UserService;
+using Microsoft.EntityFrameworkCore;
 
 namespace adv_Backend_Entrance.UserService.BL.Services
 {
@@ -18,19 +22,32 @@ namespace adv_Backend_Entrance.UserService.BL.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
         private readonly AuthDbContext _authDBContext;
         private readonly IConfiguration _configuration;
 
-        public AdditionTokenService(UserManager<User> userManager, SignInManager<User> signInManager, AuthDbContext authDbContext, IConfiguration configuration, RoleManager<IdentityRole<Guid>> roleManager)
+        public AdditionTokenService(UserManager<User> userManager, SignInManager<User> signInManager, AuthDbContext authDbContext, IConfiguration configuration)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _signInManager = signInManager;
             _authDBContext = authDbContext;
             _configuration = configuration;
         }
+        public async Task AddRoleToUser(RoleType role, Guid userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (!Enum.IsDefined(typeof(RoleType), role))
+            {
+                throw new BadRequestException($"Role '{role}' is not defined.");
+            }
 
+            var roleName = Enum.GetName(typeof(RoleType), role);
+
+            var result = await _userManager.AddToRoleAsync(user, roleName);
+            if (!result.Succeeded)
+            {
+                throw new BadRequestException($"Failed to add user to role '{roleName}'.");
+            }
+        }
         public string GenerateRefreshToken()
         {
             var randomValues = new byte[128];
@@ -40,7 +57,63 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             }
             return Convert.ToBase64String(randomValues);
         }
+        public async Task<TokenResponseDTO> RefreshToken(RefreshTokenRequestDTO refreshTokenRequestDTO)
+        {
 
+            var principal = GetUserIdFromToken(refreshTokenRequestDTO.AccessToken);
+
+            if (principal == null)
+            {
+                throw new ForbiddenException("This account is not authorized");
+            }
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id.ToString() == principal);
+            Console.WriteLine(principal);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, user.Id.ToString())
+            };
+
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var jwt = new JwtSecurityToken(
+                issuer: _configuration.GetSection("Jwt")["Issuer"],
+                audience: _configuration.GetSection("Jwt")["Audience"],
+                notBefore: DateTime.UtcNow,
+                claims: claims,
+                expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(_configuration.GetSection("Jwt")
+                    .GetValue<int>("AccessTokenLifetimeInMinutes"))),
+                signingCredentials: new SigningCredentials(
+                    new SymmetricSecurityKey(
+                        Encoding.ASCII.GetBytes(_configuration.GetSection("Jwt")["Secret"] ?? string.Empty)),
+                    SecurityAlgorithms.HmacSha256));
+
+
+
+            var tokenRefresh = GenerateRefreshToken();
+
+            user.RefreshToken = tokenRefresh;
+            var refreshTokenLifetimeInDays = _configuration.GetSection("Jwt").GetValue<int>("RefreshTokenLifetimeInDays");
+            var refreshTokenExpiry = DateTime.UtcNow.AddDays(refreshTokenLifetimeInDays);
+            user.RefreshTokenExpiry = refreshTokenExpiry;
+
+
+            await _authDBContext.SaveChangesAsync();
+
+            return new TokenResponseDTO
+            {
+                AccessToken = new JwtSecurityTokenHandler().WriteToken(jwt),
+                RefreshToken = tokenRefresh
+            };
+        }
 
         public string? GetUserIdFromToken(string token)
         {
@@ -76,4 +149,3 @@ namespace adv_Backend_Entrance.UserService.BL.Services
 
     }
 }
-*/

@@ -60,6 +60,7 @@ namespace adv_Backend_Entrance.UserService.Controllers
         }
         [HttpPost]
         [Authorize(Policy = "TokenNotInBlackList")]
+
         [Route("logout")]
         [ProducesResponseType(typeof(Error), 200)]
         [ProducesResponseType(typeof(Error), 400)]
@@ -110,6 +111,7 @@ namespace adv_Backend_Entrance.UserService.Controllers
         }
         [HttpPut]
         [Authorize(Policy = "TokenNotInBlackList")]
+        [Authorize(Roles = "Admin")]
         [Route("role/{userId}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(Error), 400)]
