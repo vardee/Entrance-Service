@@ -33,9 +33,9 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]
         [ProducesResponseType(typeof(Error), 500)]
-        public async Task<ActionResult> GetDictionary()
+        public async Task<ActionResult> GetDictionary([FromQuery] List<ImportType>? importTypes)
         {
-            await _facultyService.GetDictionary();
+            await _facultyService.GetDictionary(importTypes);
             return Ok();
         }
 

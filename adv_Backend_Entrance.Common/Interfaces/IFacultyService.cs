@@ -1,4 +1,5 @@
-﻿using System;
+﻿using adv_Backend_Entrance.Common.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,6 @@ namespace adv_Backend_Entrance.Common.Interfaces
 {
     public interface IFacultyService
     {
-        Task GetDictionary();
+        Task GetDictionary(List<ImportType>? importTypes);
     }
 }

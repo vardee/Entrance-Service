@@ -22,6 +22,7 @@ namespace adv_Backend_Entrance.UserService.BL.Configurations
                 return new RedisDBContext(connectionString);
             });
             services.AddScoped<IUserService, UsersService>();
+            services.AddScoped<AdditionTokenService>();
             services.AddSingleton<TokenHelper>();
             return services;
         }

@@ -273,17 +273,34 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             await _facultyDBContext.SaveChangesAsync();
         }
 
-        public async Task GetDictionary()
+        public async Task GetDictionary(List<ImportType>? importTypes)
         {
             try
             {
-                await GetEducationLevels();
-                await GetDocumentType();
-                await GetFaculties();
-                await GetPrograms();
-                await AddImportStatus(ImportStatus.Imported);
-
-
+                if(importTypes == null)
+                {
+                    await GetEducationLevels();
+                    await GetDocumentType();
+                    await GetFaculties();
+                    await GetPrograms();
+                    await AddImportStatus(ImportStatus.Imported);
+                }
+                else if(importTypes != null && importTypes.Contains(ImportType.DocumentTypes))
+                {
+                    await GetDocumentType();
+                }
+                else if (importTypes != null && importTypes.Contains(ImportType.EducationLevels))
+                {
+                    await GetEducationLevels();
+                }
+                else if (importTypes != null && importTypes.Contains(ImportType.Faculties))
+                {
+                    await GetFaculties();
+                }
+                else if (importTypes != null && importTypes.Contains(ImportType.Programs))
+                {
+                    await GetPrograms();
+                }
                 var sendNotificationDTO = new SendNotificationDTO
                 {
                     Message = "Импорт произошел успешно",
