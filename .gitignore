@@ -25,3 +25,15 @@
 /adv_Backend_Entrance.FacultyService.DAL/obj
 /adv_Backend_Entrance.FacultyService.MVCPanel/bin/Debug/net8.0
 /adv_Backend_Entrance.FacultyService.MVCPanel/obj
+/adv_Backend_Entrance.ApplicantService/bin/Debug/net8.0
+/adv_Backend_Entrance.ApplicantService/obj
+/adv_Backend_Entrance.ApplicantService.BL/bin/Debug/net8.0
+/adv_Backend_Entrance.ApplicantService.BL/obj
+/adv_Backend_Entrance.ApplicantService.DAL/obj
+/adv_Backend_Entrance.ApplicantService.DAL/bin/Debug/net8.0
+/adv_Backend_Entrance.EntranceService/bin/Debug/net8.0
+/adv_Backend_Entrance.EntranceService/obj
+/adv_Backend_Entrance.EntranceService.BL/bin/Debug/net8.0
+/adv_Backend_Entrance.EntranceService.BL/obj
+/adv_Backend_Entrance.EntranceService.DAL/bin/Debug/net8.0
+/adv_Backend_Entrance.EntranceService.DAL/obj
