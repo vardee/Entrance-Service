@@ -17,11 +17,23 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.Facult
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.FacultyService.DAL", "adv_Backend_Entrance.FacultyService.DAL\adv_Backend_Entrance.FacultyService.DAL.csproj", "{8EA9498C-60A6-4DBB-A4DC-1F232F75D839}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance_Notification.DAL", "adv_Backend_Entrance_Notification.DAL\adv_Backend_Entrance_Notification.DAL.csproj", "{49AF25ED-8388-4248-9908-8E1A6C5D0EE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance_Notification.DAL", "adv_Backend_Entrance_Notification.DAL\adv_Backend_Entrance_Notification.DAL.csproj", "{49AF25ED-8388-4248-9908-8E1A6C5D0EE8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance_Notification.BL", "adv_Backend_Entrance_Notification.BL\adv_Backend_Entrance_Notification.BL.csproj", "{AC6BBC81-88E1-42A7-9641-D2FCCE1A4D69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance_Notification.BL", "adv_Backend_Entrance_Notification.BL\adv_Backend_Entrance_Notification.BL.csproj", "{AC6BBC81-88E1-42A7-9641-D2FCCE1A4D69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance_Notification", "adv_Backend_Entrance_Notification\adv_Backend_Entrance_Notification.csproj", "{0037D096-985C-43AF-BBF8-826C8EADEB14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance_Notification", "adv_Backend_Entrance_Notification\adv_Backend_Entrance_Notification.csproj", "{0037D096-985C-43AF-BBF8-826C8EADEB14}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.EntranceService", "adv_Backend_Entrance.EntranceService\adv_Backend_Entrance.EntranceService.csproj", "{845F2013-032C-48D2-B333-EC6C5C51BD2E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.EntranceService.DAL", "adv_Backend_Entrance.EntranceService.DAL\adv_Backend_Entrance.EntranceService.DAL.csproj", "{AC739E67-694A-4027-81CB-FB730C157D92}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.EntranceService.BL", "adv_Backend_Entrance.EntranceService.BL\adv_Backend_Entrance.EntranceService.BL.csproj", "{91E0AECC-BEC4-4ACC-8FEC-40B0ABE5CD39}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance.ApplicantService.DAL", "adv_Backend_Entrance.ApplicantService.DAL\adv_Backend_Entrance.ApplicantService.DAL.csproj", "{887C48D6-5A43-4893-A9F6-198E256D3AFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance.ApplicantService.BL", "adv_Backend_Entrance.ApplicantService.BL\adv_Backend_Entrance.ApplicantService.BL.csproj", "{0FE3E164-FC59-481B-9500-6FC523D33F55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance.ApplicantService", "adv_Backend_Entrance.ApplicantService\adv_Backend_Entrance.ApplicantService.csproj", "{74F96B08-0D1C-495B-92F5-1E4A535763EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +81,30 @@ Global
 		{0037D096-985C-43AF-BBF8-826C8EADEB14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0037D096-985C-43AF-BBF8-826C8EADEB14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0037D096-985C-43AF-BBF8-826C8EADEB14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{845F2013-032C-48D2-B333-EC6C5C51BD2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{845F2013-032C-48D2-B333-EC6C5C51BD2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{845F2013-032C-48D2-B333-EC6C5C51BD2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{845F2013-032C-48D2-B333-EC6C5C51BD2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC739E67-694A-4027-81CB-FB730C157D92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC739E67-694A-4027-81CB-FB730C157D92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC739E67-694A-4027-81CB-FB730C157D92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC739E67-694A-4027-81CB-FB730C157D92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91E0AECC-BEC4-4ACC-8FEC-40B0ABE5CD39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91E0AECC-BEC4-4ACC-8FEC-40B0ABE5CD39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91E0AECC-BEC4-4ACC-8FEC-40B0ABE5CD39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91E0AECC-BEC4-4ACC-8FEC-40B0ABE5CD39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{887C48D6-5A43-4893-A9F6-198E256D3AFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{887C48D6-5A43-4893-A9F6-198E256D3AFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{887C48D6-5A43-4893-A9F6-198E256D3AFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{887C48D6-5A43-4893-A9F6-198E256D3AFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FE3E164-FC59-481B-9500-6FC523D33F55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FE3E164-FC59-481B-9500-6FC523D33F55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FE3E164-FC59-481B-9500-6FC523D33F55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FE3E164-FC59-481B-9500-6FC523D33F55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74F96B08-0D1C-495B-92F5-1E4A535763EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74F96B08-0D1C-495B-92F5-1E4A535763EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74F96B08-0D1C-495B-92F5-1E4A535763EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74F96B08-0D1C-495B-92F5-1E4A535763EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

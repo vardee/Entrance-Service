@@ -14,8 +14,7 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
     [Route("faculty")]
     public class FacultyController : ControllerBase
     {
-        private readonly IFacultyInteractionsService
-            _interactionService;
+        private readonly IFacultyInteractionsService _interactionService;
         private readonly IFacultyService _facultyService;
         private readonly TokenHelper _tokenHelper;
         public FacultyController(IFacultyService facultyService, TokenHelper tokenHelper, IFacultyInteractionsService facultyInteractionsService)
@@ -42,7 +41,7 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
         [HttpGet]
         [Route("document_types")]
         [Authorize(Policy = "TokenNotInBlackList")]
-        [Authorize(Roles = "Admin,Applicant,Manager,MainManager")]
+        [Authorize(Roles = "Admin,Applicant,Manager,MainManager,User")]
         [ProducesResponseType(typeof(List<GetDocumentTypesDTO>), 200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]
@@ -55,7 +54,7 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
         [HttpGet]
         [Route("faculties")]
         [Authorize(Policy = "TokenNotInBlackList")]
-        [Authorize(Roles = "Admin,Applicant,Manager,MainManager")]
+        [Authorize(Roles = "Admin,Applicant,Manager,MainManager,User")]
         [ProducesResponseType(typeof(List<GetFacultiesDTO>), 200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]
@@ -68,7 +67,7 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
         [HttpGet]
         [Route("education_levels")]
         [Authorize(Policy = "TokenNotInBlackList")]
-        [Authorize(Roles = "Admin,Applicant,Manager,MainManager")]
+        [Authorize(Roles = "Admin,Applicant,Manager,MainManager,User")]
         [ProducesResponseType(typeof(List<GetEducationLevelsDTO>), 200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]
@@ -81,18 +80,18 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
         [HttpGet]
         [Route("programs")]
         [Authorize(Policy = "TokenNotInBlackList")]
-        [Authorize(Roles = "Admin,Applicant,Manager,MainManager")]
+        [Authorize(Roles = "Admin,Applicant,Manager,MainManager,User")]
         [ProducesResponseType(typeof(GetQuerybleProgramsDTO), 200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]
         [ProducesResponseType(typeof(Error), 500)]
         public async Task<ActionResult<List<GetEducationLevelsDTO>>> GetQueryblePrograms(
-            [FromQuery] List<EducationLanguage> LanguageEnum, 
-            [FromQuery] List<EducationLevel> EducationLevelEnum, 
-            [FromQuery] List<EducationForm> EducationFormEnum,Guid? FacultyId, Guid? Id,
-            [FromQuery] int size = 10, int page=1)
+            [FromQuery] List<EducationLanguage> LanguageEnum,
+            [FromQuery] List<EducationLevel> EducationLevelEnum,
+            [FromQuery] List<EducationForm> EducationFormEnum, Guid? FacultyId, Guid? Id,
+            [FromQuery] int size = 10, int page = 1)
         {
-            var result = await _interactionService.GetQueryblePrograms(size,page,LanguageEnum,EducationLevelEnum, EducationFormEnum,FacultyId,Id);
+            var result = await _interactionService.GetQueryblePrograms(size, page, LanguageEnum, EducationLevelEnum, EducationFormEnum, FacultyId, Id);
             return Ok(result);
         }
 

@@ -9,6 +9,7 @@ namespace adv_Backend_Entrance.Common.Enums
 {
     public enum RoleType
     {
+        User,
         Admin,
         Manager,
         MainManager,

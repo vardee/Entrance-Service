@@ -71,7 +71,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             var result = await _userManager.CreateAsync(user, userRegisterDTO.Password);
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, "Applicant");
+                await _userManager.AddToRoleAsync(user, "User");
                 return await UserLogin(new UserLoginDTO()
                 {
                     Email = userRegisterDTO.Email,
@@ -231,9 +231,9 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 {
                     return new UserGetProfileDTO
                     {
-                        Firstname = user.FullName,
-                        Lastname = user.LastName,
-                        Patronymic = user.Patronymic,
+                        firstname = user.FullName,
+                        lastname = user.LastName,
+                        patronymic = user.Patronymic,
                         BirthDate = user.BirthDate,
                         Email = user.Email,
                         Phone = user.PhoneNumber,

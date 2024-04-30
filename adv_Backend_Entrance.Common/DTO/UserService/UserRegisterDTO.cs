@@ -7,8 +7,7 @@ public class UserRegisterDTO
     public string FullName { get; set; }
     [Required]
     public string LastName { get; set; }
-    [Required]
-    public string Patronymic { get; set; }
+    public string? Patronymic { get; set; }
     [Required]
     public Gender Gender { get; set; }
     [Required]

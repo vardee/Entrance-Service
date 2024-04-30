@@ -152,21 +152,6 @@ namespace adv_Backend_Entrance.UserService.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("adv_Backend_Entrance.Common.Models.BlackToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("BadToken")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BlackListTokens");
-                });
-
             modelBuilder.Entity("adv_Backend_Entrance.UserService.DAL.Data.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -207,6 +192,9 @@ namespace adv_Backend_Entrance.UserService.DAL.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Nationality")
+                        .HasColumnType("text");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -219,7 +207,6 @@ namespace adv_Backend_Entrance.UserService.DAL.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Patronymic")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")

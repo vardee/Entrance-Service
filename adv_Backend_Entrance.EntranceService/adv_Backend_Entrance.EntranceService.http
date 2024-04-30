@@ -1,0 +1,6 @@
+@adv_Backend_Entrance.EntranceService_HostAddress = http://localhost:5215
+
+GET {{adv_Backend_Entrance.EntranceService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
