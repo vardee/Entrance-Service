@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -18,7 +18,8 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\adv_Backend_Entrance.ApplicantService.BL\adv_Backend_Entrance.ApplicantService.BL.csproj" />
+    <ProjectReference Include="..\adv_Backend_Entrance.Common\adv_Backend_Entrance.Common.csproj" />
   </ItemGroup>
 
 </Project>

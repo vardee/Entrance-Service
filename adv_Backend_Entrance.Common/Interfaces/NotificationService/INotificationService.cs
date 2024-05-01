@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace adv_Backend_Entrance.Common.Interfaces
+namespace adv_Backend_Entrance.Common.Interfaces.NotificationService
 {
     public interface INotificationService
     {

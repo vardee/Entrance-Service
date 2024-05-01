@@ -5,12 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace adv_Backend_Entrance.EntranceService.DAL.Data.Models
+namespace adv_Backend_Entrance.Common.DTO.ApplicantService
 {
-    public class EducationDocument
+    public class AddEducationLevelDTO
     {
-        public Guid Id { get; set; }
-        public Guid UserId { get; set; }
         public EducationLevel EducationLevel { get; set; }
     }
 }

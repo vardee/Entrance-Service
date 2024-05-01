@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace adv_Backend_Entrance.Common.DTO.EntranceService
+namespace adv_Backend_Entrance.Common.Interfaces.FacultyService
 {
-    public class AddEducationLevelDTO
+    public interface IFacultyService
     {
-        public EducationLevel EducationLevel { get; set; }
+        Task GetDictionary(List<ImportType>? importTypes);
     }
 }

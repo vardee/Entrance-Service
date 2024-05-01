@@ -1,6 +1,6 @@
 ﻿using adv_Backend_Entrance.Common.Data;
 using adv_Backend_Entrance.Common.Helpers;
-using adv_Backend_Entrance.Common.Interfaces;
+using adv_Backend_Entrance.Common.Interfaces.FacultyService;
 using adv_Backend_Entrance.FacultyService.BL.Services;
 using adv_Backend_Entrance.FacultyService.MVCPanel.Data;
 using AutoMapper;

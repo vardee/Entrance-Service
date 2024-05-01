@@ -14,5 +14,10 @@
 		<PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\adv_Backend_Entrance.ApplicantService.DAL\adv_Backend_Entrance.ApplicantService.DAL.csproj" />
+	  <ProjectReference Include="..\adv_Backend_Entrance.Common\adv_Backend_Entrance.Common.csproj" />
+	</ItemGroup>
+
 
 </Project>

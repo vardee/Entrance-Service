@@ -2,7 +2,6 @@
 using adv_Backend_Entrance.Common.DTO;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Enums;
-using adv_Backend_Entrance.Common.Interfaces;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.UserService.DAL.Data;
 using adv_Backend_Entrance.UserService.DAL.Data.Entities;
@@ -14,6 +13,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using adv_Backend_Entrance.Common.Helpers.Validators;
+using adv_Backend_Entrance.Common.Interfaces.UserService;
 
 namespace adv_Backend_Entrance.UserService.BL.Services
 {

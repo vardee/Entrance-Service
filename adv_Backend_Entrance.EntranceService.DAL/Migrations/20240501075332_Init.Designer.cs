@@ -12,7 +12,7 @@ using adv_Backend_Entrance.EntranceService.DAL.Data;
 namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
 {
     [DbContext(typeof(EntranceDBContext))]
-    [Migration("20240427093403_Init")]
+    [Migration("20240501075332_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -34,16 +34,17 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
                     b.Property<int>("ApplicationStatus")
                         .HasColumnType("integer");
 
-                    b.Property<int>("EducationId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("EducationId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<Guid>("ManagerId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Nationality")
                         .HasColumnType("text");
@@ -76,50 +77,6 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
                     b.HasKey("ApplicationId", "ProgramId");
 
                     b.ToTable("ApplicationPrograms");
-                });
-
-            modelBuilder.Entity("adv_Backend_Entrance.EntranceService.DAL.Data.Models.EducationDocument", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("EducationLevel")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("EducationDocuments");
-                });
-
-            modelBuilder.Entity("adv_Backend_Entrance.EntranceService.DAL.Data.Models.Passport", b =>
-                {
-                    b.Property<int>("PassportNumber")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PassportNumber"));
-
-                    b.Property<string>("BirthPlace")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateOnly>("IssuedWhen")
-                        .HasColumnType("date");
-
-                    b.Property<string>("IssuedWhom")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("PassportNumber");
-
-                    b.ToTable("Passports");
                 });
 
             modelBuilder.Entity("adv_Backend_Entrance.EntranceService.DAL.Data.Models.ApplicationProgram", b =>

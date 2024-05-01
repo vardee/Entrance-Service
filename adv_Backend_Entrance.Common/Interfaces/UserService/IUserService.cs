@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace adv_Backend_Entrance.Common.Interfaces
+namespace adv_Backend_Entrance.Common.Interfaces.UserService
 {
     public interface IUserService
     {
@@ -14,14 +14,14 @@ namespace adv_Backend_Entrance.Common.Interfaces
         Task<TokenResponseDTO> UserLogin(UserLoginDTO userLoginDTO);
         Task<TokenResponseDTO> RefreshToken(RefreshTokenRequestDTO refreshTokenRequestDTO);
         Task Logout(string token);
-        Task <UserGetProfileDTO> GetProfile(string token);
+        Task<UserGetProfileDTO> GetProfile(string token);
         Task EditProfile(string token, EditUserProfileDTO editUserProfileDTO);
 
         Task AddUserRole(string token, AddUserRoleDTO addUserRoleDTO, Guid userId);
         Task<GetMyRolesDTO> GetMyRoles(string token);
 
-        Task ChangePassword(string token,changePasswordDTO changePasswordDTO);
+        Task ChangePassword(string token, changePasswordDTO changePasswordDTO);
 
-        Task <GetUsersPageDTO> GetQuerybleUsers(int page, int size, string token, string? email, string? Lastname, string? Firstname);
+        Task<GetUsersPageDTO> GetQuerybleUsers(int page, int size, string token, string? email, string? Lastname, string? Firstname);
     }
 }

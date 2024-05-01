@@ -1,6 +1,6 @@
 ﻿using adv_Backend_Entrance.Common.Data;
 using adv_Backend_Entrance.Common.Helpers;
-using adv_Backend_Entrance.Common.Interfaces;
+using adv_Backend_Entrance.Common.Interfaces.UserService;
 using adv_Backend_Entrance.UserService.BL.Services;
 using adv_Backend_Entrance.UserService.DAL.Data;
 using AutoMapper;

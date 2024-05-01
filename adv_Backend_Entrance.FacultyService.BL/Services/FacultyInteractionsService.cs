@@ -1,7 +1,7 @@
 ﻿using adv_Backend_Entrance.Common.DTO;
 using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.Enums;
-using adv_Backend_Entrance.Common.Interfaces;
+using adv_Backend_Entrance.Common.Interfaces.FacultyService;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.FacultyService.MVCPanel.Data;
 using Microsoft.EntityFrameworkCore;

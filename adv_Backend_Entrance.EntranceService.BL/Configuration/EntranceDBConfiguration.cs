@@ -1,6 +1,6 @@
 ﻿using adv_Backend_Entrance.Common.Data;
 using adv_Backend_Entrance.Common.Helpers;
-using adv_Backend_Entrance.Common.Interfaces;
+using adv_Backend_Entrance.Common.Interfaces.EntranceService;
 using adv_Backend_Entrance.EntranceService.BL.Services;
 using adv_Backend_Entrance.EntranceService.DAL.Data;
 using Microsoft.AspNetCore.Http;

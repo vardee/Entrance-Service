@@ -5,12 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace adv_Backend_Entrance.Common.Interfaces
+namespace adv_Backend_Entrance.Common.Interfaces.EntranceService
 {
     public interface IEntranceService
     {
         Task CreateApplication(CreateApplicationDTO createApplicationDTO, string token);
-        Task AddPassport(AddPassportDTO addPassportDTO, string token);
-        Task AddEducationLevel(AddEducationLevelDTO addEducationLevelDTO, string token);
     }
 }

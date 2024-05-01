@@ -1,6 +1,5 @@
 ﻿using adv_Backend_Entrance.Common.Data;
 using adv_Backend_Entrance.Common.DTO.EntranceService;
-using adv_Backend_Entrance.Common.Interfaces;
 using adv_Backend_Entrance.UserService.DAL.Data.Entities;
 using adv_Backend_Entrance.UserService.DAL.Data;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +25,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.Common.DTO.UserService;
+using adv_Backend_Entrance.Common.DTO.ApplicantService;
+using adv_Backend_Entrance.Common.Interfaces.EntranceService;
 
 namespace adv_Backend_Entrance.EntranceService.BL.Services
 {
@@ -38,6 +39,8 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
 
         private string _baseUrl;
         private string _getProfileUrl;
+        private string _getEducationInformation;
+        private string _getPassportInformation;
         public ApplicantEntranceService(EntranceDBContext entranceDBContext, IConfiguration configuration, HttpClient httpClient, TokenHelper tokenHelper)
         {
             _entranceDBContext = entranceDBContext;
@@ -46,6 +49,8 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             _tokenHelper = tokenHelper;
             _baseUrl = _configuration.GetValue<string>("BaseUrl");
             _getProfileUrl = _configuration.GetValue<string>("GetProfileUrl");
+            _getEducationInformation = _configuration.GetValue<string>("GetEducationInfo"); ;
+            _getPassportInformation = _configuration.GetValue<string>("GetPassportInfo"); ;
             var token = _tokenHelper.GetTokenFromHeader();
 
             if (!string.IsNullOrEmpty(token))
@@ -54,48 +59,43 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             }
         }
 
-        public async Task AddEducationLevel(AddEducationLevelDTO addEducationLevelDTO, string token)
-        {
-            string userId = GetUserIdFromToken(token);
-            var educationLevel = new EducationDocument
-            {
-                UserId = Guid.Parse(userId),
-                EducationLevel = addEducationLevelDTO.EducationLevel,
-            };
-            _entranceDBContext.EducationDocuments.Add(educationLevel);
-            await _entranceDBContext.SaveChangesAsync();
-        }
-
-        public async Task AddPassport(AddPassportDTO addPassportDTO, string token)
-        {
-            string userId = GetUserIdFromToken(token);
-            var passport = new Passport
-            {
-                UserId = Guid.Parse(userId),
-                PassportNumber = addPassportDTO.PassportNumber,
-                IssuedWhen = addPassportDTO.IssuedWhen,
-                IssuedWhom = addPassportDTO.IssuedWhom,
-                BirthPlace = addPassportDTO.BirthPlace,
-            };
-            _entranceDBContext.Passports.Add(passport);
-            await _entranceDBContext.SaveChangesAsync();
-        }
-
         public async Task CreateApplication(CreateApplicationDTO createApplicationDTO, string token)
         {
             string userId = GetUserIdFromToken(token);
-            var userPassport = await _entranceDBContext.Passports.FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
-            if (userPassport == null)
+            HttpResponseMessage getPassportResponse = await _httpClient.GetAsync(_getPassportInformation);
+            if (!getPassportResponse.IsSuccessStatusCode)
+            {
+                throw new BadRequestException("bAD REQUEST SOORY YOU CANT!");
+            }
+            string getPassportResponseBody = await getPassportResponse.Content.ReadAsStringAsync();
+            var userPassportResponse = JsonSerializer.Deserialize<GetPassportInformationDTO>(getPassportResponseBody);
+            Console.WriteLine(userPassportResponse);
+            if (getPassportResponseBody == null)
             {
                 throw new NotFoundException("Your passport not found!");
             }
-
-            var userEducation = await _entranceDBContext.EducationDocuments.FirstOrDefaultAsync(eD => eD.UserId == Guid.Parse(userId));
-            if (userEducation == null)
+            HttpResponseMessage getEducationResponse = await _httpClient.GetAsync(_getEducationInformation);
+            if (!getEducationResponse.IsSuccessStatusCode)
+            {
+                throw new BadRequestException("bAD REQUEST SOORY YOU CANT!");
+            }
+            string getEducationResponseBody = await getEducationResponse.Content.ReadAsStringAsync();
+            var userEducationResponse = JsonSerializer.Deserialize<GetEducationInformationDTO>(getEducationResponseBody);
+            Console.WriteLine(userEducationResponse);
+            if (getEducationResponseBody == null)
             {
                 throw new NotFoundException("Your education document not found!");
             }
+            if (userEducationResponse.id != createApplicationDTO.EducationId)
+            {
+                throw new BadRequestException("Your education document is not valid! Check your document value and retry!");
+            }
+            if (userPassportResponse.passportNumber != createApplicationDTO.PassportId)
+            {
+                throw new BadRequestException("Your passport is not valid! Check your passport value and retry!");
+            }
             HttpResponseMessage getProfileReponse = await _httpClient.GetAsync(_getProfileUrl);
+
 
             if (getProfileReponse.IsSuccessStatusCode)
             {
@@ -114,9 +114,9 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 };
                 _entranceDBContext.Applications.Add(application);
                 await _entranceDBContext.SaveChangesAsync();
+                HttpResponseMessage response = await _httpClient.GetAsync(_baseUrl);
                 foreach (var program in createApplicationDTO.ProgramsPriority)
                 {
-                    HttpResponseMessage response = await _httpClient.GetAsync(_baseUrl);
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -145,6 +145,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 }
             }
         }
+
         public string? GetUserIdFromToken(string token)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Secret").Value));

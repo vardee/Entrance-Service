@@ -16,7 +16,7 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Data.Models
         public string? Nationality { get; set; }
         public Guid UserId { get; set; }
         public int PassportId { get; set; }
-        public EducationLevel EducationId { get; set; }
+        public Guid EducationId { get; set; }
 
         public EntranceApplicationStatus ApplicationStatus { get; set; }
         public Guid ManagerId { get; set; }

@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using adv_Backend_Entrance.Common.Interfaces;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.FacultyService.DAL.Data.Models;
 using adv_Backend_Entrance.FacultyService.MVCPanel.Data;
@@ -15,6 +14,7 @@ using System.Xml.Linq;
 using adv_Backend_Entrance.Common.DTO.FacultyService;
 using RabbitMQ.Client;
 using adv_Backend_Entrance.Common.DTO.NotificationService;
+using adv_Backend_Entrance.Common.Interfaces.FacultyService;
 
 namespace adv_Backend_Entrance.FacultyService.BL.Services
 {

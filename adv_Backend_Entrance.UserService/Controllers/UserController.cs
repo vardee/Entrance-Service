@@ -3,7 +3,7 @@ using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
-using adv_Backend_Entrance.Common.Interfaces;
+using adv_Backend_Entrance.Common.Interfaces.UserService;
 using adv_Backend_Entrance.Common.Middlewares;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
