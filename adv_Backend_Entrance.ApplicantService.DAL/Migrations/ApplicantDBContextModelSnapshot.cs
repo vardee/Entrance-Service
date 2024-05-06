@@ -31,6 +31,9 @@ namespace adv_Backend_Entrance.ApplicantService.DAL.Migrations
                     b.Property<int>("EducationLevel")
                         .HasColumnType("integer");
 
+                    b.Property<int>("EducationLevelId")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("FileId")
                         .HasColumnType("uuid");
 

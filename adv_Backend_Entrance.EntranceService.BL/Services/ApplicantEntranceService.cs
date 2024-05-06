@@ -1,27 +1,15 @@
-﻿using adv_Backend_Entrance.Common.Data;
-using adv_Backend_Entrance.Common.DTO.EntranceService;
-using adv_Backend_Entrance.UserService.DAL.Data.Entities;
-using adv_Backend_Entrance.UserService.DAL.Data;
-using Microsoft.AspNetCore.Identity;
+﻿using adv_Backend_Entrance.Common.DTO.EntranceService;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using adv_Backend_Entrance.EntranceService.DAL.Data;
-using System.Net.WebSockets;
 using adv_Backend_Entrance.EntranceService.DAL.Data.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Xml.Linq;
 using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.DTO.FacultyService;
 using System.Text.Json;
 using adv_Backend_Entrance.Common.Enums;
-using StackExchange.Redis;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.Common.DTO.UserService;
@@ -41,6 +29,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
         private string _getProfileUrl;
         private string _getEducationInformation;
         private string _getPassportInformation;
+        private string _getDocumentTypes;
         public ApplicantEntranceService(EntranceDBContext entranceDBContext, IConfiguration configuration, HttpClient httpClient, TokenHelper tokenHelper)
         {
             _entranceDBContext = entranceDBContext;
@@ -49,8 +38,9 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             _tokenHelper = tokenHelper;
             _baseUrl = _configuration.GetValue<string>("BaseUrl");
             _getProfileUrl = _configuration.GetValue<string>("GetProfileUrl");
-            _getEducationInformation = _configuration.GetValue<string>("GetEducationInfo"); ;
-            _getPassportInformation = _configuration.GetValue<string>("GetPassportInfo"); ;
+            _getEducationInformation = _configuration.GetValue<string>("GetEducationInfo");
+            _getPassportInformation = _configuration.GetValue<string>("GetPassportInfo");
+            _getDocumentTypes = _configuration.GetValue<string>("GetDocumentTypes");
             var token = _tokenHelper.GetTokenFromHeader();
 
             if (!string.IsNullOrEmpty(token))
@@ -61,11 +51,12 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
 
         public async Task CreateApplication(CreateApplicationDTO createApplicationDTO, string token)
         {
-            string userId = GetUserIdFromToken(token);
+            string userId = _tokenHelper.GetUserIdFromToken(token);
+
             HttpResponseMessage getPassportResponse = await _httpClient.GetAsync(_getPassportInformation);
             if (!getPassportResponse.IsSuccessStatusCode)
             {
-                throw new BadRequestException("bAD REQUEST SOORY YOU CANT!");
+                throw new BadRequestException("Server response is bad, server problems. Oops!");
             }
             string getPassportResponseBody = await getPassportResponse.Content.ReadAsStringAsync();
             var userPassportResponse = JsonSerializer.Deserialize<GetPassportInformationDTO>(getPassportResponseBody);
@@ -77,7 +68,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             HttpResponseMessage getEducationResponse = await _httpClient.GetAsync(_getEducationInformation);
             if (!getEducationResponse.IsSuccessStatusCode)
             {
-                throw new BadRequestException("bAD REQUEST SOORY YOU CANT!");
+                throw new BadRequestException("Server response is bad, server problems. Oops!");
             }
             string getEducationResponseBody = await getEducationResponse.Content.ReadAsStringAsync();
             var userEducationResponse = JsonSerializer.Deserialize<GetEducationInformationDTO>(getEducationResponseBody);
@@ -95,8 +86,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 throw new BadRequestException("Your passport is not valid! Check your passport value and retry!");
             }
             HttpResponseMessage getProfileReponse = await _httpClient.GetAsync(_getProfileUrl);
-
-
+            
             if (getProfileReponse.IsSuccessStatusCode)
             {
                 string getProfileResponseBody = await getProfileReponse.Content.ReadAsStringAsync();
@@ -115,9 +105,31 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 _entranceDBContext.Applications.Add(application);
                 await _entranceDBContext.SaveChangesAsync();
                 HttpResponseMessage response = await _httpClient.GetAsync(_baseUrl);
+                if (createApplicationDTO.ProgramsPriority.Count() < 1 )
+                {
+                    throw new BadRequestException("You must choose at least 1 program in your application!");
+                }
+                if (createApplicationDTO.ProgramsPriority.Count() > 5 )
+                {
+                    throw new BadRequestException("You cant choose more than 5 program in your application!");
+                }
+                HttpResponseMessage getDocumentTypesReponse = await _httpClient.GetAsync(_getDocumentTypes);
+                if (!getPassportResponse.IsSuccessStatusCode)
+                {
+                    throw new BadRequestException("Server response is bad, server problems. Oops!");
+                }
+                string getDocumentTypes = await getDocumentTypesReponse.Content.ReadAsStringAsync();
+                var documentTypes = JsonSerializer.Deserialize<List<GetDocumentTypesDTO>>(getDocumentTypes);
+                var nextEducationLevels = documentTypes
+                    .Where(dt => dt.educationLevel.id == userEducationResponse.educationId)
+                    .Select(dt => dt.nextEducationLevels)
+                    .FirstOrDefault();
                 foreach (var program in createApplicationDTO.ProgramsPriority)
                 {
-
+                    if(program.Priority < 1 && program.Priority > createApplicationDTO.ProgramsPriority.Count())
+                    {
+                        throw new BadRequestException("You cant put priority less than 1, and more than count of your choosen programs");
+                    }
                     if (response.IsSuccessStatusCode)
                     {
                         string responseBody = await response.Content.ReadAsStringAsync();
@@ -130,14 +142,20 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                         {
                             if (programApp.id == program.ProgramId)
                             {
-                                var applicationProgram = new ApplicationProgram
+                                if (nextEducationLevels != null && nextEducationLevels.Any() && nextEducationLevels.Select(e => e.id).Contains(programApp.educationLevel.id))
                                 {
-                                    ApplicationId = application.Id,
-                                    ProgramId = program.ProgramId,
-                                    Priority = program.Priority,
-                                };
-                                _entranceDBContext.ApplicationPrograms.Add(applicationProgram);
-
+                                    var applicationProgram = new ApplicationProgram
+                                    {
+                                        ApplicationId = application.Id,
+                                        ProgramId = program.ProgramId,
+                                        Priority = program.Priority,
+                                    };
+                                    _entranceDBContext.ApplicationPrograms.Add(applicationProgram);
+                                }
+                                else
+                                {
+                                    throw new BadRequestException("You cannot apply for these levels of education!");
+                                }
                             }
                         }
                     }
@@ -146,35 +164,5 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             }
         }
 
-        public string? GetUserIdFromToken(string token)
-        {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Secret").Value));
-
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = securityKey,
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false
-            };
-
-            try
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var claimsPrincipal = handler.ValidateToken(token, validationParameters, out var validatedToken);
-
-                if (claimsPrincipal is null || !(validatedToken is JwtSecurityToken jwtSecurityToken))
-                    return null;
-
-                var emailClaim = claimsPrincipal.FindFirst(ClaimTypes.Email);
-
-                return emailClaim?.Value;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
     }
 }

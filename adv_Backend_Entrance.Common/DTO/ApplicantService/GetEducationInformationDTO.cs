@@ -11,5 +11,6 @@ namespace adv_Backend_Entrance.Common.DTO.ApplicantService
     {
         public Guid id { get; set; }
         public EducationLevel EducationLevel { get; set; }
+        public int educationId { get; set; }
     }
 }

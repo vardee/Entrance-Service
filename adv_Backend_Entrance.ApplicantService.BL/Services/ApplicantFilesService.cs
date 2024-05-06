@@ -1,6 +1,7 @@
 ﻿using adv_Backend_Entrance.ApplicantService.DAL.Data;
 using adv_Backend_Entrance.ApplicantService.DAL.Data.Entites;
 using adv_Backend_Entrance.Common.DTO.ApplicantService;
+using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces.ApplicantService;
 using adv_Backend_Entrance.Common.Middlewares;
 using Microsoft.AspNetCore.Http;
@@ -23,17 +24,19 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
         private readonly IConfiguration _configuration;
         private readonly string _filePassportDirectory;
         private readonly string _fileEducationDocumentDirectory;
+        private readonly TokenHelper _tokenHelper;
 
-        public ApplicantFilesService(ApplicantDBContext applicantDBContext, IConfiguration configuration)
+        public ApplicantFilesService(ApplicantDBContext applicantDBContext, IConfiguration configuration, TokenHelper tokenHelper)
         {
             _applicantDBContext = applicantDBContext;
             _configuration = configuration;
+            _tokenHelper = tokenHelper;
             _filePassportDirectory = @"C:\Users\rusma\Documents\Files\FilesPassports";
             _fileEducationDocumentDirectory = @"C:\Users\rusma\Documents\Files\FilesEducationDocuments";
         }
         public async Task UploadEducationDocumentFile(AddFileDTO addFileDTO, string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _tokenHelper.GetUserIdFromToken(token);
             var education = await _applicantDBContext.EducationDocuments.FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
             if (addFileDTO.FormFile == null || addFileDTO.FormFile.Length == 0)
             {
@@ -58,7 +61,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
 
         public async Task UploadPassportFile(AddFileDTO addFileDTO, string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _tokenHelper.GetUserIdFromToken(token);
             var passport = await _applicantDBContext.Passports.FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
             if (addFileDTO.FormFile == null || addFileDTO.FormFile.Length == 0)
             {
@@ -80,40 +83,10 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             passport.FileId = passportScan.Id;
             await _applicantDBContext.SaveChangesAsync();
         }
-        public string? GetUserIdFromToken(string token)
-        {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Secret").Value));
-
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = securityKey,
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false
-            };
-
-            try
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var claimsPrincipal = handler.ValidateToken(token, validationParameters, out var validatedToken);
-
-                if (claimsPrincipal is null || !(validatedToken is JwtSecurityToken jwtSecurityToken))
-                    return null;
-
-                var emailClaim = claimsPrincipal.FindFirst(ClaimTypes.Email);
-
-                return emailClaim?.Value;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
 
         public async Task<byte[]> GetEducationDocumentFile(string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _tokenHelper.GetUserIdFromToken(token);
             var educationDocument = await _applicantDBContext.educationDocumentImportFiles
                 .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
 
@@ -127,7 +100,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
         }
         public async Task<byte[]> GetPassportFile(string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _tokenHelper.GetUserIdFromToken(token);
             var passportDocument = await _applicantDBContext.passportImportFiles
                 .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
 
@@ -143,7 +116,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
 
         public async Task DeletePassport(string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _tokenHelper.GetUserIdFromToken(token);
             var passportDocument = await _applicantDBContext.passportImportFiles
                 .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
 
@@ -167,7 +140,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
 
         public async Task DeleteEducationLevel(string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _tokenHelper.GetUserIdFromToken(token);
             var educationDocument = await _applicantDBContext.educationDocumentImportFiles
                 .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
 

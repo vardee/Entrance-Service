@@ -1,17 +1,25 @@
-﻿using adv_Backend_Entrance.ApplicantService.DAL.Data;
+﻿using adv_Backend_Entrance.ApplicantService.BL.Helpers;
+using adv_Backend_Entrance.ApplicantService.DAL.Data;
 using adv_Backend_Entrance.ApplicantService.DAL.Data.Entites;
 using adv_Backend_Entrance.Common.DTO.ApplicantService;
+using adv_Backend_Entrance.Common.DTO.FacultyService;
+using adv_Backend_Entrance.Common.Enums;
+using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces.ApplicantService;
 using adv_Backend_Entrance.Common.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Extensions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace adv_Backend_Entrance.ApplicantService.BL.Services
@@ -20,27 +28,66 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
     {
         private readonly IConfiguration _configuration;
         private readonly ApplicantDBContext _applicantDBContext;
-        public ApplicantDocumentService(IConfiguration configuration, ApplicantDBContext applicantDBContext)
+        private readonly HttpClient _httpClient;
+        private string _getEducationLevels;
+        private readonly TokenHelper _tokenHelper;
+        public ApplicantDocumentService(IConfiguration configuration, ApplicantDBContext applicantDBContext,HttpClient httpClient, TokenHelper tokenHelper)
         {
             _configuration = configuration;
             _applicantDBContext = applicantDBContext;
+            _httpClient = httpClient;
+            _getEducationLevels = _configuration.GetValue<string>("GetEducationLevels");
+            _tokenHelper = tokenHelper;
+            var token = _tokenHelper.GetTokenFromHeader();
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
         public async Task AddEducationLevel(AddEducationLevelDTO addEducationLevelDTO, string token)
         {
-            string userId = GetUserIdFromToken(token);
+            HttpResponseMessage getEducationLevelsResponse = await _httpClient.GetAsync(_getEducationLevels);
+            if (!getEducationLevelsResponse.IsSuccessStatusCode)
+            {
+                throw new BadRequestException("Server response is bad, server problems. Oops!");
+            }
+
+            string getEducationLevels = await getEducationLevelsResponse.Content.ReadAsStringAsync();
+            var educationLevels = JsonSerializer.Deserialize<List<GetEducationLevelsDTO>>(getEducationLevels);
+            var educationLevelDescription = addEducationLevelDTO.EducationLevel.GetDescription();
+            var selectedEducationLevel = educationLevels.FirstOrDefault(ed => ed.name == educationLevelDescription);
+
+            if (selectedEducationLevel == null)
+            {
+                throw new BadRequestException("Specified education level not found.");
+            }
+
+
+            if (selectedEducationLevel == null)
+            {
+                throw new BadRequestException("Specified education level not found.");
+            }
+
+
+            string userId = _tokenHelper.GetUserIdFromToken(token);
+
             var educationLevel = new EducationDocument
             {
                 UserId = Guid.Parse(userId),
                 EducationLevel = addEducationLevelDTO.EducationLevel,
+                EducationLevelId = selectedEducationLevel.id
             };
+
             _applicantDBContext.EducationDocuments.Add(educationLevel);
             await _applicantDBContext.SaveChangesAsync();
         }
 
+
         public async Task AddPassport(AddPassportDTO addPassportDTO, string token)
         {
-            string userId = GetUserIdFromToken(token);
+            string userId = _tokenHelper.GetUserIdFromToken(token);
             var passport = new Passport
             {
                 UserId = Guid.Parse(userId),
@@ -54,7 +101,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
         }
         public async Task DeleteEducationInformation(string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _tokenHelper.GetUserIdFromToken(token);
             if (userId == null)
             {
                 throw new ForbiddenException("This user not found in system!");
@@ -70,7 +117,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
 
         public async Task DeletePassportInformation(string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _tokenHelper.GetUserIdFromToken(token);
             if (userId == null)
             {
                 throw new ForbiddenException("This user not found in system!");
@@ -86,7 +133,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
 
         public async Task<GetEducationInformationDTO> EditEducationInformation(AddEducationLevelDTO editEducationLevelDTO, string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _tokenHelper.GetUserIdFromToken(token);
             if (userId == null)
             {
                 throw new ForbiddenException("This user not found in system!");
@@ -111,7 +158,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
 
         public async Task<GetPassportInformationDTO> EditPaspportInformation(AddPassportDTO editPassportDTO, string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _tokenHelper.GetUserIdFromToken(token);
             if (userId == null)
             {
                 throw new ForbiddenException("This user not found in system!");
@@ -151,7 +198,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
 
         public async Task<GetEducationInformationDTO> GetEducationInformation(string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _tokenHelper.GetUserIdFromToken(token);
             if (userId == null)
             {
                 throw new ForbiddenException("This user not found in system!");
@@ -165,13 +212,14 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             {
                 EducationLevel = education.EducationLevel,
                 id = education.Id,
+                educationId = education.EducationLevelId
             };
             return educationInfo;
         }
 
         public async Task<GetPassportInformationDTO> GetPassportInformation(string token)
         {
-            var userId = GetUserIdFromToken(token);
+            var userId = _tokenHelper.GetUserIdFromToken(token);
             if (userId == null)
             {
                 throw new ForbiddenException("This user not found in system!");
@@ -189,37 +237,6 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
                 passportNumber = passport.PassportNumber,
             };
             return passportInfo;
-        }
-
-        public string? GetUserIdFromToken(string token)
-        {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Secret").Value));
-
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = securityKey,
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false
-            };
-
-            try
-            {
-                var handler = new JwtSecurityTokenHandler();
-                var claimsPrincipal = handler.ValidateToken(token, validationParameters, out var validatedToken);
-
-                if (claimsPrincipal is null || !(validatedToken is JwtSecurityToken jwtSecurityToken))
-                    return null;
-
-                var emailClaim = claimsPrincipal.FindFirst(ClaimTypes.Email);
-
-                return emailClaim?.Value;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
         }
     }
 }

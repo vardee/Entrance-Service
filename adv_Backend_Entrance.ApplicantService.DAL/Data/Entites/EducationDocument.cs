@@ -11,6 +11,7 @@ namespace adv_Backend_Entrance.ApplicantService.DAL.Data.Entites
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
+        public int EducationLevelId { get; set; }
         public Guid FileId { get; set; }
         public EducationLevel EducationLevel { get; set; }
     }

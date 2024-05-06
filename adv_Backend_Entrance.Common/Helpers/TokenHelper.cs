@@ -2,9 +2,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,6 +40,36 @@ namespace adv_Backend_Entrance.Common.Helpers
                 {
                     return authorizationHeader.Substring("Bearer ".Length);
                 }
+                return null;
+            }
+        }
+        public string? GetUserIdFromToken(string token)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Secret").Value));
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = securityKey,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false
+            };
+
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var claimsPrincipal = handler.ValidateToken(token, validationParameters, out var validatedToken);
+
+                if (claimsPrincipal is null || !(validatedToken is JwtSecurityToken jwtSecurityToken))
+                    return null;
+
+                var emailClaim = claimsPrincipal.FindFirst(ClaimTypes.Email);
+
+                return emailClaim?.Value;
+            }
+            catch (Exception)
+            {
                 return null;
             }
         }

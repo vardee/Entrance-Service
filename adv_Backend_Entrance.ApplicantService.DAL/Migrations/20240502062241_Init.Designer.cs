@@ -12,8 +12,8 @@ using adv_Backend_Entrance.ApplicantService.DAL.Data;
 namespace adv_Backend_Entrance.ApplicantService.DAL.Migrations
 {
     [DbContext(typeof(ApplicantDBContext))]
-    [Migration("20240501075757_Init2")]
-    partial class Init2
+    [Migration("20240502062241_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,12 +34,36 @@ namespace adv_Backend_Entrance.ApplicantService.DAL.Migrations
                     b.Property<int>("EducationLevel")
                         .HasColumnType("integer");
 
+                    b.Property<int>("EducationLevelId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("FileId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
                     b.ToTable("EducationDocuments");
+                });
+
+            modelBuilder.Entity("adv_Backend_Entrance.ApplicantService.DAL.Data.Entites.EducationDocumentImportFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("educationDocumentImportFiles");
                 });
 
             modelBuilder.Entity("adv_Backend_Entrance.ApplicantService.DAL.Data.Entites.Passport", b =>
@@ -70,6 +94,24 @@ namespace adv_Backend_Entrance.ApplicantService.DAL.Migrations
                     b.HasKey("PassportNumber");
 
                     b.ToTable("Passports");
+                });
+
+            modelBuilder.Entity("adv_Backend_Entrance.ApplicantService.DAL.Data.Entites.PassportImportFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("passportImportFiles");
                 });
 #pragma warning restore 612, 618
         }
