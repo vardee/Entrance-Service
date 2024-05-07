@@ -38,6 +38,41 @@ namespace adv_Backend_Entrance.EntranceService.Controllers
             await _entranceService.CreateApplication(createApplicationDTO, token);
             return Ok();
         }
-
+        [HttpDelete]
+        [Route("statement")]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Authorize(Roles = "Applicant")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(Error), 400)]
+        [ProducesResponseType(typeof(Error), 401)]
+        [ProducesResponseType(typeof(Error), 500)]
+        public async Task<ActionResult> DeleteProgramFromApplication([FromBody] DeleteProgramFromApplicationDTO deleteProgramFromApplicationDTO)
+        {
+            string token = _tokenHelper.GetTokenFromHeader();
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new UnauthorizedException("Данный пользователь не авторизован");
+            }
+            await _entranceService.DeleteProgramFromApplication(deleteProgramFromApplicationDTO, token);
+            return Ok();
+        }
+        [HttpPut]
+        [Route("statement/programs")]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Authorize(Roles = "Applicant")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(Error), 400)]
+        [ProducesResponseType(typeof(Error), 401)]
+        [ProducesResponseType(typeof(Error), 500)]
+        public async Task<ActionResult> AddProgramInApplication([FromBody] AddProgramsDTO addProgramsDTO)
+        {
+            string token = _tokenHelper.GetTokenFromHeader();
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new UnauthorizedException("Данный пользователь не авторизован");
+            }
+            await _entranceService.AddProgramsInApplication(addProgramsDTO, token);
+            return Ok();
+        }
     }
 }

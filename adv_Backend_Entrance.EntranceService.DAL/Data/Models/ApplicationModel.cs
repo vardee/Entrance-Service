@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace adv_Backend_Entrance.EntranceService.DAL.Data.Models
 {
-    public class Application
+    public class ApplicationModel
     {
         public Guid Id { get; set; }
         public string? FirstName { get; set; }

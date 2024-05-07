@@ -12,7 +12,7 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Data
     public class EntranceDBContext : DbContext 
     {
         public EntranceDBContext(DbContextOptions<EntranceDBContext> options) : base(options) { }
-        public DbSet<Application> Applications { get; set; }
+        public DbSet<ApplicationModel> Applications { get; set; }
         public DbSet<ApplicationProgram> ApplicationPrograms { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

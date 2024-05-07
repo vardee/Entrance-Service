@@ -15,6 +15,9 @@ using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.DTO.ApplicantService;
 using adv_Backend_Entrance.Common.Interfaces.EntranceService;
+using Microsoft.EntityFrameworkCore.Storage.Json;
+using static System.Net.Mime.MediaTypeNames;
+using adv_Backend_Entrance.Common.DTO;
 
 namespace adv_Backend_Entrance.EntranceService.BL.Services
 {
@@ -86,13 +89,13 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 throw new BadRequestException("Your passport is not valid! Check your passport value and retry!");
             }
             HttpResponseMessage getProfileReponse = await _httpClient.GetAsync(_getProfileUrl);
-            
+
             if (getProfileReponse.IsSuccessStatusCode)
             {
                 string getProfileResponseBody = await getProfileReponse.Content.ReadAsStringAsync();
                 var userProfileResponse = JsonSerializer.Deserialize<UserGetProfileDTO>(getProfileResponseBody);
                 Console.WriteLine(getProfileResponseBody);
-                var application = new Application
+                var application = new ApplicationModel
                 {
                     FirstName = userProfileResponse.firstname,
                     LastName = userProfileResponse.lastname,
@@ -105,11 +108,11 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 _entranceDBContext.Applications.Add(application);
                 await _entranceDBContext.SaveChangesAsync();
                 HttpResponseMessage response = await _httpClient.GetAsync(_baseUrl);
-                if (createApplicationDTO.ProgramsPriority.Count() < 1 )
+                if (createApplicationDTO.ProgramsPriority.Count() < 1)
                 {
                     throw new BadRequestException("You must choose at least 1 program in your application!");
                 }
-                if (createApplicationDTO.ProgramsPriority.Count() > 5 )
+                if (createApplicationDTO.ProgramsPriority.Count() > 5)
                 {
                     throw new BadRequestException("You cant choose more than 5 program in your application!");
                 }
@@ -126,7 +129,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     .FirstOrDefault();
                 foreach (var program in createApplicationDTO.ProgramsPriority)
                 {
-                    if(program.Priority < 1 && program.Priority > createApplicationDTO.ProgramsPriority.Count())
+                    if (program.Priority < 1 || program.Priority > createApplicationDTO.ProgramsPriority.Count())
                     {
                         throw new BadRequestException("You cant put priority less than 1, and more than count of your choosen programs");
                     }
@@ -137,26 +140,27 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                         var programs = programsWithPagination.programs;
 
                         Console.WriteLine(responseBody);
-
-                        foreach (var programApp in programs)
+                        var matchingProgram = programs.FirstOrDefault(p => p.id == program.ProgramId);
+                        if (matchingProgram != null)
                         {
-                            if (programApp.id == program.ProgramId)
+                            if (nextEducationLevels != null && nextEducationLevels.Any() && nextEducationLevels.Select(e => e.id).Contains(matchingProgram.educationLevel.id))
                             {
-                                if (nextEducationLevels != null && nextEducationLevels.Any() && nextEducationLevels.Select(e => e.id).Contains(programApp.educationLevel.id))
+                                var applicationProgram = new ApplicationProgram
                                 {
-                                    var applicationProgram = new ApplicationProgram
-                                    {
-                                        ApplicationId = application.Id,
-                                        ProgramId = program.ProgramId,
-                                        Priority = program.Priority,
-                                    };
-                                    _entranceDBContext.ApplicationPrograms.Add(applicationProgram);
-                                }
-                                else
-                                {
-                                    throw new BadRequestException("You cannot apply for these levels of education!");
-                                }
+                                    ApplicationId = application.Id,
+                                    ProgramId = program.ProgramId,
+                                    Priority = program.Priority,
+                                };
+                                _entranceDBContext.ApplicationPrograms.Add(applicationProgram);
                             }
+                            else
+                            {
+                                throw new BadRequestException("You cannot apply for these levels of education!");
+                            }
+                        }
+                        else
+                        {
+                            throw new BadRequestException("This program not found!");
                         }
                     }
                     await _entranceDBContext.SaveChangesAsync();
@@ -164,5 +168,123 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             }
         }
 
+        public async Task DeleteProgramFromApplication(DeleteProgramFromApplicationDTO deleteProgramFromApplicationDTO, string token)
+        {
+            string userId = _tokenHelper.GetUserIdFromToken(token);
+
+            var userProgram = await _entranceDBContext.ApplicationPrograms.FirstOrDefaultAsync(aP => aP.ApplicationId == deleteProgramFromApplicationDTO.ApplicationId && aP.ProgramId == deleteProgramFromApplicationDTO.ProgramId);
+            if (userProgram == null)
+            {
+                throw new BadRequestException("You don't have this program in your application!");
+            }
+
+            var maxPriority = await _entranceDBContext.ApplicationPrograms
+                .Where(ap => ap.ApplicationId == deleteProgramFromApplicationDTO.ApplicationId)
+                .MaxAsync(ap => ap.Priority);
+
+            _entranceDBContext.ApplicationPrograms.Remove(userProgram);
+            await _entranceDBContext.SaveChangesAsync();
+
+            var remainingPrograms = await _entranceDBContext.ApplicationPrograms
+                .Where(ap => ap.ApplicationId == deleteProgramFromApplicationDTO.ApplicationId && ap.ProgramId != deleteProgramFromApplicationDTO.ProgramId)
+                .ToListAsync();
+            if (userProgram.Priority != maxPriority)
+            {
+                foreach (var program in remainingPrograms)
+                {
+                    if (program.Priority != 1)
+                    {
+                        program.Priority--;
+                    }
+                }
+            }
+            await _entranceDBContext.SaveChangesAsync();
+        }
+        public async Task AddProgramsInApplication(AddProgramsDTO addProgramsDTO, string token)
+        {
+            var userProgram = await _entranceDBContext.ApplicationPrograms.Where(ap => ap.ApplicationId == addProgramsDTO.ApplicationId).ToListAsync();
+            if(userProgram == null)
+            {
+                throw new BadRequestException("You don't have any applications available!");
+            }
+            if (userProgram.Count() == 5)
+            {
+                throw new BadRequestException("You have maximum programs in your application, delete usless programs from application!");
+            }
+            if (addProgramsDTO.Programs.Count() < 1)
+            {
+                throw new BadRequestException("You must choose at least 1 program in your application!");
+            }
+            if (addProgramsDTO.Programs.Count() > 5)
+            {
+                throw new BadRequestException("You cant choose more than 5 program in your application!");
+            }
+            string userId = _tokenHelper.GetUserIdFromToken(token);
+            HttpResponseMessage getEducationResponse = await _httpClient.GetAsync(_getEducationInformation);
+            if (!getEducationResponse.IsSuccessStatusCode)
+            {
+                throw new BadRequestException("Server response is bad, server problems. Oops!");
+            }
+            string getEducationResponseBody = await getEducationResponse.Content.ReadAsStringAsync();
+            var userEducationResponse = JsonSerializer.Deserialize<GetEducationInformationDTO>(getEducationResponseBody);
+            if (getEducationResponseBody == null)
+            {
+                throw new NotFoundException("Your education document not found!");
+            }
+            HttpResponseMessage getDocumentTypesReponse = await _httpClient.GetAsync(_getDocumentTypes);
+            string getDocumentTypes = await getDocumentTypesReponse.Content.ReadAsStringAsync();
+            var documentTypes = JsonSerializer.Deserialize<List<GetDocumentTypesDTO>>(getDocumentTypes);
+            var nextEducationLevels = documentTypes
+                .Where(dt => dt.educationLevel.id == userEducationResponse.educationId)
+                .Select(dt => dt.nextEducationLevels)
+                .FirstOrDefault();
+            HttpResponseMessage response = await _httpClient.GetAsync(_baseUrl);
+            foreach (var program in addProgramsDTO.Programs)
+            {
+                var currentProgram = await _entranceDBContext.ApplicationPrograms.FirstOrDefaultAsync(aP => aP.ApplicationId == addProgramsDTO.ApplicationId && program.Priority == aP.Priority);
+                if (currentProgram != null)
+                {
+                    throw new BadRequestException($"Please change program priority {program.Priority}, because you have the same priority program!");
+                }
+                if (program.Priority < 1 || program.Priority > 5)
+                {
+                    throw new BadRequestException("You cant put priority less than 1, and more than count of your choosen programs");
+                }
+                
+                string responseBody = await response.Content.ReadAsStringAsync();
+                var programsWithPagination = JsonSerializer.Deserialize<GetProgramsWithPaginationDTO>(responseBody);
+                var programs = programsWithPagination.programs;
+
+                Console.WriteLine(responseBody);
+                var matchingProgram = programs.FirstOrDefault(p => p.id == program.ProgramId);
+                if (matchingProgram != null)
+                {
+                    if (nextEducationLevels != null && nextEducationLevels.Any() && nextEducationLevels.Select(e => e.id).Contains(matchingProgram.educationLevel.id))
+                    {
+                        var applicationProgram = new ApplicationProgram
+                        {
+                            ApplicationId = addProgramsDTO.ApplicationId,
+                            ProgramId = program.ProgramId,
+                            Priority = program.Priority,
+                        };
+                        _entranceDBContext.ApplicationPrograms.Add(applicationProgram);
+                    }
+                    else
+                    {
+                        throw new BadRequestException("You cannot apply for these levels of education!");
+                    }
+                }
+                else
+                {
+                    throw new BadRequestException("This program not found!");
+                }
+            }
+            await _entranceDBContext.SaveChangesAsync();
+        }
+        public async Task ChangeProgramPriority(ChangeProgramPriorityDTO changeProgramPriorityDTO, string token)
+        {
+            string userId = _tokenHelper.GetUserIdFromToken(token);
+
+        }
     }
 }

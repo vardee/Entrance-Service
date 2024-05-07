@@ -4,13 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace adv_Backend_Entrance.EntranceService.DAL.Data.Models
+namespace adv_Backend_Entrance.Common.DTO.EntranceService
 {
-    public class ApplicationProgram
+    public class DeleteProgramFromApplicationDTO
     {
         public Guid ApplicationId { get; set; }
-        public ApplicationModel Application { get; set; }
         public Guid ProgramId { get; set; }
-        public int Priority { get; set; }
     }
 }
