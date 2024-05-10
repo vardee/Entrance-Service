@@ -32,17 +32,18 @@ namespace adv_Backend_Entrance.Common.Helpers
         }
         public string GetTokenFromHeader()
         {
-            using (
-                var scope = _serviceProvider.CreateScope())
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext != null)
             {
-                string authorizationHeader = _serviceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                string authorizationHeader = httpContext.Request.Headers["Authorization"].FirstOrDefault();
                 if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer "))
                 {
                     return authorizationHeader.Substring("Bearer ".Length);
                 }
-                return null;
             }
+            return null;
         }
+
         public string? GetUserIdFromToken(string token)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Secret").Value));

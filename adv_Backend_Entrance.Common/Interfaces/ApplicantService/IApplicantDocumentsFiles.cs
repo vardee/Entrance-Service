@@ -10,11 +10,11 @@ namespace adv_Backend_Entrance.Common.Interfaces.ApplicantService
 {
     public interface IApplicantDocumentsFiles
     {
-        Task UploadPassportFile(AddFileDTO addFileDTO,string token);
-        Task UploadEducationDocumentFile(AddFileDTO addFileDTO, string token);
-        Task<byte[]> GetPassportFile(string token);
-        Task<byte[]> GetEducationDocumentFile(string token);
-        Task DeletePassport(string token);  
-        Task DeleteEducationLevel(string token);
+        Task UploadPassportFile(AddFileDTO addFileDTO, Guid userId);
+        Task UploadEducationDocumentFile(AddFileDTO addFileDTO, Guid userId);
+        Task<byte[]> GetPassportFile(Guid userId);
+        Task<byte[]> GetEducationDocumentFile(Guid userId);
+        Task DeletePassport(Guid userId);  
+        Task DeleteEducationLevel(Guid userId);
     }
 }

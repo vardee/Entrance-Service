@@ -4,17 +4,8 @@ using adv_Backend_Entrance.Common.DTO.ApplicantService;
 using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces.ApplicantService;
 using adv_Backend_Entrance.Common.Middlewares;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace adv_Backend_Entrance.ApplicantService.BL.Services
 {
@@ -34,10 +25,9 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             _filePassportDirectory = @"C:\Users\rusma\Documents\Files\FilesPassports";
             _fileEducationDocumentDirectory = @"C:\Users\rusma\Documents\Files\FilesEducationDocuments";
         }
-        public async Task UploadEducationDocumentFile(AddFileDTO addFileDTO, string token)
+        public async Task UploadEducationDocumentFile(AddFileDTO addFileDTO, Guid userId)
         {
-            var userId = _tokenHelper.GetUserIdFromToken(token);
-            var education = await _applicantDBContext.EducationDocuments.FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
+            var education = await _applicantDBContext.EducationDocuments.FirstOrDefaultAsync(p => p.UserId == userId);
             if (addFileDTO.FormFile == null || addFileDTO.FormFile.Length == 0)
             {
                 throw new ArgumentException("File is empty or null.");
@@ -51,7 +41,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             }
             var educationScan = new EducationDocumentImportFile
             {
-                UserId = Guid.Parse(userId),
+                UserId = userId,
                 Path = filePath,
             };
             _applicantDBContext.educationDocumentImportFiles.Add(educationScan);
@@ -59,10 +49,9 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             await _applicantDBContext.SaveChangesAsync();
         }
 
-        public async Task UploadPassportFile(AddFileDTO addFileDTO, string token)
+        public async Task UploadPassportFile(AddFileDTO addFileDTO, Guid userId)
         {
-            var userId = _tokenHelper.GetUserIdFromToken(token);
-            var passport = await _applicantDBContext.Passports.FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
+            var passport = await _applicantDBContext.Passports.FirstOrDefaultAsync(p => p.UserId == userId);
             if (addFileDTO.FormFile == null || addFileDTO.FormFile.Length == 0)
             {
                 throw new ArgumentException("File is empty or null.");
@@ -76,7 +65,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             }
             var passportScan = new PassportImportFile
             {
-                UserId = Guid.Parse(userId),
+                UserId = userId,
                 Path = filePath,
             };
             _applicantDBContext.passportImportFiles.Add(passportScan);
@@ -84,11 +73,10 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             await _applicantDBContext.SaveChangesAsync();
         }
 
-        public async Task<byte[]> GetEducationDocumentFile(string token)
+        public async Task<byte[]> GetEducationDocumentFile(Guid userId)
         {
-            var userId = _tokenHelper.GetUserIdFromToken(token);
             var educationDocument = await _applicantDBContext.educationDocumentImportFiles
-                .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
+                .FirstOrDefaultAsync(p => p.UserId == userId);
 
             if (educationDocument == null || string.IsNullOrEmpty(educationDocument.Path))
             {
@@ -98,11 +86,10 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
 
             return fileBytes;
         }
-        public async Task<byte[]> GetPassportFile(string token)
+        public async Task<byte[]> GetPassportFile(Guid userId)
         {
-            var userId = _tokenHelper.GetUserIdFromToken(token);
             var passportDocument = await _applicantDBContext.passportImportFiles
-                .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
+                .FirstOrDefaultAsync(p => p.UserId == userId);
 
             if (passportDocument == null || string.IsNullOrEmpty(passportDocument.Path))
             {
@@ -114,11 +101,10 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             return fileBytes;
         }
 
-        public async Task DeletePassport(string token)
+        public async Task DeletePassport(Guid userId)
         {
-            var userId = _tokenHelper.GetUserIdFromToken(token);
             var passportDocument = await _applicantDBContext.passportImportFiles
-                .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
+                .FirstOrDefaultAsync(p => p.UserId == userId);
 
             if (passportDocument == null || string.IsNullOrEmpty(passportDocument.Path))
             {
@@ -138,11 +124,10 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             await _applicantDBContext.SaveChangesAsync();
         }
 
-        public async Task DeleteEducationLevel(string token)
+        public async Task DeleteEducationLevel(Guid userId)
         {
-            var userId = _tokenHelper.GetUserIdFromToken(token);
             var educationDocument = await _applicantDBContext.educationDocumentImportFiles
-                .FirstOrDefaultAsync(p => p.UserId == Guid.Parse(userId));
+                .FirstOrDefaultAsync(p => p.UserId == userId);
 
             if (educationDocument == null || string.IsNullOrEmpty(educationDocument.Path))
             {

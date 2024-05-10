@@ -10,6 +10,7 @@ using Swashbuckle.AspNetCore.Filters;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.FileProviders;
+using adv_Backend_Entrance.ApplicantService.BL.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.Services.AddControllers().AddJsonOptions(opts =>
 
 // Add business logic service dependencies
 builder.Services.AddApplicantDBConfiguration(builder.Configuration);
+builder.Services.QueueSubscribe();
 
 // Configure Swagger
 builder.Services.AddEndpointsApiExplorer();

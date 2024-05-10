@@ -36,7 +36,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            await _applicantService.AddEducationLevel(addEducationLevelDTO, token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            await _applicantService.AddEducationLevel(addEducationLevelDTO, userId);
             return Ok();
         }
         [HttpPost]
@@ -54,7 +56,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            await _applicantService.AddPassport(addPassportDTO, token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            await _applicantService.AddPassport(addPassportDTO, userId);
             return Ok();
         }
         [HttpPut]
@@ -72,7 +76,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            var result = await _applicantService.EditPaspportInformation(editPassportDTO, token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            var result = await _applicantService.EditPaspportInformation(editPassportDTO, userId);
             return Ok(result);
         }
         [HttpPut]
@@ -90,7 +96,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            var result = await _applicantService.EditEducationInformation(editEdcuationLevelDTO, token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            var result = await _applicantService.EditEducationInformation(editEdcuationLevelDTO, userId);
             return Ok(result);
         }
         [HttpGet]
@@ -108,7 +116,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            var result = await _applicantService.GetPassportInformation(token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            var result = await _applicantService.GetPassportInformation(userId);
             return Ok(result);
         }
         [HttpGet]
@@ -126,7 +136,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            var result = await _applicantService.GetEducationInformation(token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            var result = await _applicantService.GetEducationInformation(userId);
             return Ok(result);
         }
         [HttpDelete]
@@ -144,7 +156,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            await _applicantService.DeleteEducationInformation(token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            await _applicantService.DeleteEducationInformation(userId);
             return Ok();
         }
         [HttpDelete]
@@ -162,7 +176,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            await _applicantService.DeletePassportInformation(token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            await _applicantService.DeletePassportInformation(userId);
             return Ok();
         }
         [HttpPost]
@@ -180,7 +196,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            await _applicantDocumentsFiles.UploadEducationDocumentFile(addFileDTO, token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            await _applicantDocumentsFiles.UploadEducationDocumentFile(addFileDTO, userId);
             return Ok();
         }
         [HttpPost]
@@ -198,7 +216,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            await _applicantDocumentsFiles.UploadPassportFile(addFileDTO, token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            await _applicantDocumentsFiles.UploadPassportFile(addFileDTO, userId);
             return Ok();
         }
         [HttpGet]
@@ -216,7 +236,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            var result = await _applicantDocumentsFiles.GetEducationDocumentFile(token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            var result = await _applicantDocumentsFiles.GetEducationDocumentFile(userId);
             return Ok(result);
         }
         [HttpGet]
@@ -234,7 +256,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            var result = await _applicantDocumentsFiles.GetPassportFile(token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            var result = await _applicantDocumentsFiles.GetPassportFile(userId);
             return Ok(result);
         }
         [HttpDelete]
@@ -252,7 +276,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            await _applicantDocumentsFiles.DeletePassport(token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            await _applicantDocumentsFiles.DeletePassport(userId);
             return Ok();
         }
         [HttpDelete]
@@ -270,7 +296,9 @@ namespace adv_Backend_Entrance.ApplicantService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            await _applicantDocumentsFiles.DeleteEducationLevel(token);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            await _applicantDocumentsFiles.DeleteEducationLevel(userId);
             return Ok();
         }
     }

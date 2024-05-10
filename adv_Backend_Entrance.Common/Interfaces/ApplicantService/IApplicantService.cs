@@ -9,13 +9,13 @@ namespace adv_Backend_Entrance.Common.Interfaces.ApplicantService
 {
     public interface IApplicantService
     {
-        Task AddPassport(AddPassportDTO addPassportDTO, string token);
-        Task AddEducationLevel(AddEducationLevelDTO addEducationLevelDTO, string token);
-        Task<GetEducationInformationDTO> GetEducationInformation(string token);
-        Task<GetPassportInformationDTO> GetPassportInformation(string token);
-        Task<GetPassportInformationDTO> EditPaspportInformation(AddPassportDTO editPassportDTO, string token);
-        Task<GetEducationInformationDTO> EditEducationInformation(AddEducationLevelDTO editEducationLevelDTO, string token);
-        Task DeletePassportInformation(string token);
-        Task DeleteEducationInformation(string token);
+        Task AddPassport(AddPassportDTO addPassportDTO, Guid userId);
+        Task AddEducationLevel(AddEducationLevelDTO addEducationLevelDTO, Guid userId);
+        Task<GetEducationInformationDTO> GetEducationInformation(Guid userId);
+        Task<GetPassportInformationDTO> GetPassportInformation(Guid userId);
+        Task<GetPassportInformationDTO> EditPaspportInformation(AddPassportDTO editPassportDTO, Guid userId);
+        Task<GetEducationInformationDTO> EditEducationInformation(AddEducationLevelDTO editEducationLevelDTO, Guid userId);
+        Task DeletePassportInformation(Guid userId);
+        Task DeleteEducationInformation(Guid userId);
     }
 }

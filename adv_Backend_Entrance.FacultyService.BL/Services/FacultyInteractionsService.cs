@@ -94,8 +94,6 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
         {
             var programsQuery = _facultyDBContext.EducationProgrammModels.AsQueryable();
             var programs = await programsQuery.ToListAsync();
-            Console.WriteLine(programs);
-            Console.WriteLine(await programsQuery.ToListAsync());
             if (EducationLevelEnum != null && EducationLevelEnum.Any())
             {
                 programsQuery = programsQuery.Where(p => EducationLevelEnum.Contains(p.EducationLevelEnum));
@@ -144,7 +142,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
 
             var programsDTO = new GetQuerybleProgramsDTO
             {
-                Programs = programsQuery.Select(p => new GetProgramsDTO
+                Programs = programsQuery.ToList().Select(p => new GetProgramsDTO
                 {
                     id = p.Id,
                     createTime = p.CreateTime,
@@ -168,6 +166,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             };
 
             return programsDTO;
+
         }
 
     }

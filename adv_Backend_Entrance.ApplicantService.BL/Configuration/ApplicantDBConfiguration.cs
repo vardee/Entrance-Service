@@ -27,10 +27,13 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Configuration
                 var connectionString = configuration.GetConnectionString("RedisDBContext");
                 return new RedisDBContext(connectionString);
             });
+            services.AddHttpClient();
             services.AddScoped<IApplicantService, ApplicantDocumentService>();
             services.AddScoped<IApplicantDocumentsFiles, ApplicantFilesService>();
+            services.AddHttpContextAccessor();
             services.AddSingleton<TokenHelper>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
 
             return services;
         }

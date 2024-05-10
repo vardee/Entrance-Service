@@ -56,6 +56,8 @@ namespace adv_Backend_Entrance.UserService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
             return Ok(await _userService.RefreshToken(refreshTokenRequestDTO));
         }
         [HttpPost]
@@ -73,6 +75,8 @@ namespace adv_Backend_Entrance.UserService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
             await _userService.Logout(token);
             return Ok();
         }
@@ -90,7 +94,9 @@ namespace adv_Backend_Entrance.UserService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            return Ok(await _userService.GetProfile(token));
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            return Ok(await _userService.GetProfile(userId));
         }
         [HttpPut]
         [Authorize(Policy = "TokenNotInBlackList")]
@@ -106,7 +112,9 @@ namespace adv_Backend_Entrance.UserService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            await _userService.EditProfile(token, editUserProfileDTO);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            await _userService.EditProfile(userId, editUserProfileDTO);
             return Ok();
         }
         [HttpPut]
@@ -124,7 +132,9 @@ namespace adv_Backend_Entrance.UserService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            await _userService.AddUserRole(token, addUserRoleDTO, userId);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid myId = Guid.Parse(id);
+            await _userService.AddUserRole(userId, addUserRoleDTO, myId);
             return Ok();
         }
         [HttpGet]
@@ -141,7 +151,9 @@ namespace adv_Backend_Entrance.UserService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            return Ok(await _userService.GetMyRoles(token));
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            return Ok(await _userService.GetMyRoles(userId));
         }
         [HttpPut]
         [Authorize(Policy = "TokenNotInBlackList")]
@@ -157,7 +169,9 @@ namespace adv_Backend_Entrance.UserService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            await _userService.ChangePassword(token, changePasswordDTO);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            await _userService.ChangePassword(userId, changePasswordDTO);
             return Ok();
         }
         [HttpGet]
@@ -175,7 +189,9 @@ namespace adv_Backend_Entrance.UserService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            var result = await _userService.GetQuerybleUsers(page, size, token, email, Lastname, Firstname);
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            var result = await _userService.GetQuerybleUsers(page, size, userId, email, Lastname, Firstname);
             return Ok(result);
         }
 

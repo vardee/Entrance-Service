@@ -2,6 +2,7 @@ using adv_Backend_Entrance.Common.Helpers.TokenRequirment;
 using adv_Backend_Entrance.Common.JWT;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.FacultyService.BL.Configurations;
+using adv_Backend_Entrance.FacultyService.BL.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
@@ -18,6 +19,7 @@ builder.Services.AddControllers().AddJsonOptions(opts =>
 // Add business logic service dependencies
 builder.Services.AddFacultyBlServiceDependencies(builder.Configuration);
 
+builder.Services.QueueSubscribe();
 
 // Configure Swagger
 builder.Services.AddEndpointsApiExplorer();

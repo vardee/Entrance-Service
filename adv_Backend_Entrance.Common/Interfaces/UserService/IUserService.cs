@@ -14,14 +14,14 @@ namespace adv_Backend_Entrance.Common.Interfaces.UserService
         Task<TokenResponseDTO> UserLogin(UserLoginDTO userLoginDTO);
         Task<TokenResponseDTO> RefreshToken(RefreshTokenRequestDTO refreshTokenRequestDTO);
         Task Logout(string token);
-        Task<UserGetProfileDTO> GetProfile(string token);
-        Task EditProfile(string token, EditUserProfileDTO editUserProfileDTO);
+        Task<UserGetProfileDTO> GetProfile(Guid userId);
+        Task EditProfile(Guid userId, EditUserProfileDTO editUserProfileDTO);
 
-        Task AddUserRole(string token, AddUserRoleDTO addUserRoleDTO, Guid userId);
-        Task<GetMyRolesDTO> GetMyRoles(string token);
+        Task AddUserRole(Guid userId, AddUserRoleDTO addUserRoleDTO,Guid id);
+        Task<GetMyRolesDTO> GetMyRoles(Guid userId);
 
-        Task ChangePassword(string token, changePasswordDTO changePasswordDTO);
+        Task ChangePassword(Guid userId, changePasswordDTO changePasswordDTO);
 
-        Task<GetUsersPageDTO> GetQuerybleUsers(int page, int size, string token, string? email, string? Lastname, string? Firstname);
+        Task<GetUsersPageDTO> GetQuerybleUsers(int page, int size, Guid userId, string? email, string? Lastname, string? Firstname);
     }
 }

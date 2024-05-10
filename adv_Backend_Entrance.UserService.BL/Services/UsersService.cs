@@ -138,10 +138,10 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             };
         }
 
-        public async Task ChangePassword(string token, changePasswordDTO changePasswordDTO)
+        public async Task ChangePassword(Guid userId, changePasswordDTO changePasswordDTO)
         {
-            var userId = _additionTokenService.GetUserIdFromToken(token);
-            var user  = await _userManager.FindByIdAsync(userId);
+            
+            var user  = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
             {
                 throw new NotFoundException("User not found");
@@ -221,12 +221,11 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             await _redisDBContext.AddToken(token);
         }
 
-        public async Task<UserGetProfileDTO> GetProfile(string token)
+        public async Task<UserGetProfileDTO> GetProfile(Guid userId)
         {
-            var userId = _additionTokenService.GetUserIdFromToken(token);
             if (userId != null)
             {
-                var user = await _userManager.FindByIdAsync(userId);
+                var user = await _userManager.FindByIdAsync(userId.ToString());
                 if (user != null)
                 {
                     return new UserGetProfileDTO
@@ -249,12 +248,13 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 throw new UnauthorizedException("User is not authorized");
             }
         }
-        public async Task EditProfile(string token, EditUserProfileDTO editUserProfileDTO)
+        public async Task EditProfile(Guid userId, EditUserProfileDTO editUserProfileDTO)
         {
-            var userId = _additionTokenService.GetUserIdFromToken(token);
+            
             if (userId != null)
             {
-                var user = await _userManager.FindByIdAsync(userId);
+                
+                var user = await _userManager.FindByIdAsync(userId.ToString());
                 if (user != null)
                 {
                     if (editUserProfileDTO.FirstName != "")
@@ -300,12 +300,12 @@ namespace adv_Backend_Entrance.UserService.BL.Services
         }
 
 
-        public async Task AddUserRole(string token, AddUserRoleDTO addUserRoleDTO, Guid Id)
+        public async Task AddUserRole(Guid userId, AddUserRoleDTO addUserRoleDTO, Guid Id)
         {
-            var userId = _additionTokenService.GetUserIdFromToken(token);
+            
             if (userId != null)
             {
-                var user = await _userManager.FindByIdAsync(userId);
+                var user = await _userManager.FindByIdAsync(userId.ToString());
                 if (user != null)
                 {
                     var roles = await _userManager.GetRolesAsync(user);
@@ -341,12 +341,12 @@ namespace adv_Backend_Entrance.UserService.BL.Services
         }
 
 
-        public async Task<GetMyRolesDTO> GetMyRoles(string token)
+        public async Task<GetMyRolesDTO> GetMyRoles(Guid userId)
         {
-            var userId = _additionTokenService.GetUserIdFromToken(token);
+            
             if (userId != null)
             {
-                var user = await _userManager.FindByIdAsync(userId);
+                var user = await _userManager.FindByIdAsync(userId.ToString());
                 var roles = await _userManager.GetRolesAsync(user);
                 if (roles != null)
                 {
@@ -365,7 +365,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 throw new UnauthorizedException("User is not authorized");
             }
         }
-        public async Task<GetUsersPageDTO> GetQuerybleUsers(int page, int size, string token, string? email, string? Lastname, string? Firstname)
+        public async Task<GetUsersPageDTO> GetQuerybleUsers(int page, int size, Guid userId, string? email, string? Lastname, string? Firstname)
         {
             var userQuery =  _authDBContext.Users.AsQueryable();
             var users = await userQuery.ToListAsync();

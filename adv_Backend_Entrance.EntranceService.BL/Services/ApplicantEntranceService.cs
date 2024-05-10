@@ -61,45 +61,27 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
         public async Task CreateApplication(CreateApplicationDTO createApplicationDTO, string token)
         {
             string userId = _tokenHelper.GetUserIdFromToken(token);
-            HttpResponseMessage getPassportResponse = await _httpClient.GetAsync(_getPassportInformation);
-            if (!getPassportResponse.IsSuccessStatusCode)
+            var passportInfo = await _bus.Rpc.RequestAsync<Guid, GetPassportInformationDTO>(Guid.Parse(userId), x => x.WithQueueName("application_passport"));
+            if (passportInfo == null)
             {
                 throw new BadRequestException("Server response is bad, server problems. Oops!");
             }
-            string getPassportResponseBody = await getPassportResponse.Content.ReadAsStringAsync();
-            var userPassportResponse = JsonSerializer.Deserialize<GetPassportInformationDTO>(getPassportResponseBody);
-            Console.WriteLine(userPassportResponse);
-            if (getPassportResponseBody == null)
+            var educationInfo = await _bus.Rpc.RequestAsync<Guid, GetEducationInformationDTO>(Guid.Parse(userId), x => x.WithQueueName("application_educationInfo"));
+            if(educationInfo == null)
             {
-                throw new NotFoundException("Your passport not found!");
+                throw new BadRequestException("You dont have education document!");
             }
-            HttpResponseMessage getEducationResponse = await _httpClient.GetAsync(_getEducationInformation);
-            if (!getEducationResponse.IsSuccessStatusCode)
-            {
-                throw new BadRequestException("Server response is bad, server problems. Oops!");
-            }
-            string getEducationResponseBody = await getEducationResponse.Content.ReadAsStringAsync();
-            var userEducationResponse = JsonSerializer.Deserialize<GetEducationInformationDTO>(getEducationResponseBody);
-            Console.WriteLine(userEducationResponse);
-            if (getEducationResponseBody == null)
-            {
-                throw new NotFoundException("Your education document not found!");
-            }
-            if (userEducationResponse.id != createApplicationDTO.EducationId)
+            if (educationInfo.id != createApplicationDTO.EducationId)
             {
                 throw new BadRequestException("Your education document is not valid! Check your document value and retry!");
             }
-            if (userPassportResponse.passportNumber != createApplicationDTO.PassportId)
+            if (passportInfo.passportNumber != createApplicationDTO.PassportId)
             {
                 throw new BadRequestException("Your passport is not valid! Check your passport value and retry!");
             }
-            HttpResponseMessage getProfileReponse = await _httpClient.GetAsync(_getProfileUrl);
-
-            if (getProfileReponse.IsSuccessStatusCode)
+            var userProfileResponse = await _bus.Rpc.RequestAsync<Guid, UserGetProfileDTO>(Guid.Parse(userId), x => x.WithQueueName("application_profileResponse"));
+            if (userProfileResponse != null)
             {
-                string getProfileResponseBody = await getProfileReponse.Content.ReadAsStringAsync();
-                var userProfileResponse = JsonSerializer.Deserialize<UserGetProfileDTO>(getProfileResponseBody);
-                Console.WriteLine(getProfileResponseBody);
                 var application = new ApplicationModel
                 {
                     FirstName = userProfileResponse.firstname,
@@ -112,7 +94,6 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 };
                 _entranceDBContext.Applications.Add(application);
                 await _entranceDBContext.SaveChangesAsync();
-                HttpResponseMessage response = await _httpClient.GetAsync(_baseUrl);
                 if (createApplicationDTO.ProgramsPriority.Count() < 1)
                 {
                     throw new BadRequestException("You must choose at least 1 program in your application!");
@@ -121,15 +102,11 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 {
                     throw new BadRequestException("You cant choose more than 5 program in your application!");
                 }
-                HttpResponseMessage getDocumentTypesReponse = await _httpClient.GetAsync(_getDocumentTypes);
-                if (!getPassportResponse.IsSuccessStatusCode)
-                {
-                    throw new BadRequestException("Server response is bad, server problems. Oops!");
-                }
-                string getDocumentTypes = await getDocumentTypesReponse.Content.ReadAsStringAsync();
-                var documentTypes = JsonSerializer.Deserialize<List<GetDocumentTypesDTO>>(getDocumentTypes);
+                var documentTypes = await _bus.Rpc.RequestAsync<Guid, List<GetDocumentTypesDTO>>(Guid.Parse(userId), x => x.WithQueueName("application_facultyDocuments"));
+                var programsWithPagination = await _bus.Rpc.RequestAsync<Guid, GetQuerybleProgramsDTO>(Guid.Parse(userId), x => x.WithQueueName("application_facultyPrograms"));
+               
                 var nextEducationLevels = documentTypes
-                    .Where(dt => dt.educationLevel.id == userEducationResponse.educationId)
+                    .Where(dt => dt.educationLevel.id == educationInfo.educationId)
                     .Select(dt => dt.nextEducationLevels)
                     .FirstOrDefault();
                 foreach (var program in createApplicationDTO.ProgramsPriority)
@@ -138,13 +115,9 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     {
                         throw new BadRequestException("You cant put priority less than 1, and more than count of your choosen programs");
                     }
-                    if (response.IsSuccessStatusCode)
+                    if (programsWithPagination != null)
                     {
-                        string responseBody = await response.Content.ReadAsStringAsync();
-                        var programsWithPagination = JsonSerializer.Deserialize<GetProgramsWithPaginationDTO>(responseBody);
-                        var programs = programsWithPagination.programs;
-
-                        Console.WriteLine(responseBody);
+                        var programs = programsWithPagination.Programs;
                         var matchingProgram = programs.FirstOrDefault(p => p.id == program.ProgramId);
                         if (matchingProgram != null)
                         {
@@ -233,25 +206,17 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 throw new BadRequestException("You cant choose more than 5 program in your application!");
             }
             string userId = _tokenHelper.GetUserIdFromToken(token);
-            HttpResponseMessage getEducationResponse = await _httpClient.GetAsync(_getEducationInformation);
-            if (!getEducationResponse.IsSuccessStatusCode)
+            var educationInfo = await _bus.Rpc.RequestAsync<Guid, GetEducationInformationDTO>(Guid.Parse(userId), x => x.WithQueueName("application_educationEditInfo"));
+            if (educationInfo == null)
             {
-                throw new BadRequestException("Server response is bad, server problems. Oops!");
+                throw new BadRequestException("You dont have education document!");
             }
-            string getEducationResponseBody = await getEducationResponse.Content.ReadAsStringAsync();
-            var userEducationResponse = JsonSerializer.Deserialize<GetEducationInformationDTO>(getEducationResponseBody);
-            if (getEducationResponseBody == null)
-            {
-                throw new NotFoundException("Your education document not found!");
-            }
-            HttpResponseMessage getDocumentTypesReponse = await _httpClient.GetAsync(_getDocumentTypes);
-            string getDocumentTypes = await getDocumentTypesReponse.Content.ReadAsStringAsync();
-            var documentTypes = JsonSerializer.Deserialize<List<GetDocumentTypesDTO>>(getDocumentTypes);
+            var documentTypes = await _bus.Rpc.RequestAsync<Guid, List<GetDocumentTypesDTO>>(Guid.Parse(userId), x => x.WithQueueName("application_facultyEditDocuments"));
             var nextEducationLevels = documentTypes
-                .Where(dt => dt.educationLevel.id == userEducationResponse.educationId)
+                .Where(dt => dt.educationLevel.id == educationInfo.educationId)
                 .Select(dt => dt.nextEducationLevels)
                 .FirstOrDefault();
-            HttpResponseMessage response = await _httpClient.GetAsync(_baseUrl);
+            var programsWithPagination = await _bus.Rpc.RequestAsync<Guid, GetQuerybleProgramsDTO>(Guid.Parse(userId), x => x.WithQueueName("application_facultyEditPrograms"));
             foreach (var program in addProgramsDTO.Programs)
             {
                 var currentProgram = await _entranceDBContext.ApplicationPrograms.FirstOrDefaultAsync(aP => aP.ApplicationId == addProgramsDTO.ApplicationId && program.Priority == aP.Priority);
@@ -263,12 +228,8 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 {
                     throw new BadRequestException("You cant put priority less than 1, and more than count of your choosen programs");
                 }
-                
-                string responseBody = await response.Content.ReadAsStringAsync();
-                var programsWithPagination = JsonSerializer.Deserialize<GetProgramsWithPaginationDTO>(responseBody);
-                var programs = programsWithPagination.programs;
+                var programs = programsWithPagination.Programs;
 
-                Console.WriteLine(responseBody);
                 var matchingProgram = programs.FirstOrDefault(p => p.id == program.ProgramId);
                 if (matchingProgram != null)
                 {
