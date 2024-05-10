@@ -3,6 +3,7 @@ using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces.EntranceService;
 using adv_Backend_Entrance.EntranceService.BL.Services;
 using adv_Backend_Entrance.EntranceService.DAL.Data;
+using EasyNetQ;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +27,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Configuration
                 var connectionString = configuration.GetConnectionString("RedisDBContext");
                 return new RedisDBContext(connectionString);
             });
+          
             services.AddScoped<IEntranceService, ApplicantEntranceService>();
             services.AddSingleton<TokenHelper>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

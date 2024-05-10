@@ -11,6 +11,7 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Data.Models
         public Guid ApplicationId { get; set; }
         public ApplicationModel Application { get; set; }
         public Guid ProgramId { get; set; }
+        public string ProgramName { get; set; } 
         public int Priority { get; set; }
     }
 }

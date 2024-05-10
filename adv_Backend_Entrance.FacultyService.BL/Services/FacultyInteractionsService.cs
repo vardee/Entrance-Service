@@ -48,7 +48,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                     .Select(x => new GetEducationLevelsDTO
                     {
                         id = x.Id,
-                        name = educationLevel.Name
+                        name = x.Name
                     })
                     .ToListAsync();
 

@@ -18,6 +18,10 @@ using adv_Backend_Entrance.Common.Interfaces.EntranceService;
 using Microsoft.EntityFrameworkCore.Storage.Json;
 using static System.Net.Mime.MediaTypeNames;
 using adv_Backend_Entrance.Common.DTO;
+using System.Runtime.CompilerServices;
+using EasyNetQ;
+using JsonSerializer = System.Text.Json.JsonSerializer;
+using adv_Backend_Entrance.UserService.DAL.Data.Entities;
 
 namespace adv_Backend_Entrance.EntranceService.BL.Services
 {
@@ -27,6 +31,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
         private readonly TokenHelper _tokenHelper;
+        private readonly IBus _bus;
 
         private string _baseUrl;
         private string _getProfileUrl;
@@ -44,6 +49,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             _getEducationInformation = _configuration.GetValue<string>("GetEducationInfo");
             _getPassportInformation = _configuration.GetValue<string>("GetPassportInfo");
             _getDocumentTypes = _configuration.GetValue<string>("GetDocumentTypes");
+            _bus = RabbitHutch.CreateBus("host=localhost");
             var token = _tokenHelper.GetTokenFromHeader();
 
             if (!string.IsNullOrEmpty(token))
@@ -55,7 +61,6 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
         public async Task CreateApplication(CreateApplicationDTO createApplicationDTO, string token)
         {
             string userId = _tokenHelper.GetUserIdFromToken(token);
-
             HttpResponseMessage getPassportResponse = await _httpClient.GetAsync(_getPassportInformation);
             if (!getPassportResponse.IsSuccessStatusCode)
             {
@@ -149,6 +154,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                                 {
                                     ApplicationId = application.Id,
                                     ProgramId = program.ProgramId,
+                                    ProgramName = matchingProgram.name,
                                     Priority = program.Priority,
                                 };
                                 _entranceDBContext.ApplicationPrograms.Add(applicationProgram);
@@ -164,8 +170,15 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                         }
                     }
                     await _entranceDBContext.SaveChangesAsync();
+                    await AddUserRole(Guid.Parse(userId));
                 }
             }
+        }
+
+        private async Task AddUserRole(Guid userId)
+        {
+            var message = new AddRoleDTO { UserId = userId, Role = RoleType.Applicant };
+            await _bus.PubSub.PublishAsync(message, "application_created");
         }
 
         public async Task DeleteProgramFromApplication(DeleteProgramFromApplicationDTO deleteProgramFromApplicationDTO, string token)
@@ -281,10 +294,42 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             }
             await _entranceDBContext.SaveChangesAsync();
         }
-        public async Task ChangeProgramPriority(ChangeProgramPriorityDTO changeProgramPriorityDTO, string token)
+        public async Task ChangeProgramPriority(ChangeProgramPriorityDTO changeProgramPriorityDTO)
+        {
+            var userPrograms = await _entranceDBContext.ApplicationPrograms.Where(aP => aP.ApplicationId == changeProgramPriorityDTO.ApplicationId).ToListAsync();
+            if (userPrograms == null)
+            {
+                throw new BadRequestException("You don't have any applications available!");
+            }
+            var currentProgram = await _entranceDBContext.ApplicationPrograms.FirstOrDefaultAsync(sP => sP.ApplicationId == changeProgramPriorityDTO.ApplicationId && sP.ProgramId == changeProgramPriorityDTO.ProgramId);
+            if (currentProgram == null){
+                throw new BadRequestException("You don't this program in application!");
+            }
+            var samePriorityProgram = await _entranceDBContext.ApplicationPrograms.FirstOrDefaultAsync(sP => sP.ApplicationId == changeProgramPriorityDTO.ApplicationId && sP.Priority == changeProgramPriorityDTO.ProgramPriority);
+            samePriorityProgram.Priority = currentProgram.Priority;
+            currentProgram.Priority = changeProgramPriorityDTO.ProgramPriority;
+            await _entranceDBContext.SaveChangesAsync();
+        }
+
+        public async Task<GetMyApplicationDTO> GetApplication(string token)
         {
             string userId = _tokenHelper.GetUserIdFromToken(token);
-
+            var userProgram = await _entranceDBContext.Applications.FirstOrDefaultAsync(a => a.UserId == Guid.Parse(userId));
+            var programsPriority = await _entranceDBContext.ApplicationPrograms
+                .Where(aP => aP.ApplicationId == userProgram.Id)
+                .Select(aP => new GetMyProgramsDTO
+                {
+                    ProgramId = aP.ProgramId,
+                    Priority = aP.Priority,
+                    ProgramName = aP.ProgramName
+                })
+                .ToListAsync();
+            var myApplication = new GetMyApplicationDTO
+            {
+                ApplicationId = userProgram.Id,
+                ProgramsPriority = programsPriority,
+            };
+            return myApplication;
         }
     }
 }

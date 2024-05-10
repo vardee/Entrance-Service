@@ -146,6 +146,17 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             if (editEducationLevelDTO.EducationLevel != null)
             {
                 education.EducationLevel = editEducationLevelDTO.EducationLevel;
+                HttpResponseMessage getEducationLevelsResponse = await _httpClient.GetAsync(_getEducationLevels);
+                if (!getEducationLevelsResponse.IsSuccessStatusCode)
+                {
+                    throw new BadRequestException("Server response is bad, server problems. Oops!");
+                }
+
+                string getEducationLevels = await getEducationLevelsResponse.Content.ReadAsStringAsync();
+                var educationLevels = JsonSerializer.Deserialize<List<GetEducationLevelsDTO>>(getEducationLevels);
+                var educationLevelDescription = editEducationLevelDTO.EducationLevel.GetDescription();
+                var selectedEducationLevel = educationLevels.FirstOrDefault(ed => ed.name == educationLevelDescription);
+                education.EducationLevelId = selectedEducationLevel.id;
             }
             await _applicantDBContext.SaveChangesAsync();
             var educationInfo = new GetEducationInformationDTO

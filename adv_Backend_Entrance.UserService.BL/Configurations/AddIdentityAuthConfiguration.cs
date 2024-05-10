@@ -20,6 +20,7 @@ namespace adv_Backend_Entrance.UserService.BL.Configurations
                 .AddSignInManager<SignInManager<User>>()
                 .AddUserManager<UserManager<User>>()
                 .AddRoleManager<RoleManager<IdentityRole<Guid>>>();
+
             return services;
         }
     }

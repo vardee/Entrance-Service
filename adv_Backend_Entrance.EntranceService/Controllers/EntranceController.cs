@@ -1,4 +1,5 @@
 ﻿using adv_Backend_Entrance.Common.Data.Models;
+using adv_Backend_Entrance.Common.DTO;
 using adv_Backend_Entrance.Common.DTO.EntranceService;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
@@ -73,6 +74,37 @@ namespace adv_Backend_Entrance.EntranceService.Controllers
             }
             await _entranceService.AddProgramsInApplication(addProgramsDTO, token);
             return Ok();
+        }
+        [HttpPut]
+        [Route("statement/programs/priority")]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Authorize(Roles = "Applicant")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(Error), 400)]
+        [ProducesResponseType(typeof(Error), 401)]
+        [ProducesResponseType(typeof(Error), 500)]
+        public async Task<ActionResult> ChangeProgramPriority([FromBody] ChangeProgramPriorityDTO changeProgramPriorityDTO)
+        {
+            await _entranceService.ChangeProgramPriority(changeProgramPriorityDTO);
+            return Ok();
+        }
+        [HttpGet]
+        [Route("statement")]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Authorize(Roles = "Applicant")]
+        [ProducesResponseType(typeof(GetMyApplicationDTO),200)]
+        [ProducesResponseType(typeof(Error), 400)]
+        [ProducesResponseType(typeof(Error), 401)]
+        [ProducesResponseType(typeof(Error), 500)]
+        public async Task<ActionResult<GetMyApplicationDTO>> GetMyApplication()
+        {
+            string token = _tokenHelper.GetTokenFromHeader();
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new UnauthorizedException("Данный пользователь не авторизован");
+            }
+            var result = await _entranceService.GetApplication(token);
+            return Ok(result);
         }
     }
 }

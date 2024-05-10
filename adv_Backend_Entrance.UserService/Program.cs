@@ -3,6 +3,7 @@ using adv_Backend_Entrance.Common.Helpers.TokenRequirment;
 using adv_Backend_Entrance.Common.JWT;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.UserService.BL.Configurations;
+using adv_Backend_Entrance.UserService.BL.Services;
 using adv_Backend_Entrance.UserService.DAL;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -27,6 +28,7 @@ builder.Services.AddAuthBlServiceDependencies(builder.Configuration);
 // Add Identity dependencies configuration
 builder.Services.AddIdentityDependenciesConfiguration();
 
+builder.Services.QueueSubscribe();
 // Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>

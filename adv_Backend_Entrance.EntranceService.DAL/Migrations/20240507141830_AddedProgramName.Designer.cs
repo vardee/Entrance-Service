@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using adv_Backend_Entrance.EntranceService.DAL.Data;
@@ -11,9 +12,11 @@ using adv_Backend_Entrance.EntranceService.DAL.Data;
 namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
 {
     [DbContext(typeof(EntranceDBContext))]
-    partial class EntranceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20240507141830_AddedProgramName")]
+    partial class AddedProgramName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

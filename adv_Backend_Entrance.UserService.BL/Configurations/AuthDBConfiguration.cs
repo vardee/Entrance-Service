@@ -4,6 +4,7 @@ using adv_Backend_Entrance.Common.Interfaces.UserService;
 using adv_Backend_Entrance.UserService.BL.Services;
 using adv_Backend_Entrance.UserService.DAL.Data;
 using AutoMapper;
+using EasyNetQ;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,7 @@ namespace adv_Backend_Entrance.UserService.BL.Configurations
                 var connectionString = configuration.GetConnectionString("RedisDBContext");
                 return new RedisDBContext(connectionString);
             });
+
             services.AddScoped<IUserService, UsersService>();
             services.AddScoped<AdditionTokenService>();
             services.AddSingleton<TokenHelper>();
