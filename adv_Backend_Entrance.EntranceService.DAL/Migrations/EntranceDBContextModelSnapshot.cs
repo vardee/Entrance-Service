@@ -22,14 +22,11 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("adv_Backend_Entrance.EntranceService.DAL.Data.Models.ApplicationModel", b =>
+            modelBuilder.Entity("adv_Backend_Entrance.EntranceService.DAL.Data.Models.ApplicantModel", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<int>("ApplicationStatus")
-                        .HasColumnType("integer");
 
                     b.Property<Guid>("EducationId")
                         .HasColumnType("uuid");
@@ -39,9 +36,6 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
 
                     b.Property<string>("LastName")
                         .HasColumnType("text");
-
-                    b.Property<Guid>("ManagerId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("Nationality")
                         .HasColumnType("text");
@@ -53,6 +47,32 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
                         .HasColumnType("text");
 
                     b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Applicants");
+                });
+
+            modelBuilder.Entity("adv_Backend_Entrance.EntranceService.DAL.Data.Models.ApplicationModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ApplicantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ApplicationStatus")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ChangedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ManagerId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
@@ -78,6 +98,25 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
                     b.HasKey("ApplicationId", "ProgramId");
 
                     b.ToTable("ApplicationPrograms");
+                });
+
+            modelBuilder.Entity("adv_Backend_Entrance.EntranceService.DAL.Data.Models.ManagerModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Managers");
                 });
 
             modelBuilder.Entity("adv_Backend_Entrance.EntranceService.DAL.Data.Models.ApplicationProgram", b =>

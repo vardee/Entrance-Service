@@ -1,6 +1,6 @@
 ﻿using adv_Backend_Entrance.Common.Data.Models;
 using adv_Backend_Entrance.Common.DTO;
-using adv_Backend_Entrance.Common.DTO.EntranceService;
+using adv_Backend_Entrance.Common.DTO.EntranceService.Applicant;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces.EntranceService;

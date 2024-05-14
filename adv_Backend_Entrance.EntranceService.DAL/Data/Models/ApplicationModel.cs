@@ -10,14 +10,9 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Data.Models
     public class ApplicationModel
     {
         public Guid Id { get; set; }
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
-        public string? Patronymic { get; set; }
-        public string? Nationality { get; set; }
-        public Guid UserId { get; set; }
-        public int PassportId { get; set; }
-        public Guid EducationId { get; set; }
-
+        public Guid ApplicantId { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public DateTime ChangedTime { get; set; }
         public EntranceApplicationStatus ApplicationStatus { get; set; }
         public Guid ManagerId { get; set; }
     }

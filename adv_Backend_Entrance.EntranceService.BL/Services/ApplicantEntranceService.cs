@@ -22,6 +22,7 @@ using System.Runtime.CompilerServices;
 using EasyNetQ;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using adv_Backend_Entrance.UserService.DAL.Data.Entities;
+using adv_Backend_Entrance.Common.DTO.EntranceService.Applicant;
 
 namespace adv_Backend_Entrance.EntranceService.BL.Services
 {
@@ -82,15 +83,21 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             var userProfileResponse = await _bus.Rpc.RequestAsync<Guid, UserGetProfileDTO>(Guid.Parse(userId), x => x.WithQueueName("application_profileResponse"));
             if (userProfileResponse != null)
             {
-                var application = new ApplicationModel
+                var applicant = new ApplicantModel
                 {
                     FirstName = userProfileResponse.firstname,
                     LastName = userProfileResponse.lastname,
                     Patronymic = userProfileResponse.patronymic,
                     EducationId = createApplicationDTO.EducationId,
                     PassportId = createApplicationDTO.PassportId,
-                    UserId = Guid.Parse(userId),
+                    UserId = Guid.Parse(userId)
+                };
+                var application = new ApplicationModel
+                {
+                    ApplicantId = applicant.Id,
                     ApplicationStatus = EntranceApplicationStatus.Created,
+                    CreatedTime = DateTime.UtcNow,
+                    ChangedTime = DateTime.UtcNow,
                 };
                 _entranceDBContext.Applications.Add(application);
                 await _entranceDBContext.SaveChangesAsync();
@@ -206,17 +213,17 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 throw new BadRequestException("You cant choose more than 5 program in your application!");
             }
             string userId = _tokenHelper.GetUserIdFromToken(token);
-            var educationInfo = await _bus.Rpc.RequestAsync<Guid, GetEducationInformationDTO>(Guid.Parse(userId), x => x.WithQueueName("application_educationEditInfo"));
+            var educationInfo = await _bus.Rpc.RequestAsync<Guid, GetEducationInformationDTO>(Guid.Parse(userId), x => x.WithQueueName("application_educationInfo"));
             if (educationInfo == null)
             {
                 throw new BadRequestException("You dont have education document!");
             }
-            var documentTypes = await _bus.Rpc.RequestAsync<Guid, List<GetDocumentTypesDTO>>(Guid.Parse(userId), x => x.WithQueueName("application_facultyEditDocuments"));
+            var documentTypes = await _bus.Rpc.RequestAsync<Guid, List<GetDocumentTypesDTO>>(Guid.Parse(userId), x => x.WithQueueName("application_facultyDocuments"));
             var nextEducationLevels = documentTypes
                 .Where(dt => dt.educationLevel.id == educationInfo.educationId)
                 .Select(dt => dt.nextEducationLevels)
                 .FirstOrDefault();
-            var programsWithPagination = await _bus.Rpc.RequestAsync<Guid, GetQuerybleProgramsDTO>(Guid.Parse(userId), x => x.WithQueueName("application_facultyEditPrograms"));
+            var queryblePrograms = await _bus.Rpc.RequestAsync<Guid, GetQuerybleProgramsDTO>(Guid.Parse(userId), x => x.WithQueueName("application_facultyPrograms"));
             foreach (var program in addProgramsDTO.Programs)
             {
                 var currentProgram = await _entranceDBContext.ApplicationPrograms.FirstOrDefaultAsync(aP => aP.ApplicationId == addProgramsDTO.ApplicationId && program.Priority == aP.Priority);
@@ -228,7 +235,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 {
                     throw new BadRequestException("You cant put priority less than 1, and more than count of your choosen programs");
                 }
-                var programs = programsWithPagination.Programs;
+                var programs = queryblePrograms.Programs;
 
                 var matchingProgram = programs.FirstOrDefault(p => p.id == program.ProgramId);
                 if (matchingProgram != null)
@@ -240,6 +247,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                             ApplicationId = addProgramsDTO.ApplicationId,
                             ProgramId = program.ProgramId,
                             Priority = program.Priority,
+                            ProgramName = matchingProgram.name,
                         };
                         _entranceDBContext.ApplicationPrograms.Add(applicationProgram);
                     }
@@ -275,7 +283,8 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
         public async Task<GetMyApplicationDTO> GetApplication(string token)
         {
             string userId = _tokenHelper.GetUserIdFromToken(token);
-            var userProgram = await _entranceDBContext.Applications.FirstOrDefaultAsync(a => a.UserId == Guid.Parse(userId));
+            var applicant = await _entranceDBContext.Applicants.FirstOrDefaultAsync(a => a.UserId == Guid.Parse(userId));
+            var userProgram = await _entranceDBContext.Applications.FirstOrDefaultAsync(a => a.ApplicantId == applicant.Id);
             var programsPriority = await _entranceDBContext.ApplicationPrograms
                 .Where(aP => aP.ApplicationId == userProgram.Id)
                 .Select(aP => new GetMyProgramsDTO
@@ -292,5 +301,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             };
             return myApplication;
         }
+
+
     }
 }

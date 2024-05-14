@@ -1,5 +1,5 @@
 ﻿using adv_Backend_Entrance.Common.DTO;
-using adv_Backend_Entrance.Common.DTO.EntranceService;
+using adv_Backend_Entrance.Common.DTO.EntranceService.Applicant;
 using System;
 using System.Collections.Generic;
 using System.Linq;

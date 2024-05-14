@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace adv_Backend_Entrance.Common.DTO.EntranceService
+namespace adv_Backend_Entrance.Common.DTO.EntranceService.Manager
 {
-    public class DeleteProgramFromApplicationDTO
+    public class TakeApplicationDTO
     {
         public Guid ApplicationId { get; set; }
-        public Guid ProgramId { get; set; }
     }
 }

@@ -28,10 +28,6 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             {
                 return await documentService.GetEducationInformation(request);
             }, x => x.WithQueueName("application_educationInfo"));
-            bus.Rpc.Respond<Guid, GetEducationInformationDTO>(async request =>
-            {
-                return await documentService.GetEducationInformation(request);
-            }, x => x.WithQueueName("application_educationEditInfo"));
         }
     }
 

@@ -13,7 +13,9 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Data
     {
         public EntranceDBContext(DbContextOptions<EntranceDBContext> options) : base(options) { }
         public DbSet<ApplicationModel> Applications { get; set; }
+        public DbSet<ApplicantModel> Applicants { get; set; }
         public DbSet<ApplicationProgram> ApplicationPrograms { get; set; }
+        public DbSet<ManagerModel> Managers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ApplicationProgram>()
