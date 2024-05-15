@@ -1,4 +1,5 @@
-﻿using System;
+﻿using adv_Backend_Entrance.Common.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,7 @@ namespace adv_Backend_Entrance.Common.DTO.EntranceService.Manager
 {
     public class ChangeApplicationStatusDTO
     {
+        public Guid ApplicationId { get; set; }
+        public EntranceApplicationStatus Status { get; set; }   
     }
 }

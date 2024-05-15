@@ -1,4 +1,6 @@
 ﻿using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
+using adv_Backend_Entrance.Common.DTO.FacultyService;
+using adv_Backend_Entrance.Common.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +13,10 @@ namespace adv_Backend_Entrance.Common.Interfaces.EntranceService
     public interface IManagerService
     {
         Task TakeApplication(TakeApplicationDTO takeApplicationDTO, Guid userId);
-        Task RejectApplication(RejectApplicationDTO rejectApplicationDTO, Guid userId);    
+        Task RejectApplication(RejectApplicationDTO rejectApplicationDTO, Guid userId);
+        Task ChangeApplicationStatus(ChangeApplicationStatusDTO changeApplicationStatusDTO, Guid userId);
+        Task<GetAllQuerybleApplicationsDTO> GetQuerybleApplications(int size, int page, string? name, Guid? ProgramId, List<Guid>? Faculties, List<EntranceApplicationStatus>? entranceApplicationStatuses, Boolean? haveManager,Boolean? isMy, Guid? managerId, Sorting? timeSorting);
+        Task<GetApplicationsDTO> GetApplicantion(GetApplicantDTO getApplicantDTO);
+        Task<GetApplicantInformationDTO> GetApplicantInformation(GetApplicantDTO getApplicantDTO);
     }
 }

@@ -100,7 +100,6 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     ChangedTime = DateTime.UtcNow,
                 };
                 _entranceDBContext.Applications.Add(application);
-                await _entranceDBContext.SaveChangesAsync();
                 if (createApplicationDTO.ProgramsPriority.Count() < 1)
                 {
                     throw new BadRequestException("You must choose at least 1 program in your application!");
@@ -136,6 +135,9 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                                     ProgramId = program.ProgramId,
                                     ProgramName = matchingProgram.name,
                                     Priority = program.Priority,
+                                    ProgramCode = matchingProgram.code,
+                                    FacultyId = matchingProgram.faculty.id,
+                                    FacultyName = matchingProgram.faculty.name,
                                 };
                                 _entranceDBContext.ApplicationPrograms.Add(applicationProgram);
                             }

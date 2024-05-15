@@ -1,5 +1,4 @@
 ﻿using adv_Backend_Entrance.Common.DTO.EntranceService.Applicant;
-using adv_Backend_Entrance.Common.DTO.FacultyService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace adv_Backend_Entrance.Common.DTO.EntranceService.Manager
 {
-    public class GetAllQuerybleApplicationsDTO
+    public class GetApplicationsDTO
     {
-        public IQueryable<GetApplicationsDTO> Applications { get; set; }
-        public PaginationInformation PaginationInformation { get; set; }
+        public Guid ApplicationId { get; set; }
+        public List<GetApplicationPriorityDTO> ProgramsPriority { get; set; }
     }
 }
