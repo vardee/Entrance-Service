@@ -1,6 +1,7 @@
 ﻿using adv_Backend_Entrance.Common.Data.Models;
 using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.DTO.UserService;
+using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces.UserService;
@@ -15,11 +16,13 @@ namespace adv_Backend_Entrance.UserService.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IManagerAccountService _managerService;
         private readonly TokenHelper _tokenHelper;
-        public UserController(IUserService userService, TokenHelper tokenHelper)
+        public UserController(IUserService userService, TokenHelper tokenHelper, IManagerAccountService managerService)
         {
             _userService = userService;
             _tokenHelper = tokenHelper;
+            _managerService = managerService;
         }
         [HttpPost]
         [Route("register")]
@@ -193,6 +196,26 @@ namespace adv_Backend_Entrance.UserService.Controllers
             Guid userId = Guid.Parse(id);
             var result = await _userService.GetQuerybleUsers(page, size, userId, email, Lastname, Firstname);
             return Ok(result);
+        }
+        [HttpPut]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Route("profile/applicant")]
+        [Authorize(Roles = "Admin,MainManager,Manager")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(Error), 400)]
+        [ProducesResponseType(typeof(Error), 401)]
+        [ProducesResponseType(typeof(Error), 500)]
+        public async Task<ActionResult> EditProfile([FromBody] EditApplicantProfileInformationDTO editApplicantProfileInformationDTO)
+        {
+            string token = _tokenHelper.GetTokenFromHeader();
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new UnauthorizedException("Данный пользователь не авторизован");
+            }
+            string id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            await _managerService.EditApplicantProfile(editApplicantProfileInformationDTO);
+            return Ok();
         }
 
     }

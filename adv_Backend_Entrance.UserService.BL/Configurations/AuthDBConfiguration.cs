@@ -24,6 +24,7 @@ namespace adv_Backend_Entrance.UserService.BL.Configurations
             });
 
             services.AddScoped<IUserService, UsersService>();
+            services.AddScoped<IManagerAccountService, ManagerAccountService>();
             services.AddScoped<AdditionTokenService>();
             services.AddSingleton<TokenHelper>();
             return services;

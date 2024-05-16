@@ -100,6 +100,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     ChangedTime = DateTime.UtcNow,
                 };
                 _entranceDBContext.Applications.Add(application);
+                _entranceDBContext.Applicants.Add(applicant);
                 if (createApplicationDTO.ProgramsPriority.Count() < 1)
                 {
                     throw new BadRequestException("You must choose at least 1 program in your application!");

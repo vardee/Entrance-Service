@@ -23,4 +23,8 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.1" />
 	  <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DTO\UserService\UserService\" />
+  </ItemGroup>
 </Project>

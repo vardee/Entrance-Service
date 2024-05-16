@@ -14,6 +14,8 @@ using System.Security.Claims;
 using System.Text;
 using adv_Backend_Entrance.Common.Helpers.Validators;
 using adv_Backend_Entrance.Common.Interfaces.UserService;
+using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
+using EasyNetQ;
 
 namespace adv_Backend_Entrance.UserService.BL.Services
 {
@@ -25,6 +27,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
         private readonly RedisDBContext _redisDBContext;
         private readonly IConfiguration _configuration;
         private readonly AdditionTokenService _additionTokenService;
+        private readonly IBus _bus;
 
 
         public UsersService(UserManager<User> userManager, SignInManager<User> signInManager, AuthDbContext authDbContext, IConfiguration configuration, RedisDBContext redisDBContext, AdditionTokenService additionTokenService)
@@ -35,6 +38,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             _configuration = configuration;
             _redisDBContext = redisDBContext;
             _additionTokenService = additionTokenService;
+            _bus = RabbitHutch.CreateBus("host=localhost");
         }
 
         public async Task<TokenResponseDTO> UserRegister(UserRegisterDTO userRegisterDTO)
@@ -287,6 +291,15 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                         user.Patronymic = editUserProfileDTO.Patronymic;
                     }
                     await _authDBContext.SaveChangesAsync();
+                    var editedProfile = new EditApplicantProfileInformationDTO
+                    {
+                        UserId = userId,
+                        Email = editUserProfileDTO.Email,
+                        FirstName = editUserProfileDTO.FirstName,
+                        LastName = editUserProfileDTO.LastName,
+                        Patronymic = editUserProfileDTO.Patronymic,
+                    };
+                    await SyncProfile(editedProfile);
                 }
                 else
                 {
@@ -298,7 +311,21 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 throw new UnauthorizedException("User is not authorized");
             }
         }
-
+        private async Task SyncProfile(EditApplicantProfileInformationDTO editApplicantProfile)
+        {
+            var message = new EditApplicantProfileInformationDTO
+            {
+                Email = editApplicantProfile.Email,
+                BirthDate = editApplicantProfile.BirthDate,
+                Phone = editApplicantProfile.Phone,
+                FirstName = editApplicantProfile.FirstName,
+                LastName = editApplicantProfile.LastName,
+                Patronymic = editApplicantProfile.Patronymic,
+                Nationality = editApplicantProfile.Nationality,
+                UserId = editApplicantProfile.UserId
+            };
+            await _bus.PubSub.PublishAsync(message, "profile_edit");
+        }
 
         public async Task AddUserRole(Guid userId, AddUserRoleDTO addUserRoleDTO, Guid Id)
         {

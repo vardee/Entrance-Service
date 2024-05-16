@@ -30,6 +30,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Configuration
           
             services.AddScoped<IEntranceService, ApplicantEntranceService>();
             services.AddScoped<IManagerService, ManagerEntranceService>();
+            services.AddScoped<ManagerHelperService>();
             services.AddSingleton<TokenHelper>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
