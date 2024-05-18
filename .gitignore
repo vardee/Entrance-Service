@@ -37,3 +37,7 @@
 /adv_Backend_Entrance.EntranceService.BL/obj
 /adv_Backend_Entrance.EntranceService.DAL/bin/Debug/net8.0
 /adv_Backend_Entrance.EntranceService.DAL/obj
+/adv_Backend_Entrance.AdminPanel/bin/Debug/net8.0
+/adv_Backend_Entrance.AdminPanel/obj
+/adv_Backend_Entrance.AdminPanel.BL/obj
+/adv_Backend_Entrance.AdminPanel.DAL/obj
