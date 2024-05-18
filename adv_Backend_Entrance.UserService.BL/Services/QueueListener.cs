@@ -5,6 +5,7 @@ using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Interfaces.UserService;
 using adv_Backend_Entrance.UserService.BL.Services;
 using adv_Backend_Entrance.Common.DTO.ApplicantService;
+using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
 
 namespace adv_Backend_Entrance.UserService.BL.Services
 {
@@ -24,6 +25,24 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             {
                 return await userService.GetProfile(request);
             }, x => x.WithQueueName("application_profileResponse"));
+            bus.Rpc.Respond<UserLoginDTO, TokenResponseDTO>(async request =>
+            {
+                return await userService.UserLogin(request);
+            }, x => x.WithQueueName("userLogin_token"));
+            bus.PubSub.Subscribe<EditApplicantProfileInformationDTO>("editUserProfile", async data =>
+            {
+                var editProfile = new EditUserProfileDTO
+                {
+                    FirstName = data.FirstName,
+                    LastName = data.LastName,
+                    Patronymic = data.Patronymic,
+                    Gender = data.Gender,
+                    Phone = data.Phone,
+                    Email = data.Email,
+                    BirthDate = data.BirthDate
+                };
+                await userService.EditProfile(data.UserId, editProfile);
+            });
         }
     }
 }

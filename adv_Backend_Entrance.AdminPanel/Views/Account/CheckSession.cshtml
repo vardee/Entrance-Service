@@ -1,0 +1,14 @@
+﻿@{
+    var accessToken = Context.Session.GetString("AccessToken");
+    var refreshToken = Context.Session.GetString("RefreshToken");
+}
+
+@if (accessToken != null && refreshToken != null)
+{
+    <p>AccessToken: @accessToken</p>
+    <p>RefreshToken: @refreshToken</p>
+}
+else
+{
+    <p>No tokens in session.</p>
+}

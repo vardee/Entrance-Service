@@ -43,7 +43,15 @@ namespace adv_Backend_Entrance.Common.Helpers
             }
             return null;
         }
-
+        public string GetTokenFromSession()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext != null)
+            {
+                return httpContext.Session.GetString("AccessToken");
+            }
+            return null;
+        }
         public string? GetUserIdFromToken(string token)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Secret").Value));

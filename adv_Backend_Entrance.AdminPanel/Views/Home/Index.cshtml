@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    @if (!User.Identity!.IsAuthenticated)
+    {
+        <p><a asp-controller="Account" asp-action="Login">Login</a> to start.</p>
+    }
+</div>

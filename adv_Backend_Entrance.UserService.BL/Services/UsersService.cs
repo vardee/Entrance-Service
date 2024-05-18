@@ -141,16 +141,15 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 RefreshToken = tokenRefresh
             };
         }
-
         public async Task ChangePassword(Guid userId, changePasswordDTO changePasswordDTO)
         {
-            
-            var user  = await _userManager.FindByIdAsync(userId.ToString());
+
+            var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
             {
                 throw new NotFoundException("User not found");
             }
-            if(changePasswordDTO.Password != changePasswordDTO.ConfirmPassword)
+            if (changePasswordDTO.Password != changePasswordDTO.ConfirmPassword)
             {
                 throw new BadRequestException("Your new passswords dont sovpadat!");
             }
@@ -160,6 +159,8 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 throw new BadRequestException(string.Join(", ", result.Errors.Select(x => x.Description)));
             }
         }
+
+
         public async Task<TokenResponseDTO> RefreshToken(RefreshTokenRequestDTO refreshTokenRequestDTO)
         {
 
@@ -276,6 +277,10 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                     if (editUserProfileDTO.Phone != "")
                     {
                         user.PhoneNumber = editUserProfileDTO.Phone;
+                    }
+                    if (editUserProfileDTO.Gender != null)
+                    {
+                        user.Gender = editUserProfileDTO.Gender;
                     }
                     if (editUserProfileDTO.BirthDate != null)
 

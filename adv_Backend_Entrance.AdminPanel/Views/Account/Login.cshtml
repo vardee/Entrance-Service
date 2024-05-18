@@ -1,0 +1,25 @@
+﻿@model LoginModel
+
+@{
+    ViewBag.Title = "Войти";
+    Layout = "_Layout";
+}
+
+<div class="card p-0 mx-auto container bg-white border-0">
+    <div class="card-body">
+        <form asp-action="Login" asp-controller="Account" method="post">
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input type="email" class="form-control" asp-for="Email" />
+                <span class="text-danger" asp-validation-for="Email"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="Password"></label>
+                <input type="password" class="form-control" asp-for="Password" />
+                <span class="text-danger" asp-validation-for="Password"></span>
+            </div>
+            <div class="text-danger" asp-validation-summary="All"></div>
+            <button type="submit" class="btn btn-primary">Войти</button>
+        </form>
+    </div>
+</div>

@@ -29,11 +29,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.Entran
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.EntranceService.BL", "adv_Backend_Entrance.EntranceService.BL\adv_Backend_Entrance.EntranceService.BL.csproj", "{91E0AECC-BEC4-4ACC-8FEC-40B0ABE5CD39}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance.ApplicantService.DAL", "adv_Backend_Entrance.ApplicantService.DAL\adv_Backend_Entrance.ApplicantService.DAL.csproj", "{887C48D6-5A43-4893-A9F6-198E256D3AFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.ApplicantService.DAL", "adv_Backend_Entrance.ApplicantService.DAL\adv_Backend_Entrance.ApplicantService.DAL.csproj", "{887C48D6-5A43-4893-A9F6-198E256D3AFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance.ApplicantService.BL", "adv_Backend_Entrance.ApplicantService.BL\adv_Backend_Entrance.ApplicantService.BL.csproj", "{0FE3E164-FC59-481B-9500-6FC523D33F55}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.ApplicantService.BL", "adv_Backend_Entrance.ApplicantService.BL\adv_Backend_Entrance.ApplicantService.BL.csproj", "{0FE3E164-FC59-481B-9500-6FC523D33F55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance.ApplicantService", "adv_Backend_Entrance.ApplicantService\adv_Backend_Entrance.ApplicantService.csproj", "{74F96B08-0D1C-495B-92F5-1E4A535763EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.ApplicantService", "adv_Backend_Entrance.ApplicantService\adv_Backend_Entrance.ApplicantService.csproj", "{74F96B08-0D1C-495B-92F5-1E4A535763EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance.AdminPanel", "adv_Backend_Entrance.AdminPanel\adv_Backend_Entrance.AdminPanel.csproj", "{916C6D0C-E047-42B3-8146-1D553A862E2A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance.AdminPanel.BL", "adv_Backend_Entrance.AdminPanel.BL\adv_Backend_Entrance.AdminPanel.BL.csproj", "{6F13716C-ED4D-4778-BE0C-1E924672D397}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance.AdminPanel.DAL", "adv_Backend_Entrance.AdminPanel.DAL\adv_Backend_Entrance.AdminPanel.DAL.csproj", "{9CE0A7A3-1C9D-43E1-87BD-68A2DCBF1B61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -105,6 +111,18 @@ Global
 		{74F96B08-0D1C-495B-92F5-1E4A535763EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74F96B08-0D1C-495B-92F5-1E4A535763EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74F96B08-0D1C-495B-92F5-1E4A535763EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{916C6D0C-E047-42B3-8146-1D553A862E2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{916C6D0C-E047-42B3-8146-1D553A862E2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{916C6D0C-E047-42B3-8146-1D553A862E2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{916C6D0C-E047-42B3-8146-1D553A862E2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F13716C-ED4D-4778-BE0C-1E924672D397}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F13716C-ED4D-4778-BE0C-1E924672D397}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F13716C-ED4D-4778-BE0C-1E924672D397}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F13716C-ED4D-4778-BE0C-1E924672D397}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CE0A7A3-1C9D-43E1-87BD-68A2DCBF1B61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CE0A7A3-1C9D-43E1-87BD-68A2DCBF1B61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CE0A7A3-1C9D-43E1-87BD-68A2DCBF1B61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CE0A7A3-1C9D-43E1-87BD-68A2DCBF1B61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
