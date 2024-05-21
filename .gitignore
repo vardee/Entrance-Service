@@ -41,3 +41,5 @@
 /adv_Backend_Entrance.AdminPanel/obj
 /adv_Backend_Entrance.AdminPanel.BL/obj
 /adv_Backend_Entrance.AdminPanel.DAL/obj
+/adv_Backend_Entrance.AdminPanel.DAL/bin/Debug/net8.0
+/adv_Backend_Entrance.AdminPanel.BL/bin/Debug/net8.0
