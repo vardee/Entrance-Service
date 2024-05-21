@@ -6,6 +6,7 @@ using adv_Backend_Entrance.Common.Interfaces.UserService;
 using adv_Backend_Entrance.UserService.BL.Services;
 using adv_Backend_Entrance.Common.DTO.ApplicantService;
 using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
+using adv_Backend_Entrance.Common.DTO.AdminPanel;
 
 namespace adv_Backend_Entrance.UserService.BL.Services
 {
@@ -43,6 +44,24 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 };
                 await userService.EditProfile(data.UserId, editProfile);
             });
+            bus.PubSub.Subscribe<string>("logoutUser", async data =>
+            {
+                await userService.Logout(data);
+            });
+            bus.PubSub.Subscribe<ChangePasswordMVCDTO>("changePassword", async data =>
+            {
+                var passswordData = new changePasswordDTO
+                {
+                    ConfirmPassword = data.ConfirmPassword,
+                    Password = data.Password,
+                    OldPasssword = data.OldPasssword
+                };
+                await userService.ChangePassword(data.UserId, passswordData);
+            });
+            bus.Rpc.Respond<GetUserProfileMVCDTO, UserGetProfileDTO>(async request =>
+            {
+                return await userService.GetProfile(request.UserId);
+            }, x => x.WithQueueName("getUserProfileMVC"));
         }
     }
 }

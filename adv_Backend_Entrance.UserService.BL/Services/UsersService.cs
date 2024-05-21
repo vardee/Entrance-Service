@@ -16,6 +16,7 @@ using adv_Backend_Entrance.Common.Helpers.Validators;
 using adv_Backend_Entrance.Common.Interfaces.UserService;
 using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
 using EasyNetQ;
+using adv_Backend_Entrance.Common.Helpers;
 
 namespace adv_Backend_Entrance.UserService.BL.Services
 {
@@ -26,17 +27,19 @@ namespace adv_Backend_Entrance.UserService.BL.Services
         private readonly AuthDbContext _authDBContext;
         private readonly RedisDBContext _redisDBContext;
         private readonly IConfiguration _configuration;
+        private readonly TokenHelper _tokenHelper;
         private readonly AdditionTokenService _additionTokenService;
         private readonly IBus _bus;
 
 
-        public UsersService(UserManager<User> userManager, SignInManager<User> signInManager, AuthDbContext authDbContext, IConfiguration configuration, RedisDBContext redisDBContext, AdditionTokenService additionTokenService)
+        public UsersService(UserManager<User> userManager, SignInManager<User> signInManager, AuthDbContext authDbContext, IConfiguration configuration, RedisDBContext redisDBContext, AdditionTokenService additionTokenService, TokenHelper tokenHelper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _authDBContext = authDbContext;
             _configuration = configuration;
             _redisDBContext = redisDBContext;
+            _tokenHelper = tokenHelper;
             _additionTokenService = additionTokenService;
             _bus = RabbitHutch.CreateBus("host=localhost");
         }
@@ -223,8 +226,18 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             {
                 throw new UnauthorizedException("User is not authorized");
             }
+
+            var id = _tokenHelper.GetUserIdFromToken(token);
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user != null)
+            {
+                user.RefreshToken = null;
+                await _userManager.UpdateAsync(user);
+            }
             await _redisDBContext.AddToken(token);
         }
+
 
         public async Task<UserGetProfileDTO> GetProfile(Guid userId)
         {
@@ -341,25 +354,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 if (user != null)
                 {
                     var roles = await _userManager.GetRolesAsync(user);
-                    if (roles.Contains("Admin"))
-                    {
-                        await _additionTokenService.AddRoleToUser(addUserRoleDTO.Role, Id);
-                    }
-                    else if (roles.Contains("MainManager"))
-                    {
-                        if (addUserRoleDTO.Role == RoleType.Manager)
-                        {
-                            await _additionTokenService.AddRoleToUser(addUserRoleDTO.Role, Id);
-                        }
-                        else
-                        {
-                            throw new ForbiddenException("MainManager can only assign the Manager role.");
-                        }
-                    }
-                    else
-                    {
-                        throw new ForbiddenException("You dont have permissions to assign roles.");
-                    }
+                    await _additionTokenService.AddRoleToUser(addUserRoleDTO.Role, Id);
                 }
                 else
                 {

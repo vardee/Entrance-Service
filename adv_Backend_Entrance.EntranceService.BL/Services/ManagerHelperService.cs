@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using adv_Backend_Entrance.EntranceService.DAL.Data.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace adv_Backend_Entrance.EntranceService.BL.Services
 {
@@ -52,6 +54,23 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             {
                 throw new NotFoundException("This applicant not found!");
             }
+            await _entranceDBContext.SaveChangesAsync();
+        }
+        public async Task AddManagerInDb(AddManagerInDbDTO addManagerInDb)
+        {
+            var currentUser = await _entranceDBContext.Managers.FirstOrDefaultAsync(m => m.UserId == addManagerInDb.UserId && m.Role == addManagerInDb.Role);
+            if(currentUser != null)
+            {
+                throw new BadRequestException($"This user is already have this role {addManagerInDb.Role}");
+            }
+            var manager = new ManagerModel
+            {
+                Email = addManagerInDb.Email,
+                FullName = addManagerInDb.FullName,
+                Role = addManagerInDb.Role,
+                UserId = addManagerInDb.UserId,
+            };
+            _entranceDBContext.Managers.Add(manager);
             await _entranceDBContext.SaveChangesAsync();
         }
     }

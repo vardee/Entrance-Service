@@ -6,9 +6,12 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
+using System;
 using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
 using adv_Backend_Entrance.Common.Helpers;
+using adv_Backend_Entrance.Common.DTO.AdminPanel;
+using NuGet.Protocol.Core.Types;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace adv_Backend_Entrance.AdminPanel.Controllers
 {
@@ -32,7 +35,30 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
         }
 
         [HttpGet]
-        public IActionResult EditProfile()
+        public async Task<IActionResult> EditProfile()
+        {
+            var token = _tokenHelper.GetTokenFromSession();
+            var id = _tokenHelper.GetUserIdFromToken(token);
+            var userId = Guid.Parse(id);
+            var request = new GetUserProfileMVCDTO
+            {
+                UserId = userId
+            };
+            var response = await _bus.Rpc.RequestAsync<GetUserProfileMVCDTO, UserGetProfileDTO>(request, c => c.WithQueueName("getUserProfileMVC"));
+            var viewModel = new EditProfileModel
+            {
+                Email = response.Email,
+                BirthDate = response.BirthDate,
+                FirstName = response.firstname,
+                LastName = response.lastname,
+                Patronymic = response.patronymic,
+                Phone = response.Phone,
+            };
+            return View(viewModel);
+        }
+
+        [HttpGet]
+        public IActionResult ChangePassword()
         {
             return View();
         }
@@ -48,14 +74,14 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
 
             try
             {
+                Console.WriteLine(login.Email);
                 var loginDto = new UserLoginDTO { Email = login.Email, Password = login.Password };
                 var response = await _bus.Rpc.RequestAsync<UserLoginDTO, TokenResponseDTO>(loginDto, c => c.WithQueueName("userLogin_token"));
 
                 TokenResponseDTO loginResponse = response;
                 HttpContext.Session.SetString("AccessToken", loginResponse.AccessToken);
                 HttpContext.Session.SetString("RefreshToken", loginResponse.RefreshToken);
-
-                return RedirectToAction("Index", "Home");
+                return Json(new { redirectUrl = "/Home/Index" });
             }
             catch (Exception ex)
             {
@@ -64,6 +90,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 return View(login);
             }
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProfile(EditProfileModel model)
@@ -74,30 +101,84 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
             }
             try
             {
-                var token =  _tokenHelper.GetTokenFromSession();
-                Console.WriteLine(token);
+                var token = _tokenHelper.GetTokenFromSession();
                 var id = _tokenHelper.GetUserIdFromToken(token);
-                Console.WriteLine(id);
                 var userId = Guid.Parse(id);
-                var editProfile = new EditApplicantProfileInformationDTO { UserId = userId, FirstName = model.FirstName, LastName = model.LastName, Patronymic = model.Patronymic, BirthDate = model.BirthDate, Phone = model.Phone, Email = model.Email };
+                var editProfile = new EditApplicantProfileInformationDTO
+                {
+                    UserId = userId,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    Patronymic = model.Patronymic,
+                    BirthDate = DateTime.SpecifyKind(model.BirthDate, DateTimeKind.Utc),
+                    Phone = model.Phone,
+                    Email = model.Email
+                };
+                var request = new GetUserProfileMVCDTO
+                {
+                    UserId = userId
+                };
                 await _bus.PubSub.PublishAsync(editProfile, "editUserProfile");
-                return RedirectToAction("Index", "Home");
+                var response = await _bus.Rpc.RequestAsync<GetUserProfileMVCDTO, UserGetProfileDTO>(request, c => c.WithQueueName("getUserProfileMVC"));
+                var viewModel = new EditProfileModel
+                {
+                    Email = response.Email,
+                    BirthDate = response.BirthDate,
+                    FirstName = response.firstname,
+                    LastName = response.lastname,
+                    Patronymic = response.patronymic,
+                    Phone = response.Phone,
+                };
+                return View(viewModel);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during login process");
-                ModelState.AddModelError("", "Invalid login attempt.");
-                return View();
+                _logger.LogError(ex, "Error during profile edit process");
+                ModelState.AddModelError("", "Error during profile edit.");
+                return View(model);
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            var token = _tokenHelper.GetTokenFromSession();
+            await _bus.PubSub.PublishAsync(token, "logoutUser");
+            HttpContext.Session.Clear();
+            return Ok();
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Logout()
+        public async Task<IActionResult> ChangePassword(ChangePasswordModel model)
         {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Login", "Account");
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                var token = _tokenHelper.GetTokenFromSession();
+                var id = _tokenHelper.GetUserIdFromToken(token);
+                var userId = Guid.Parse(id);
+                var changePassword = new ChangePasswordMVCDTO
+                {
+                    ConfirmPassword = model.ConfirmPassword,
+                    OldPasssword = model.OldPassword,
+                    Password = model.Password,
+                    UserId = userId
+                };
+                await _bus.PubSub.PublishAsync(changePassword, "changePassword");
+                return Json(new { redirectUrl = "/Account/ChangePassword" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during password change process");
+                ModelState.AddModelError("", "Error during password change.");
+                return View(model);
+            }
         }
 
         [HttpGet]

@@ -2,12 +2,14 @@
 using adv_Backend_Entrance.Common.DTO.EntranceService.Applicant;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
 using adv_Backend_Entrance.Common.DTO.FacultyService;
+using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces.EntranceService;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.EntranceService.DAL.Data;
 using adv_Backend_Entrance.EntranceService.DAL.Data.Models;
+using adv_Backend_Entrance.UserService.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -70,7 +72,16 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
 
         public async Task<GetAllQuerybleApplicationsDTO> GetQuerybleApplications(int size, int page, string? name, Guid? ProgramId, List<Guid>? Faculties, List<EntranceApplicationStatus>? entranceApplicationStatuses, bool? haveManager, bool? isMy, Guid? managerId, Sorting? timeSorting)
         {
+            if (page <= 0)
+            {
+                page = 1;
+            }
+            if(size <= 0)
+            {
+                size = 10;
+            }
             var applicationsQuery = _entranceDBContext.Applications.AsQueryable();
+
             if (ProgramId != null)
             {
                 var programs = await _entranceDBContext.ApplicationPrograms.Where(aP => aP.ProgramId == ProgramId).ToListAsync();
@@ -83,10 +94,20 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 }
                 else
                 {
-                    throw new BadRequestException("This program not found!");
+                    return new GetAllQuerybleApplicationsDTO
+                    {
+                        Applications = Enumerable.Empty<GetApplicationsDTO>().AsQueryable(),
+                        PaginationInformation = new PaginationInformation
+                        {
+                            Current = page,
+                            Page = 0,
+                            Size = size
+                        }
+                    };
                 }
             }
-            if (Faculties.Any() && Faculties != null)
+
+            if (Faculties != null && Faculties.Any())
             {
                 var programs = await _entranceDBContext.ApplicationPrograms.Where(aP => Faculties.Contains(aP.FacultyId)).ToListAsync();
                 if (programs.Any())
@@ -98,39 +119,65 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 }
                 else
                 {
-                    throw new BadRequestException("This program not found!");
+                    return new GetAllQuerybleApplicationsDTO
+                    {
+                        Applications = Enumerable.Empty<GetApplicationsDTO>().AsQueryable(),
+                        PaginationInformation = new PaginationInformation
+                        {
+                            Current = page,
+                            Page = 0,
+                            Size = size
+                        }
+                    };
                 }
             }
+
             if (entranceApplicationStatuses != null && entranceApplicationStatuses.Any())
             {
                 applicationsQuery = applicationsQuery.Where(p => entranceApplicationStatuses.Contains(p.ApplicationStatus));
             }
-            if (haveManager == true)
-            {
-                applicationsQuery = applicationsQuery.Where(aP => aP.ManagerId != null);
-            }
-            if (isMy == true)
+
+            if (isMy == true && isMy != null)
             {
                 applicationsQuery = applicationsQuery.Where(aP => aP.ManagerId == managerId);
             }
+            else if (isMy == false && isMy != null)
+            {
+                applicationsQuery = applicationsQuery.Where(aP => aP.ManagerId != managerId);
+            }
+
+            if (haveManager == true && haveManager != null)
+            {
+                applicationsQuery = applicationsQuery.Where(aP => aP.ManagerId != Guid.Empty);
+            }
+            else if(haveManager == false && haveManager != null)
+            {
+                applicationsQuery = applicationsQuery.Where(aP => aP.ManagerId == Guid.Empty);
+            }
+
+
             applicationsQuery = FilterApplications(timeSorting, applicationsQuery);
+
             int sizeOfPage = size;
             var countOfPages = (int)Math.Ceiling((double)applicationsQuery.Count() / sizeOfPage);
+
             if (page <= countOfPages)
             {
                 var lowerBound = page == 1 ? 0 : (page - 1) * sizeOfPage;
-                if (page < countOfPages)
-                {
-                    applicationsQuery = applicationsQuery.Skip(lowerBound).Take(sizeOfPage);
-                }
-                else
-                {
-                    applicationsQuery = applicationsQuery.Skip(lowerBound).Take(applicationsQuery.Count() - lowerBound);
-                }
+                applicationsQuery = applicationsQuery.Skip(lowerBound).Take(sizeOfPage);
             }
             else
             {
-                throw new BadRequestException("This page not found!");
+                return new GetAllQuerybleApplicationsDTO
+                {
+                    Applications = Enumerable.Empty<GetApplicationsDTO>().AsQueryable(),
+                    PaginationInformation = new PaginationInformation
+                    {
+                        Current = page,
+                        Page = 0,
+                        Size = size
+                    }
+                };
             }
 
             var pagination = new PaginationInformation
@@ -141,11 +188,12 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             };
 
             var applications = await applicationsQuery.ToListAsync();
+
             var applicationsDTO = new GetAllQuerybleApplicationsDTO
             {
-                Applications = applications.Select(p =>
+                Applications = (await Task.WhenAll(applications.Select(async p =>
                 {
-                    var programsPriority = _entranceDBContext.ApplicationPrograms
+                    var programsPriority = await _entranceDBContext.ApplicationPrograms
                         .Where(ap => ap.ApplicationId == p.Id)
                         .Select(ap => new GetApplicationPriorityDTO
                         {
@@ -156,18 +204,27 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                             FacultyName = ap.FacultyName,
                             FacultyId = ap.FacultyId,
                             ProgramCode = ap.ProgramCode
-                        }).ToList();
+                        }).ToListAsync();
+
+                    var applicant = await _entranceDBContext.Applicants.FirstOrDefaultAsync(ap => ap.Id == p.ApplicantId);
+                    string applicantName = applicant == null ? "Имя не указано" : $"{applicant.FirstName} {applicant.LastName} {applicant.Patronymic}";
 
                     return new GetApplicationsDTO
                     {
                         ApplicationId = p.Id,
+                        ApplicationStatus = p.ApplicationStatus,
+                        ApplicantFullName = applicantName,
+                        ManagerId = p.ManagerId,
                         ProgramsPriority = programsPriority
                     };
-                }).AsQueryable(),
+                }))).AsQueryable(),
                 PaginationInformation = pagination
             };
+
             return applicationsDTO;
         }
+
+
 
         public async Task ChangeApplicationStatus(ChangeApplicationStatusDTO changeApplicationStatusDTO, Guid userId)
         {
@@ -235,6 +292,66 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 Nationality = applicant.Nationality,
             };
         return applicantInfo;
+        }
+
+        public async Task<GetAllQuerybleManagersDTO> GetManagers(int size, int page, string? name, RoleType? roleType)
+        {
+            if (page <= 0)
+            {
+                page = 1;
+            }
+            if (size <= 0)
+            {
+                size = 10;
+            }
+
+            var managersQuery = _entranceDBContext.Managers.AsQueryable();
+
+            if (name != null)
+            {
+                managersQuery = managersQuery.Where(aR => aR.FullName.Contains(name));
+            }
+            if (roleType != null)
+            {
+                managersQuery = managersQuery.Where(aR => aR.Role == roleType);
+            }
+
+            int totalManagers = await managersQuery.CountAsync();
+            int sizeOfPage = size;
+            var countOfPages = (int)Math.Ceiling((double)totalManagers / sizeOfPage);
+
+            if (page <= countOfPages && totalManagers > 0)
+            {
+                var lowerBound = (page - 1) * sizeOfPage;
+                managersQuery = managersQuery.Skip(lowerBound).Take(sizeOfPage);
+            }
+            else
+            {
+                managersQuery = Enumerable.Empty<Manager>().AsQueryable();
+            }
+
+            var pagination = new PaginationInformation
+            {
+                Current = page,
+                Page = countOfPages,
+                Size = size
+            };
+
+            var managersList = await managersQuery.ToListAsync();
+
+            var managersDTO = new GetAllQuerybleManagersDTO
+            {
+                Managers = managersList.Select(p => new GetAllManagersDTO
+                {
+                    ManagerId = p.Id,
+                    FullName = p.FullName,
+                    Email = p.Email,
+                    Role = p.Role,
+                }).AsQueryable(),
+                PaginationInformation = pagination
+            };
+
+            return managersDTO;
         }
     }
 }

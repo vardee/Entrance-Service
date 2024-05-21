@@ -15,6 +15,8 @@ using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using Microsoft.EntityFrameworkCore;
+using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
+using EasyNetQ;
 
 namespace adv_Backend_Entrance.UserService.BL.Services
 {
@@ -24,6 +26,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
         private readonly SignInManager<User> _signInManager;
         private readonly AuthDbContext _authDBContext;
         private readonly IConfiguration _configuration;
+        private readonly IBus _bus;
 
         public AdditionTokenService(UserManager<User> userManager, SignInManager<User> signInManager, AuthDbContext authDbContext, IConfiguration configuration)
         {
@@ -31,6 +34,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             _signInManager = signInManager;
             _authDBContext = authDbContext;
             _configuration = configuration;
+            _bus = RabbitHutch.CreateBus("host=localhost");
         }
         public async Task AddRoleToUser(RoleType role, Guid userId)
         {
@@ -43,6 +47,18 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             var roleName = Enum.GetName(typeof(RoleType), role);
 
             var result = await _userManager.AddToRoleAsync(user, roleName);
+            if ((role == RoleType.Manager) || (role == RoleType.MainManager))
+            {
+                string fullUserName = $"{user.FullName} {user.LastName} {user.Patronymic}";
+                var message = new AddManagerInDbDTO
+                {
+                    FullName = fullUserName,
+                    Email = user.Email,
+                    Role = role,
+                    UserId = userId
+                };
+                await _bus.PubSub.PublishAsync(message, "addManagerInDB_User");
+            }
             if (!result.Succeeded)
             {
                 throw new BadRequestException($"Failed to add user to role '{roleName}'.");

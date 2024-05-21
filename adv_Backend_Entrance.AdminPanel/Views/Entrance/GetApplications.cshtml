@@ -1,0 +1,204 @@
+﻿@using adv_Backend_Entrance.Common.Enums
+@model ApplicationFilterViewModel
+@{
+    ViewData["Title"] = "Заявки на поступление";
+    Layout = "_Layout";
+}
+
+<div class="container mt-3 justify-content-center">
+    <label id="filterLabel" class="fs-4 fw-bold mb-3">Фильтры</label>
+    <form id="formfilter" class="row g-3 mx-auto border p-2 rounded" asp-action="GettingApplications" asp-controller="Entrance" method="post">
+        <div class="col-md-6 border p-3 rounded">
+            <label asp-for="Filter.name" class="form-label">Имя</label>
+            <input asp-for="Filter.name" id="name" name="name" class="form-control" placeholder="Введите имя" />
+        </div>
+        <div class="col-md-6 border p-3 rounded">
+            <label asp-for="Filter.ProgramId" class="form-label">Программа</label>
+            <input asp-for="Filter.ProgramId" id="ProgramId" name="ProgramId" class="form-control" placeholder="Введите ID программы" />
+        </div>
+        <div class="col-md-6 border p-3 rounded">
+            <label asp-for="Filter.Faculties" class="form-label">Факультеты</label>
+            <select asp-for="Filter.Faculties" id="Faculties" name="Faculties" class="form-select" multiple>
+                @if (Model.Filter.Faculties != null)
+                {
+                    @foreach (var faculty in Model.Filter.Faculties)
+                    {
+                        <option value="@faculty">@faculty</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-6 border p-3 rounded">
+            <label asp-for="Filter.entranceApplicationStatuses" class="form-label">Статусы заявок</label>
+            <select asp-for="Filter.entranceApplicationStatuses" id="entranceApplicationStatuses" name="entranceApplicationStatuses" class="form-select" multiple>
+                <option value="Created" id="Pending">Создана</option>
+                <option value="UnderConsideration" id="InProcess">На рассмотрении</option>
+                <option value="Approved" id="Approved">Одобрена</option>
+                <option value="Rejected" id="Rejected">Отклонена</option>
+                <option value="Closed" id="Closed">Закрыта</option>
+            </select>
+        </div>
+        <div class="col-md-4 border p-3 rounded">
+            <label asp-for="Filter.haveManager" class="form-label">Есть менеджер</label>
+            <select asp-for="Filter.haveManager" id="haveManager" name="haveManager" class="form-select">
+                <option value="" id="null">Все</option>
+                <option value="false" id="false">Нет</option>
+                <option value="true" id="true">Есть</option>
+            </select>
+        </div>
+        <div class="col-md-4 border p-3 rounded">
+            <label asp-for="Filter.isMy" class="form-label">Чьи заявки</label>
+            <select asp-for="Filter.isMy" id="isMy" name="isMy" class="form-select">
+                <option value="" id="null">Все</option>
+                <option value="false" id="false">Не мои</option>
+                <option value="true" id="true">Мои</option>
+            </select>
+        </div>
+        <div class="col-md-4 border p-3 rounded">
+            <label asp-for="Filter.managerId" class="form-label">ID менеджера</label>
+            <input asp-for="Filter.managerId" id="managerId" name="managerId" class="form-control" placeholder="Введите ID менеджера" />
+        </div>
+        <div class="col-md-4 border p-3 rounded">
+            <label asp-for="Filter.timeSorting" class="form-label">Сортировка по дате</label>
+            <select asp-for="Filter.timeSorting" id="timeSorting" name="timeSorting" class="form-select">
+                <option value="CreateDesc" id="CreateDesc">По возрастанию</option>
+                <option value="CreateAsc" id="CreateAsc">По убыванию</option>
+            </select>
+        </div>
+        <div class="col-md-4 border p-3 rounded">
+            <label asp-for="Filter.size" class="form-label">Количество записей</label>
+            <input asp-for="Filter.size" id="size" name="size" class="form-control" placeholder="Введите количество записей" />
+        </div>
+        <div class="col-md-4 border p-3 rounded">
+            <label asp-for="Filter.page" class="form-label">Номер страницы</label>
+            <input asp-for="Filter.page" id="page" name="page" class="form-control" placeholder="Введите номер страницы" />
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary mt-3" id="apply_button">Применить</button>
+        </div>
+    </form>
+</div>
+<div class="container-fluid" id="applicationsInfo">
+    @foreach (var application in Model.Applications)
+    {
+        <div class="application-card mt-5 mb-3 border p-3 rounded mx-auto col-md-8" data-application-id="@application.ApplicationId">
+            <div class="application-details row g-3">
+                <div class="col-md-12">
+                    <p class="application-name">
+                        <strong>ФИО:</strong> @application.ApplicantFullName
+                    </p>
+                    <p class="application-status">
+                        <strong>Статус заявки:</strong> @application.ApplicationStatus.ToString()
+                    </p>
+                    <p class="application-manager-id">
+                        <strong>ID Менеджера:</strong> @if (application.ManagerId != Guid.Empty)
+                        {
+                            @application.ManagerId.ToString()
+                        }
+                        else
+                        {
+                            <span>Нет менеджера</span>
+                        }
+                    </p>
+                    @if (application.ManagerId == Model.CurrentManagerId)
+                    {
+                        <div class="mb-3">
+                            <form id="formChange_@application.ApplicationId" asp-action="ChangeStatus" asp-controller="GetApplications" method="post">
+                                <input type="hidden" name="applicationId" value="@application.ApplicationId" />
+                                <select class="form-control w-100 border p-1" name="status" id="status_@application.ApplicationId" onchange="changeStatus('@application.ApplicationId')">
+                                    <option selected>Поменять статус</option>
+                                    <option value="Approved" id="Approved">Подтверждена</option>
+                                    <option value="Rejected" id="Rejected">Отклонена</option>
+                                    <option value="Closed" id="Closed">Закрыта</option>
+                                </select>
+                            </form>
+                        </div>
+                    }
+                    <div>
+                        @if (application.ManagerId != Model.CurrentManagerId && application.ManagerId == Guid.Empty)
+                        {
+                            <button onclick="takeApplication('@application.ApplicationId')" class="btn btn-primary">Взять</button>
+                        }
+                        else if (application.ManagerId == Model.CurrentManagerId)
+                        {
+                            <button onclick="rejectApplication('@application.ApplicationId')" class="btn btn-danger">Отправить в пул</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function updateApplications() {
+            $.ajax({
+                type: "POST",
+                url: "/Entrance/GettingApplications",
+                data: $("#formfilter").serialize(),
+                success: function (response) {
+                    $("#applicationsInfo").html($(response).find("#applicationsInfo").html());
+                },
+                error: function () {
+                    alert("Произошла ошибка при загрузке заявок.");
+                }
+            });
+        }
+
+        function takeApplication(applicationId) {
+            $.ajax({
+                url: '/Entrance/TakeApplicantApplication',
+                type: 'POST',
+                data: { applicationId: applicationId },
+                success: function () {
+                    updateApplications();
+                },
+                error: function () {
+                    alert("Произошла ошибка при взятии заявки.");
+                }
+            });
+        }
+
+        function rejectApplication(applicationId) {
+            $.ajax({
+                url: '/Entrance/RejectApplicantApplication',
+                type: 'POST',
+                data: { applicationId: applicationId },
+                success: function () {
+                    updateApplications();
+                },
+                error: function () {
+                    alert("Произошла ошибка при возвращении заявки.");
+                }
+            });
+        }
+        function changeStatus(applicationId) {
+            $.ajax({
+                url: '/Entrance/ChangeApplicationStatus',
+                type: 'POST',
+                data: $("#formChange_" + applicationId).serialize(),
+                success: function () {
+                    updateApplications();
+                },
+                error: function () {
+                    alert("Произошла ошибка при изменении заявки.");
+                }
+            });
+        }
+        $(document).ready(function () {
+            $("#formfilter").submit(function (event) {
+                event.preventDefault();
+                updateApplications();
+            });
+        });
+    </script>
+}
+
+
+
+
+
+
+

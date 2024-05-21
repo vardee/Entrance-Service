@@ -6,13 +6,11 @@ namespace adv_Backend_Entrance.AdminPanel.Models
     {
         [Required(ErrorMessage = "Старый пароль обязателен для заполнения")]
         [DataType(DataType.Password)]
-        [EmailAddress]
         [Display(Name = "Старый пароль")]
         public string OldPassword { get; set; } = "";
         
         [Required(ErrorMessage = "Пароль обязателен для заполнения")]
         [DataType(DataType.Password)]
-        [EmailAddress]
         [Display(Name = "Пароль")]
         public string Password { get; set; } = "";
 

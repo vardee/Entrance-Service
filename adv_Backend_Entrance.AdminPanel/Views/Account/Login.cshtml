@@ -7,7 +7,7 @@
 
 <div class="card p-0 mx-auto container bg-white border-0">
     <div class="card-body">
-        <form asp-action="Login" asp-controller="Account" method="post">
+        <form id="formLogin" method="post">
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
                 <input type="email" class="form-control" asp-for="Email" />
@@ -19,7 +19,26 @@
                 <span class="text-danger" asp-validation-for="Password"></span>
             </div>
             <div class="text-danger" asp-validation-summary="All"></div>
-            <button type="submit" class="btn btn-primary">Войти</button>
+            <button type="button" class="btn btn-primary" onclick="login()">Войти</button>
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function login() {
+            $.ajax({
+                type: "POST",
+                url: "/Account/Login",
+                data: $("#formLogin").serialize(),
+                success: function (response) {
+                    window.location.href = response.redirectUrl;
+                },
+                error: function () {
+                    alert("Произошла ошибка при входе.");
+                }
+            });
+        }
+    </script>
+}

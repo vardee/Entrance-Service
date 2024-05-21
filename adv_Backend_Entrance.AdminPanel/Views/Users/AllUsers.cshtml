@@ -1,0 +1,42 @@
+﻿@model UsersModel
+
+@{
+    ViewBag.Title = "Пользователи";
+    Layout = "_Layout";
+}
+
+<div class="container">
+    @foreach (var user in Model)
+    {
+        <div class="author mt-5 mb-3 border p-3 rounded mx-auto col-md-8 d-flex align-items-center" data-author-name="">
+            <div class="avatar-container me-3 position-relative">
+                <img class="crowned-avatar gold" src="../image/crownGold.png" alt="Crown" style="max-width: 30px; max-height: 30px; margin-left: 10px; transform: rotate(-15deg); display: none;">
+                <img class="crowned-avatar silver" src="../image/crownSilver.png" alt="Crown" style="max-width: 30px; max-height: 30px; margin-left: 10px; transform: rotate(-15deg); display: none;">
+                <img class="crowned-avatar bronze" src="../image/crownBronze.png" alt="Crown" style="max-width: 30px; max-height: 30px; margin-left: 10px; transform: rotate(-15deg); display: none;">
+                <img class="avatar-img" src="@Url.Content("~/image/default-avatar.png")" alt="Avatar" style="max-width: 75px; max-height: 75px;">
+                <p class="author-nickname text-light p-1 rounded position-absolute start-100 top-50 translate-middle-y" style="margin-left: 5px;">@user.FullName</p>
+            </div>
+            <div class="author-details flex-grow-1">
+                <div class="d-md-flex justify-content-between align-items-start">
+                    <div class="author-info flex-grow-1 order-md-1 mx-md-3">
+                        <a class="author-link"><p class="author-name">@user.FullName</p></a>
+                        <p class="text-dark p-1 rounded" style="margin-top: -5px; margin-left: -5px;">Дата регистрации: <span class="created-date">[Дата регистрации не указана]</span></p>
+                        <p class="account-birthdate">Дата рождения: <span class="birthdate">@user.BirthDate.ToString("dd.MM.yyyy")</span></p>
+                    </div>
+                    <div class="subscribe-btn-container d-flex flex-column align-items-end order-md-2 ms-3">
+                        <div class="post-info me-3">
+                            <p>Посты: <span class="post-count">[Количество постов не указано]</span></p>
+                        </div>
+                        <div class="like-info me-3">
+                            <p>Лайки: <span class="like-count">[Количество лайков не указано]</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+}

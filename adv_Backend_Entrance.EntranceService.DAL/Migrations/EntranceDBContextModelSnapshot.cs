@@ -125,6 +125,12 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.ToTable("Managers");

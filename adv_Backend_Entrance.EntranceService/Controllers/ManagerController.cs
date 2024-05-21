@@ -90,7 +90,7 @@ namespace adv_Backend_Entrance.EntranceService.Controllers
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]
         [ProducesResponseType(typeof(Error), 500)]
-        public async Task<ActionResult<GetAllQuerybleApplicationsDTO>> GetApplications([FromQuery] Sorting? timeSorting, [FromQuery] string? name, [FromQuery] Guid? ProgramId, [FromQuery] List<Guid>? Faculties, [FromQuery] List<EntranceApplicationStatus>? entranceApplicationStatuses, Boolean? haveManager, Boolean? isMy,int size = 10, int page = 1)
+        public async Task<ActionResult<GetAllQuerybleApplicationsDTO>> GetApplications([FromQuery] Sorting? timeSorting, [FromQuery] string? name, [FromQuery] Guid? ProgramId, [FromQuery] List<Guid>? Faculties, [FromQuery] List<EntranceApplicationStatus>? entranceApplicationStatuses, bool haveManager, bool isMy,int size = 10, int page = 1)
         {
             string token = _tokenHelper.GetTokenFromHeader();
             if (string.IsNullOrEmpty(token))
@@ -140,6 +140,26 @@ namespace adv_Backend_Entrance.EntranceService.Controllers
             var id = _tokenHelper.GetUserIdFromToken(token);
             Guid userId = Guid.Parse(id);
             var result = await _managerService.GetApplicantInformation(getApplicantDTO);
+            return Ok(result);
+        }
+        [HttpGet]
+        [Route("managers")]
+        [Authorize(Policy = "TokenNotInBlackList")]
+        [Authorize(Roles = "MainManager,Administrator")]
+        [ProducesResponseType(typeof(GetAllQuerybleManagersDTO), 200)]
+        [ProducesResponseType(typeof(Error), 400)]
+        [ProducesResponseType(typeof(Error), 401)]
+        [ProducesResponseType(typeof(Error), 500)]
+        public async Task<ActionResult<GetAllQuerybleManagersDTO>> GetManagers([FromQuery] string? name, [FromQuery] RoleType? roleType, [FromQuery] int size = 10, [FromQuery] int page = 1)
+        {
+            string token = _tokenHelper.GetTokenFromHeader();
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new UnauthorizedException("Данный пользователь не авторизован");
+            }
+            var id = _tokenHelper.GetUserIdFromToken(token);
+            Guid userId = Guid.Parse(id);
+            var result = await _managerService.GetManagers(size,page,name,roleType);
             return Ok(result);
         }
     }
