@@ -63,6 +63,10 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             {
                 await managerService.RemoveManagerFromDb(data);
             });
+            bus.PubSub.Subscribe<ChangeManagerMVCDTO>("changeApplicationManagerMVC", async data =>
+            {
+                await fullManagerService.ChangeApplicationManager(data.ApplicationId,data.ManagerId);
+            });
             bus.Rpc.Respond<GetApplicationsMVCDTO, GetAllQuerybleApplicationsDTO>(async request =>
             {
                 return await fullManagerService.GetQuerybleApplications(request.size,request.page,request.name,request.ProgramId,request.Faculties,request.entranceApplicationStatuses,request.haveManager, request.isMy,request.managerId,request.timeSorting);
@@ -71,6 +75,10 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             {
                 return await fullManagerService.GetManagers(request.Size, request.Page,request.Name,request.Role);
             }, x => x.WithQueueName("gettingManagers_withMvc"));
+            bus.Rpc.Respond<Guid, GetAllQuerybleManagersDTO>(async request =>
+            {
+                return await fullManagerService.GetManagers(1000, 1, "", null);
+            }, x => x.WithQueueName("gettingForFilterManagers_withMvc"));
         }
     }
 }

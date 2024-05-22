@@ -25,12 +25,27 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             {
                 return await documentService.GetDocumentTypes();
             }, x => x.WithQueueName("application_facultyDocuments"));
+
+
+            bus.Rpc.Respond<Guid, List<GetFacultiesDTO>>(async request =>
+            {
+                return await documentService.GetFaculties();
+            }, x => x.WithQueueName("getFacultiesMVC"));
+
+
+
             bus.Rpc.Respond<Guid, GetQuerybleProgramsDTO>(async request =>
             {
                 var result = await documentService.GetQueryblePrograms(1000, 1, null, null, null, null, null);
                 Console.WriteLine(result);
                 return result;
             }, x => x.WithQueueName("application_facultyPrograms"));
+            bus.Rpc.Respond<Guid, GetQuerybleProgramsDTO>(async request =>
+            {
+                var result = await documentService.GetQueryblePrograms(1000, 1, null, null, null, null, null);
+                Console.WriteLine(result);
+                return result;
+            }, x => x.WithQueueName("getProgramsForAppMVC"));
         }
     }
 }

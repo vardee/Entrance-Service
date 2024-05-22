@@ -14,8 +14,18 @@
         </div>
         <div class="col-md-6 border p-3 rounded">
             <label asp-for="Filter.ProgramId" class="form-label">Программа</label>
-            <input asp-for="Filter.ProgramId" id="ProgramId" name="ProgramId" class="form-control" placeholder="Введите ID программы" />
+            <select class="form-control w-100 border p-1" name="ProgramId" id="ProgramId">
+                <option value="null" selected disabled>Выберите программу</option>
+                @if (Model.Filter.Programs != null)
+                {
+                    @foreach (var program in Model.Filter.Programs)
+                    {
+                        <option value="@program.ProgramId">@program.Name</option>
+                    }
+                }
+            </select>
         </div>
+
         <div class="col-md-6 border p-3 rounded">
             <label asp-for="Filter.Faculties" class="form-label">Факультеты</label>
             <select asp-for="Filter.Faculties" id="Faculties" name="Faculties" class="form-select" multiple>
@@ -23,7 +33,7 @@
                 {
                     @foreach (var faculty in Model.Filter.Faculties)
                     {
-                        <option value="@faculty">@faculty</option>
+                        <option value="@faculty.Id">@faculty.Name</option>
                     }
                 }
             </select>
@@ -55,8 +65,17 @@
             </select>
         </div>
         <div class="col-md-4 border p-3 rounded">
-            <label asp-for="Filter.managerId" class="form-label">ID менеджера</label>
-            <input asp-for="Filter.managerId" id="managerId" name="managerId" class="form-control" placeholder="Введите ID менеджера" />
+            <label asp-for="Filter.managerId" class="form-label">Менеджер</label>
+            <select class="form-control w-100 border p-1" name="managerId" id="managerId">
+                <option value="null" selected disabled>Выберите менеджера</option>
+                @if (Model.Filter.Managers != null)
+                {
+                    @foreach (var manager in Model.Filter.Managers)
+                    {
+                        <option value="@manager.ManagerId">@manager.Email</option>
+                    }
+                }
+            </select>
         </div>
         <div class="col-md-4 border p-3 rounded">
             <label asp-for="Filter.timeSorting" class="form-label">Сортировка по дате</label>
@@ -78,6 +97,7 @@
         </div>
     </form>
 </div>
+
 <div class="container-fluid" id="applicationsInfo">
     @foreach (var application in Model.Applications)
     {
@@ -91,15 +111,16 @@
                         <strong>Статус заявки:</strong> @application.ApplicationStatus.ToString()
                     </p>
                     <p class="application-manager-id">
-                        <strong>ID Менеджера:</strong> @if (application.ManagerId != Guid.Empty)
+                        <strong>Менеджер:</strong> @if (application.ManagerId != Guid.Empty)
                         {
-                            @application.ManagerId.ToString()
+                            @application.ManagerEmail
                         }
                         else
                         {
                             <span>Нет менеджера</span>
                         }
                     </p>
+
                     @if (application.ManagerId == Model.CurrentManagerId)
                     {
                         <div class="mb-3">
@@ -115,13 +136,33 @@
                         </div>
                     }
                     <div>
-                        @if (application.ManagerId != Model.CurrentManagerId && application.ManagerId == Guid.Empty)
+                    <form id="formChangeManager_@application.ApplicationId" asp-action="RemoveRoleUser" asp-controller="Users" method="post" class="mt-2">
+                        <input type="hidden" name="ApplicationId" value="@application.ApplicationId" />
+                        <select class="form-control w-100 border p-1" name="managerId" id="managerId">
+                            <option selected disabled>Выберите менеджера</option>
+                            @if (application.ManagerModels != null)
+                            {
+                                @foreach (var manager in application.ManagerModels)
+                                {
+                                    <option value="@manager.ManagerId">@manager.Email</option>
+                                }
+                            }
+                        </select>
+                        <button type="button" onclick="changeManager('@application.ApplicationId')" class="btn btn-danger mt-2">Поменять менеджера</button>
+                    </form>
+                    </div>
+                    <div>
+                        @if (application.ManagerId == Model.CurrentManagerId)
                         {
-                            <button onclick="takeApplication('@application.ApplicationId')" class="btn btn-primary">Взять</button>
+                            <div class="mb-3">
+                                <button onclick="rejectApplication('@application.ApplicationId')" class="btn btn-danger">Отправить в пул</button>
+                            </div>
                         }
-                        else if (application.ManagerId == Model.CurrentManagerId)
+                        else if (application.ManagerId == Guid.Empty)
                         {
-                            <button onclick="rejectApplication('@application.ApplicationId')" class="btn btn-danger">Отправить в пул</button>
+                            <div class="mb-3">
+                                <button onclick="takeApplication('@application.ApplicationId')" class="btn btn-primary">Взять</button>
+                            </div>
                         }
                     </div>
                 </div>
@@ -129,6 +170,7 @@
         </div>
     }
 </div>
+
 
 @section Scripts {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -179,6 +221,19 @@
                 url: '/Entrance/ChangeApplicationStatus',
                 type: 'POST',
                 data: $("#formChange_" + applicationId).serialize(),
+                success: function () {
+                    updateApplications();
+                },
+                error: function () {
+                    alert("Произошла ошибка при изменении заявки.");
+                }
+            });
+        }
+        function changeManager(applicationId) {
+            $.ajax({
+                url: '/Entrance/ChangeApplicationManager',
+                type: 'POST',
+                data: $("#formChangeManager_" + applicationId).serialize(),
                 success: function () {
                     updateApplications();
                 },

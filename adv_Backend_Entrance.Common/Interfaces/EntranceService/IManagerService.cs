@@ -19,5 +19,6 @@ namespace adv_Backend_Entrance.Common.Interfaces.EntranceService
         Task<GetApplicationsDTO> GetApplicantion(GetApplicantDTO getApplicantDTO);
         Task<GetApplicantInformationDTO> GetApplicantInformation(GetApplicantDTO getApplicantDTO);
         Task<GetAllQuerybleManagersDTO> GetManagers(int size, int page, string? name, RoleType? roleType);
+        Task ChangeApplicationManager(Guid applicationId, Guid managerId);
     }
 }

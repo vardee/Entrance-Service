@@ -92,19 +92,6 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                         applicationsQuery = applicationsQuery.Where(p => p.Id == program.ApplicationId);
                     }
                 }
-                else
-                {
-                    return new GetAllQuerybleApplicationsDTO
-                    {
-                        Applications = Enumerable.Empty<GetApplicationsDTO>().AsQueryable(),
-                        PaginationInformation = new PaginationInformation
-                        {
-                            Current = page,
-                            Page = 0,
-                            Size = size
-                        }
-                    };
-                }
             }
 
             if (Faculties != null && Faculties.Any())
@@ -116,19 +103,6 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     {
                         applicationsQuery = applicationsQuery.Where(p => p.Id == program.ApplicationId);
                     }
-                }
-                else
-                {
-                    return new GetAllQuerybleApplicationsDTO
-                    {
-                        Applications = Enumerable.Empty<GetApplicationsDTO>().AsQueryable(),
-                        PaginationInformation = new PaginationInformation
-                        {
-                            Current = page,
-                            Page = 0,
-                            Size = size
-                        }
-                    };
                 }
             }
 
@@ -208,13 +182,15 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
 
                     var applicant = await _entranceDBContext.Applicants.FirstOrDefaultAsync(ap => ap.Id == p.ApplicantId);
                     string applicantName = applicant == null ? "Имя не указано" : $"{applicant.FirstName} {applicant.LastName} {applicant.Patronymic}";
-
+                    var manager = await _entranceDBContext.Managers.FirstOrDefaultAsync(m => m.Id == p.ManagerId);
+                    string managerEmail = manager.Email;
                     return new GetApplicationsDTO
                     {
                         ApplicationId = p.Id,
                         ApplicationStatus = p.ApplicationStatus,
                         ApplicantFullName = applicantName,
                         ManagerId = p.ManagerId,
+                        ManagerEmail = managerEmail,
                         ProgramsPriority = programsPriority
                     };
                 }))).AsQueryable(),
@@ -292,6 +268,26 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 Nationality = applicant.Nationality,
             };
         return applicantInfo;
+        }
+        public async Task ChangeApplicationManager(Guid applicationId, Guid managerId)
+        {
+            var currentManager = await _entranceDBContext.Managers.FirstOrDefaultAsync(m => m.Id == managerId);
+            if(currentManager == null)
+            {
+                throw new BadRequestException("This manager not found!");
+
+            }
+            var currentApplication = await _entranceDBContext.Applications.FirstOrDefaultAsync(a => a.Id == applicationId);
+            if( currentApplication == null)
+            {
+                throw new BadRequestException("This application not found!");
+            }
+            if(currentApplication != null && currentManager != null)
+            {
+                currentApplication.ManagerId = managerId;
+                currentApplication.ApplicationStatus = EntranceApplicationStatus.UnderConsideration;
+                await _entranceDBContext.SaveChangesAsync();
+            }
         }
 
         public async Task<GetAllQuerybleManagersDTO> GetManagers(int size, int page, string? name, RoleType? roleType)

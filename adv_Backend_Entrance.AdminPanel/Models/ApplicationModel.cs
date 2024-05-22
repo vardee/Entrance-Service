@@ -8,5 +8,8 @@ namespace adv_Backend_Entrance.AdminPanel.Models
         public Guid ApplicationId { get; set; }
         public string ApplicantFullName { get; set; }
         public EntranceApplicationStatus ApplicationStatus { get; set; }
+        public string ManagerEmail { get; set; }
+
+        public List<ManagerModel> ManagerModels { get; set; }
     }
 }
