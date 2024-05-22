@@ -36,6 +36,36 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             _configuration = configuration;
             _bus = RabbitHutch.CreateBus("host=localhost");
         }
+        public async Task RemoveRoleFromUser(RoleType role, Guid userId)
+        {
+
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (!Enum.IsDefined(typeof(RoleType), role))
+            {
+                throw new BadRequestException($"Role '{role}' is not defined.");
+            }
+
+            var roleName = Enum.GetName(typeof(RoleType), role);
+
+            var result = await _userManager.RemoveFromRoleAsync(user, roleName);
+            if ((role == RoleType.Manager) || (role == RoleType.MainManager))
+            {
+                string fullUserName = $"{user.FullName} {user.LastName} {user.Patronymic}";
+                var message = new RemoveManagerFromDbDTO
+                {
+                    FullName = fullUserName,
+                    Email = user.Email,
+                    Role = role,
+                    UserId = userId
+                };
+                await _bus.PubSub.PublishAsync(message, "removeManagerFromDB_User");
+                await _signInManager.RefreshSignInAsync(user);
+            }
+            if (!result.Succeeded)
+            {
+                throw new BadRequestException($"Failed to remove user from role '{roleName}'.");
+            }
+        }
         public async Task AddRoleToUser(RoleType role, Guid userId)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -64,6 +94,9 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 throw new BadRequestException($"Failed to add user to role '{roleName}'.");
             }
         }
+
+
+
         public string GenerateRefreshToken()
         {
             var randomValues = new byte[128];

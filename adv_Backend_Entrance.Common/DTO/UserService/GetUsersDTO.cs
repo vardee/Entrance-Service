@@ -16,5 +16,6 @@ namespace adv_Backend_Entrance.Common.DTO.UserService
         public Gender Gender { get; set; }
         public DateTime BirthDate { get; set; }
         public string Email { get; set; }
+        public List<RoleType> Roles { get; set; }
     }
 }

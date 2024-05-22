@@ -59,10 +59,18 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             {
                 await managerService.AddManagerInDb(data);
             });
+            bus.PubSub.Subscribe<RemoveManagerFromDbDTO>("addManagerInDB_User", async data =>
+            {
+                await managerService.RemoveManagerFromDb(data);
+            });
             bus.Rpc.Respond<GetApplicationsMVCDTO, GetAllQuerybleApplicationsDTO>(async request =>
             {
                 return await fullManagerService.GetQuerybleApplications(request.size,request.page,request.name,request.ProgramId,request.Faculties,request.entranceApplicationStatuses,request.haveManager, request.isMy,request.managerId,request.timeSorting);
             }, x => x.WithQueueName("getApplicationsMVC"));
+            bus.Rpc.Respond<GetManagersMVCDTO, GetAllQuerybleManagersDTO>(async request =>
+            {
+                return await fullManagerService.GetManagers(request.Size, request.Page,request.Name,request.Role);
+            }, x => x.WithQueueName("gettingManagers_withMvc"));
         }
     }
 }

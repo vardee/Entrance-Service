@@ -2,7 +2,8 @@
 {
     public class UsersPageViewModel
     {
-        public UsersModel Users { get; set; }
+        public List<UsersModel> Users { get; set; }
         public UsersFilterModel Filters { get; set; }
+        public Guid CurrentId { get; set; }
     }
 }

@@ -1,42 +1,142 @@
-﻿@model UsersModel
+﻿@using adv_Backend_Entrance.Common.Enums
+@model UsersPageViewModel
 
 @{
     ViewBag.Title = "Пользователи";
     Layout = "_Layout";
 }
 
-<div class="container">
-    @foreach (var user in Model)
+<div class="container mt-3 justify-content-center">
+    <label id="filterLabel" class="fs-4 fw-bold mb-3">Фильтры</label>
+    <form id="formfilter" class="row g-3 mx-auto border p-2 rounded" asp-action="GettingUsers" asp-controller="Users" method="post">
+        <div class="col-md-6 border p-3 rounded">
+            <label asp-for="Filters.Firstname" class="form-label">Имя</label>
+            <input asp-for="Filters.Firstname" id="Firstname" name="Firstname" class="form-control" placeholder="Введите имя" />
+        </div>
+        <div class="col-md-6 border p-3 rounded">
+            <label asp-for="Filters.Lastname" class="form-label">Фамилия</label>
+            <input asp-for="Filters.Lastname" id="Lastname" name="Lastname" class="form-control" placeholder="Введите фамилию" />
+        </div>
+        <div class="col-md-6 border p-3 rounded">
+            <label asp-for="Filters.Email" class="form-label">Email</label>
+            <input asp-for="Filters.Email" id="Email" name="Email" class="form-control" placeholder="Введите Email" />
+        </div>
+        <div class="col-md-4 border p-3 rounded">
+            <label asp-for="Filters.Page" class="form-label">Номер страницы</label>
+            <input asp-for="Filters.Page" id="Page" name="Page" class="form-control" placeholder="Введите номер страницы" />
+        </div>
+        <div class="col-md-4 border p-3 rounded">
+            <label asp-for="Filters.Size" class="form-label">Количество записей</label>
+            <input asp-for="Filters.Size" id="Size" name="Size" class="form-control" placeholder="Введите количество записей" />
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary mt-3" id="apply_button">Применить</button>
+        </div>
+    </form>
+</div>
+
+
+<div class="container" id="usersInfo">
+    @foreach (var user in Model.Users)
     {
-        <div class="author mt-5 mb-3 border p-3 rounded mx-auto col-md-8 d-flex align-items-center" data-author-name="">
-            <div class="avatar-container me-3 position-relative">
-                <img class="crowned-avatar gold" src="../image/crownGold.png" alt="Crown" style="max-width: 30px; max-height: 30px; margin-left: 10px; transform: rotate(-15deg); display: none;">
-                <img class="crowned-avatar silver" src="../image/crownSilver.png" alt="Crown" style="max-width: 30px; max-height: 30px; margin-left: 10px; transform: rotate(-15deg); display: none;">
-                <img class="crowned-avatar bronze" src="../image/crownBronze.png" alt="Crown" style="max-width: 30px; max-height: 30px; margin-left: 10px; transform: rotate(-15deg); display: none;">
-                <img class="avatar-img" src="@Url.Content("~/image/default-avatar.png")" alt="Avatar" style="max-width: 75px; max-height: 75px;">
-                <p class="author-nickname text-light p-1 rounded position-absolute start-100 top-50 translate-middle-y" style="margin-left: 5px;">@user.FullName</p>
+        <div class="card mt-5 mb-3 mx-auto col-md-8">
+            <div class="card-header">
+                <h5 class="card-title">@user.FullName</h5>
             </div>
-            <div class="author-details flex-grow-1">
-                <div class="d-md-flex justify-content-between align-items-start">
-                    <div class="author-info flex-grow-1 order-md-1 mx-md-3">
-                        <a class="author-link"><p class="author-name">@user.FullName</p></a>
-                        <p class="text-dark p-1 rounded" style="margin-top: -5px; margin-left: -5px;">Дата регистрации: <span class="created-date">[Дата регистрации не указана]</span></p>
-                        <p class="account-birthdate">Дата рождения: <span class="birthdate">@user.BirthDate.ToString("dd.MM.yyyy")</span></p>
-                    </div>
-                    <div class="subscribe-btn-container d-flex flex-column align-items-end order-md-2 ms-3">
-                        <div class="post-info me-3">
-                            <p>Посты: <span class="post-count">[Количество постов не указано]</span></p>
-                        </div>
-                        <div class="like-info me-3">
-                            <p>Лайки: <span class="like-count">[Количество лайков не указано]</span></p>
-                        </div>
-                    </div>
-                </div>
+            <div class="card-body">
+                <p class="card-text">Фамилия: @user.LastName</p>
+                <p class="card-text">Отчество: @user.Patronymic</p>
+                <p class="card-text">Пол: @user.Gender</p>
+                <p class="card-text">Дата рождения: @user.BirthDate.ToString("dd.MM.yyyy")</p>
+                <p class="card-text">Email: @user.Email</p>
+            </div>
+            <div class="card-footer text-muted">
+                <p class="card-text">Роли: @string.Join(", ", user.Roles)</p>
+                @if (user.Id != Model.CurrentId && ((!(user.Roles.Contains(RoleType.Manager) && user.Roles.Contains(RoleType.MainManager)) || !(user.Roles.Contains(RoleType.MainManager)))))
+                {
+                    <form id="formRole_@user.Id" asp-action="AddRoleUser" asp-controller="Users" method="post">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                    <select class="form-control w-100 border p-1" name="role" id="roleType">
+                        <option selected disabled>Выберите роль</option>
+                            @if (user.Roles.Contains(RoleType.Manager))
+                            {
+                                <option value="MainManager" id="MainManager">Главный менеджер</option>
+                            }
+                            @if (!user.Roles.Contains(RoleType.Manager) && !user.Roles.Contains(RoleType.MainManager))
+                            {
+                                <option value="Manager" id="Manager">Менеджер</option>
+                                <option value="MainManager" id="MainManager">Главный менеджер</option>
+                            }
+                    </select>
+                    <button type="button" onclick="addRole('@user.Id')" class="btn btn-primary mt-2">Выдать роль</button>
+                </form>
+                }
+                @if (user.Id != Model.CurrentId){
+                <form id="formRemoveRole_@user.Id" asp-action="RemoveRoleUser" asp-controller="Users" method="post" class="mt-2">
+                    <input type="hidden" name="userId" value="@user.Id" />
+                    <select class="form-control w-100 border p-1" name="role" id="roleTypeRemove">
+                        <option selected disabled>Выберите роль для удаления</option>
+                            <option value="Manager" id="Manager">Менеджер</option>
+                            <option value="MainManager" id="MainManager">Главный менеджер</option>
+                    </select>
+                    <button type="button" onclick="removeRole('@user.Id')" class="btn btn-danger mt-2">Удалить роль</button>
+                </form>
+                }
             </div>
         </div>
     }
 </div>
 
+
+
+
 @section Scripts {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function getUsers() {
+            $.ajax({
+                type: "POST",
+                url: "/Users/GettingUsers",
+                data: $("#formfilter").serialize(),
+                success: function (response) {
+                    $("#usersInfo").html($(response).find("#usersInfo").html());
+                },
+                error: function () {
+                    alert("Произошла ошибка при загрузке пользователей.");
+                }
+            });
+        }
+        function addRole(userId) {
+            $.ajax({
+                url: '/Users/AddRoleUser',
+                type: 'POST',
+                data: $("#formRole_" + userId).serialize(),
+                success: function () {
+                    getUsers();
+                },
+                error: function () {
+                    alert("Произошла ошибка при добавлении роли.");
+                }
+            });
+        }
+        function removeRole(userId) {
+            $.ajax({
+                url: '/Users/RemoveRoleUser',
+                type: 'POST',
+                data: $("#formRemoveRole_" + userId).serialize(),
+                success: function () {
+                    getUsers();
+                },
+                error: function () {
+                    alert("Произошла ошибка при удалении роли.");
+                }
+            });
+        }
+        $(document).ready(function () {
+            $("#formfilter").submit(function (event) {
+                event.preventDefault();
+                getUsers();
+            });
+        });
+        </script>
 }

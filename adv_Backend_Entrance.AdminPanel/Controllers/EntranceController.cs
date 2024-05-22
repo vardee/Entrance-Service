@@ -100,7 +100,7 @@ public class EntranceController : Controller
 
     [HttpPost]
     [Route("ChangeApplicationStatus")]
-    public async Task<IActionResult> ChangeApplicationStatus(Guid applicationId,EntranceApplicationStatus status)
+    public async Task<IActionResult> ChangeApplicationStatus(Guid applicationId, EntranceApplicationStatus status)
     {
         try
         {

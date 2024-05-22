@@ -327,7 +327,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             }
             else
             {
-                managersQuery = Enumerable.Empty<Manager>().AsQueryable();
+                managersQuery = Enumerable.Empty<ManagerModel>().AsQueryable();
             }
 
             var pagination = new PaginationInformation

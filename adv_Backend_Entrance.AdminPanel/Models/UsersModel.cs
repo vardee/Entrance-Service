@@ -11,5 +11,6 @@ namespace adv_Backend_Entrance.AdminPanel.Models
         public Gender Gender { get; set; }
         public DateTime BirthDate { get; set; }
         public string Email { get; set; }
+        public List<RoleType> Roles { get; set; }
     }
 }

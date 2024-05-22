@@ -181,11 +181,11 @@ namespace adv_Backend_Entrance.UserService.Controllers
         [Route("users")]
         [Authorize(Policy = "TokenNotInBlackList")]
         [Authorize(Roles = "Admin")]
-        [ProducesResponseType(typeof(GetQuerybleProgramsDTO), 200)]
+        [ProducesResponseType(typeof(GetUsersPageDTO), 200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]
         [ProducesResponseType(typeof(Error), 500)]
-        public async Task<ActionResult<List<GetEducationLevelsDTO>>> GetQueryblePrograms([FromQuery] string? email, string? Lastname, string? Firstname, [FromQuery] int size = 10, int page = 1)
+        public async Task<ActionResult<GetUsersPageDTO>> GetUsersPage([FromQuery] string? email, string? Lastname, string? Firstname, [FromQuery] int size = 10, int page = 1)
         {
             string token = _tokenHelper.GetTokenFromHeader();
             if (string.IsNullOrEmpty(token))
@@ -194,7 +194,7 @@ namespace adv_Backend_Entrance.UserService.Controllers
             }
             string id = _tokenHelper.GetUserIdFromToken(token);
             Guid userId = Guid.Parse(id);
-            var result = await _userService.GetQuerybleUsers(page, size, userId, email, Lastname, Firstname);
+            var result = await _userService.GetQuerybleUsers(page, size, email, Lastname, Firstname);
             return Ok(result);
         }
         [HttpPut]

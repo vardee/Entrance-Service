@@ -18,10 +18,12 @@ namespace adv_Backend_Entrance.Common.Interfaces.UserService
         Task EditProfile(Guid userId, EditUserProfileDTO editUserProfileDTO);
 
         Task AddUserRole(Guid userId, AddUserRoleDTO addUserRoleDTO,Guid id);
+
+        Task RemoveUserRole(Guid userId, AddUserRoleDTO addUserRoleDTO, Guid id);
         Task<GetMyRolesDTO> GetMyRoles(Guid userId);
 
         Task ChangePassword(Guid userId, changePasswordDTO changePasswordDTO);
 
-        Task<GetUsersPageDTO> GetQuerybleUsers(int page, int size, Guid userId, string? email, string? Lastname, string? Firstname);
+        Task<GetUsersPageDTO> GetQuerybleUsers(int page, int size, string? email, string? Lastname, string? Firstname);
     }
 }

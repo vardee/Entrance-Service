@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using adv_Backend_Entrance.EntranceService.DAL.Data.Models;
 using static System.Net.Mime.MediaTypeNames;
+using adv_Backend_Entrance.Common.Enums;
 
 namespace adv_Backend_Entrance.EntranceService.BL.Services
 {
@@ -58,19 +59,41 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
         }
         public async Task AddManagerInDb(AddManagerInDbDTO addManagerInDb)
         {
-            var currentUser = await _entranceDBContext.Managers.FirstOrDefaultAsync(m => m.UserId == addManagerInDb.UserId && m.Role == addManagerInDb.Role);
-            if(currentUser != null)
+            var currentUser = await _entranceDBContext.Managers.FirstOrDefaultAsync(m => m.UserId == addManagerInDb.UserId);
+            var sameRole = await _entranceDBContext.Managers.FirstOrDefaultAsync(m => m.UserId == addManagerInDb.UserId && m.Role == addManagerInDb.Role);
+            if(sameRole != null)
             {
                 throw new BadRequestException($"This user is already have this role {addManagerInDb.Role}");
             }
-            var manager = new ManagerModel
+            if (currentUser != null && currentUser.Role == RoleType.MainManager && addManagerInDb.Role == RoleType.Manager)
             {
-                Email = addManagerInDb.Email,
-                FullName = addManagerInDb.FullName,
-                Role = addManagerInDb.Role,
-                UserId = addManagerInDb.UserId,
-            };
-            _entranceDBContext.Managers.Add(manager);
+                throw new BadRequestException("You cant add Manager role to Main manager user!");
+            }
+            else if (currentUser != null && currentUser.Role == RoleType.Manager && addManagerInDb.Role == RoleType.MainManager)
+            {
+                currentUser.Role = RoleType.MainManager;
+            }
+            if (currentUser == null)
+            {
+                var manager = new ManagerModel
+                {
+                    Email = addManagerInDb.Email,
+                    FullName = addManagerInDb.FullName,
+                    Role = addManagerInDb.Role,
+                    UserId = addManagerInDb.UserId,
+                };
+                _entranceDBContext.Managers.Add(manager);
+                await _entranceDBContext.SaveChangesAsync();
+            }
+        }
+        public async Task RemoveManagerFromDb(RemoveManagerFromDbDTO removeManagerFromDb)
+        {
+            var currentUser = await _entranceDBContext.Managers.FirstOrDefaultAsync(m => m.UserId == removeManagerFromDb.UserId && m.Role == removeManagerFromDb.Role);
+            if (currentUser == null)
+            {
+                throw new BadRequestException($"This user is already have this role {removeManagerFromDb.Role}");
+            }
+            _entranceDBContext.Managers.Remove(currentUser);
             await _entranceDBContext.SaveChangesAsync();
         }
     }

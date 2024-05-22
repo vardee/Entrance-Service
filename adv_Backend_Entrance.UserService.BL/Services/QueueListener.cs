@@ -7,6 +7,7 @@ using adv_Backend_Entrance.UserService.BL.Services;
 using adv_Backend_Entrance.Common.DTO.ApplicantService;
 using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
 using adv_Backend_Entrance.Common.DTO.AdminPanel;
+using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
 
 namespace adv_Backend_Entrance.UserService.BL.Services
 {
@@ -18,6 +19,10 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             var bus = RabbitHutch.CreateBus("host=localhost");
             var additionService = serviceProvider.GetRequiredService<AdditionTokenService>();
             var userService = serviceProvider.GetRequiredService<IUserService>();
+            bus.Rpc.Respond<GetUsersMVCDTO, GetUsersPageDTO>(async request =>
+            {
+                return await userService.GetQuerybleUsers(request.Page,request.Size,request.Email,request.Lastname,request.Firstname);
+            }, x => x.WithQueueName("gettingUsers_withMvc"));
             bus.PubSub.Subscribe<AddRoleDTO>("application_created", async data =>
             {
                 await additionService.AddRoleToUser(data.Role, data.UserId);
@@ -47,6 +52,14 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             bus.PubSub.Subscribe<string>("logoutUser", async data =>
             {
                 await userService.Logout(data);
+            });
+            bus.PubSub.Subscribe<AddRoleUserMVCDTO>("addRoleToUserMVC", async data =>
+            {
+                await additionService.AddRoleToUser(data.Role, data.UserId);
+            });
+            bus.PubSub.Subscribe<RemoveRoleUserMVCDTO>("removeRoleToUserMVC", async data =>
+            {
+                await additionService.RemoveRoleFromUser(data.Role, data.UserId);
             });
             bus.PubSub.Subscribe<ChangePasswordMVCDTO>("changePassword", async data =>
             {

@@ -366,6 +366,27 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 throw new UnauthorizedException("User is not authorized");
             }
         }
+        public async Task RemoveUserRole(Guid userId, AddUserRoleDTO addUserRoleDTO, Guid Id)
+        {
+
+            if (userId != null)
+            {
+                var user = await _userManager.FindByIdAsync(userId.ToString());
+                if (user != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    await _additionTokenService.RemoveRoleFromUser(addUserRoleDTO.Role, Id);
+                }
+                else
+                {
+                    throw new NotFoundException("User is not found");
+                }
+            }
+            else
+            {
+                throw new UnauthorizedException("User is not authorized");
+            }
+        }
 
 
         public async Task<GetMyRolesDTO> GetMyRoles(Guid userId)
@@ -392,64 +413,86 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 throw new UnauthorizedException("User is not authorized");
             }
         }
-        public async Task<GetUsersPageDTO> GetQuerybleUsers(int page, int size, Guid userId, string? email, string? Lastname, string? Firstname)
+        public async Task<GetUsersPageDTO> GetQuerybleUsers(int page, int size, string? email, string? lastName, string? firstName)
         {
-            var userQuery =  _authDBContext.Users.AsQueryable();
-            var users = await userQuery.ToListAsync();
-            if (email != null)
+            if (page <= 0)
             {
-                userQuery = userQuery.Where(aR => aR.Email.Contains(email));
+                page = 1;
             }
-            if (Lastname != null)
+            if (size <= 0)
             {
-                userQuery = userQuery.Where(aR => aR.LastName.Contains(Lastname));
-            }
-            if (Firstname != null)
-            {
-                userQuery = userQuery.Where(aR => aR.FullName.Contains(Firstname));
-            }
-            int sizeOfPage = size;
-            var countOfPages = (int)Math.Ceiling((double)userQuery.Count() / sizeOfPage);
-            if (page <= countOfPages)
-            {
-                var lowerBound = page == 1 ? 0 : (page - 1) * sizeOfPage;
-                if (page < countOfPages)
-                {
-                    userQuery = userQuery.Skip(lowerBound).Take(sizeOfPage);
-                }
-                else
-                {
-                    userQuery = userQuery.Skip(lowerBound).Take(userQuery.Count() - lowerBound);
-                }
-            }
-            else
-            {
-                throw new BadRequestException("Такой страницы нет");
+                size = 10;
             }
 
-            var pagination = new PaginationInformation
-            {
-                Current = page,
-                Page = countOfPages,
-                Size = size
-            };
+            var userQuery = _authDBContext.Users.AsQueryable();
 
-            var usersDTO = new GetUsersPageDTO
+            if (!string.IsNullOrEmpty(email))
             {
-                Users = userQuery.Select(p => new GetUsersDTO
+                userQuery = userQuery.Where(u => u.Email.Contains(email));
+            }
+            if (!string.IsNullOrEmpty(lastName))
+            {
+                userQuery = userQuery.Where(u => u.LastName.Contains(lastName));
+            }
+            if (!string.IsNullOrEmpty(firstName))
+            {
+                userQuery = userQuery.Where(u => u.FullName.Contains(firstName));
+            }
+
+            int totalUsers = await userQuery.CountAsync();
+            var countOfPages = (int)Math.Ceiling((double)totalUsers / size);
+
+            if (page > countOfPages || totalUsers == 0)
+            {
+                return new GetUsersPageDTO
                 {
-                    Id = p.Id,
-                    FullName = p.FullName,
-                    LastName = p.LastName,
-                    Patronymic = p.Patronymic,
-                    Email = p.Email,
-                    BirthDate = p.BirthDate,
-                    Gender = p.Gender,
-                }).AsQueryable(),
-                Pagination = pagination
+                    Users = Enumerable.Empty<GetUsersDTO>().AsQueryable(),
+                    Pagination = new PaginationInformation
+                    {
+                        Current = page,
+                        Page = countOfPages,
+                        Size = size
+                    }
+                };
+            }
+
+            var users = await userQuery
+                .Skip((page - 1) * size)
+                .Take(size)
+                .ToListAsync();
+
+            var usersDTO = new List<GetUsersDTO>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+
+                usersDTO.Add(new GetUsersDTO
+                {
+                    Id = user.Id,
+                    FullName = user.FullName,
+                    LastName = user.LastName,
+                    Patronymic = user.Patronymic,
+                    Email = user.Email,
+                    BirthDate = user.BirthDate,
+                    Gender = user.Gender,
+                    Roles = roles.Select(r => Enum.Parse<RoleType>(r)).ToList()
+                });
+            }
+
+            return new GetUsersPageDTO
+            {
+                Users = usersDTO.AsQueryable(),
+                Pagination = new PaginationInformation
+                {
+                    Current = page,
+                    Page = countOfPages,
+                    Size = size
+                }
             };
-            return usersDTO;
         }
+
+
         private async Task<ClaimsIdentity> CheckBasedUserInformation(string email, string password)
         {
             Console.WriteLine(email);
