@@ -79,6 +79,14 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             {
                 return await fullManagerService.GetManagers(1000, 1, "", null);
             }, x => x.WithQueueName("gettingForFilterManagers_withMvc"));
+            bus.Rpc.Respond<Guid, GetApplicantInformationDTO>(async request =>
+            {
+                var applicantInfo = new GetApplicantDTO
+                {
+                    ApplicantId = request
+                };
+                return await fullManagerService.GetApplicantInformation(applicantInfo);
+            }, x => x.WithQueueName("getApplicantInformationMVC"));
         }
     }
 }

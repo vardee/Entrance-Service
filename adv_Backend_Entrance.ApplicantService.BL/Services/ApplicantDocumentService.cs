@@ -6,6 +6,7 @@ using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces.ApplicantService;
 using adv_Backend_Entrance.Common.Middlewares;
+using EasyNetQ;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
@@ -17,33 +18,22 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
         private readonly IConfiguration _configuration;
         private readonly ApplicantDBContext _applicantDBContext;
         private readonly HttpClient _httpClient;
-        private string _getEducationLevels;
+        private readonly IBus _bus;
         private readonly TokenHelper _tokenHelper;
         public ApplicantDocumentService(IConfiguration configuration, ApplicantDBContext applicantDBContext,HttpClient httpClient, TokenHelper tokenHelper)
         {
             _configuration = configuration;
             _applicantDBContext = applicantDBContext;
             _httpClient = httpClient;
-            _getEducationLevels = _configuration.GetValue<string>("GetEducationLevels");
+            _bus = RabbitHutch.CreateBus("host=localhost");
             _tokenHelper = tokenHelper;
             var token = _tokenHelper.GetTokenFromHeader();
-
-            if (!string.IsNullOrEmpty(token))
-            {
-                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            }
         }
 
         public async Task AddEducationLevel(AddEducationLevelDTO addEducationLevelDTO, Guid userId)
         {
-            HttpResponseMessage getEducationLevelsResponse = await _httpClient.GetAsync(_getEducationLevels);
-            if (!getEducationLevelsResponse.IsSuccessStatusCode)
-            {
-                throw new BadRequestException("Server response is bad, server problems. Oops!");
-            }
 
-            string getEducationLevels = await getEducationLevelsResponse.Content.ReadAsStringAsync();
-            var educationLevels = JsonSerializer.Deserialize<List<GetEducationLevelsDTO>>(getEducationLevels);
+            var educationLevels = await _bus.Rpc.RequestAsync<Guid, List<GetEducationLevelsDTO>>(userId, c => c.WithQueueName("getEducationLevelsFromEL"));
             var educationLevelDescription = addEducationLevelDTO.EducationLevel.GetDescription();
             var selectedEducationLevel = educationLevels.FirstOrDefault(ed => ed.name == educationLevelDescription);
 
@@ -81,6 +71,11 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
                 IssuedWhom = addPassportDTO.IssuedWhom,
                 BirthPlace = addPassportDTO.BirthPlace,
             };
+            var currentPassport = await _applicantDBContext.Passports.FirstOrDefaultAsync(p => p.PassportNumber == passport.PassportNumber);
+            if (currentPassport != null)
+            {
+                throw new BadRequestException("This passport is already in  system");
+            }
             _applicantDBContext.Passports.Add(passport);
             await _applicantDBContext.SaveChangesAsync();
         }
@@ -128,14 +123,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             if (editEducationLevelDTO.EducationLevel != null)
             {
                 education.EducationLevel = editEducationLevelDTO.EducationLevel;
-                HttpResponseMessage getEducationLevelsResponse = await _httpClient.GetAsync(_getEducationLevels);
-                if (!getEducationLevelsResponse.IsSuccessStatusCode)
-                {
-                    throw new BadRequestException("Server response is bad, server problems. Oops!");
-                }
-
-                string getEducationLevels = await getEducationLevelsResponse.Content.ReadAsStringAsync();
-                var educationLevels = JsonSerializer.Deserialize<List<GetEducationLevelsDTO>>(getEducationLevels);
+                var educationLevels = await _bus.Rpc.RequestAsync<Guid, List<GetEducationLevelsDTO>>(userId, c => c.WithQueueName("getEducationLevelsFromEL"));
                 var educationLevelDescription = editEducationLevelDTO.EducationLevel.GetDescription();
                 var selectedEducationLevel = educationLevels.FirstOrDefault(ed => ed.name == educationLevelDescription);
                 education.EducationLevelId = selectedEducationLevel.id;

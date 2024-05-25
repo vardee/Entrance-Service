@@ -1,0 +1,105 @@
+﻿@model ImportsPageViewModel
+@using adv_Backend_Entrance.Common.Enums
+
+@{
+    ViewBag.Title = "Импорты";
+    Layout = "_Layout";
+}
+<div class="container mt-3 justify-content-center">
+    <label id="filterLabel" class="fs-4 fw-bold mb-3">Фильтры</label>
+    <form id="formfilter" class="row g-3 mx-auto border p-2 rounded" asp-action="GettingImports" asp-controller="Imports" method="post">
+        <div class="col-md-4 border p-3 rounded">
+            <label asp-for="Filter.size" class="form-label">Количество записей</label>
+            <input asp-for="Filter.size" id="Size" name="Size" class="form-control" placeholder="Введите количество записей" />
+        </div>
+        <div class="col-md-4 border p-3 rounded">
+            <label asp-for="Filter.Types" class="form-label">Типы импорта</label>
+            <select asp-for="Filter.Types" id="Types" name="Types" class="form-select" multiple>
+                <option value="Programs">Программы</option>
+                <option value="Faculties">Факультеты</option>
+                <option value="EducationLevels">Документы об образовании</option>
+                <option value="DocumentTypes">Документы</option>
+            </select>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary mt-3">Применить</button>
+        </div>
+    </form>
+
+    <div class="row mt-4">
+        <div class="col-md-6 mx-auto">
+            <form id="formImport" asp-action="ImportInformation" asp-controller="Imports" method="post" class="mt-2">
+                <select asp-for="Filter.Types" class="form-control w-100 border p-1" name="Types" id="Types" multiple>
+                    <option value="Programs">Программы</option>
+                    <option value="Faculties">Факультеты</option>
+                    <option value="EducationLevels">Документы об образовании</option>
+                    <option value="DocumentTypes">Документы</option>
+                </select>
+                <button type="button" onclick="importData()" class="btn btn-danger mt-2">Импортировать</button>
+            </form>
+
+        </div>
+    </div>
+
+    <div class="row mt-4" id="importsInfo">
+        <div class="col-12">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">Тип</th>
+                        <th scope="col">Статус</th>
+                        <th scope="col">Когда было импортировано</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var import in Model.Imports)
+                    {
+                        <tr>
+                            <td>@import.Type</td>
+                            <td>@import.Status</td>
+                            <td>@import.ImportWas.ToString("dd.MM.yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function importData() {
+            $.ajax({
+                url: '/Imports/ImportInformation',
+                type: 'POST',
+                data: $("#formImport").serialize(),
+                success: function (response) {
+                getImports();
+                },
+                error: function () {
+                    alert("Произошла ошибка при импорте данных.");
+                }
+            });
+        }
+        function getImports() {
+            $.ajax({
+                type: "POST",
+                url: "/Imports/GettingImports",
+                data: $("#formfilter").serialize(),
+                success: function (response) {
+                    $("#importsInfo").html($(response).find("#importsInfo").html());
+                },
+                error: function () {
+                    alert("Произошла ошибка при загрузке импортов.");
+                }
+            });
+        }
+        $(document).ready(function () {
+            $("#formfilter").submit(function (event) {
+                event.preventDefault();
+                getImports();
+            });
+        });
+    </script>
+}

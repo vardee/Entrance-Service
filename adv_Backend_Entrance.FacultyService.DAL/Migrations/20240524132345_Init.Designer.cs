@@ -12,8 +12,8 @@ using adv_Backend_Entrance.FacultyService.MVCPanel.Data;
 namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
 {
     [DbContext(typeof(FacultyDBContext))]
-    [Migration("20240415062214_AddedAdditionalFields")]
-    partial class AddedAdditionalFields
+    [Migration("20240524132345_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,7 +50,13 @@ namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("ImportWas")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");

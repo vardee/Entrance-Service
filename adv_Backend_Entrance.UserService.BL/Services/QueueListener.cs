@@ -49,6 +49,20 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 };
                 await userService.EditProfile(data.UserId, editProfile);
             });
+            bus.PubSub.Subscribe<EditApplicantProfileInformationDTO>("applicantEditProfileMVC", async data =>
+            {
+                var editProfile = new EditUserProfileDTO
+                {
+                    FirstName = data.FirstName,
+                    LastName = data.LastName,
+                    Patronymic = data.Patronymic,
+                    Gender = data.Gender,
+                    Phone = data.Phone,
+                    Email = data.Email,
+                    BirthDate = data.BirthDate
+                };
+                await userService.EditProfile(data.UserId, editProfile);
+            });
             bus.PubSub.Subscribe<string>("logoutUser", async data =>
             {
                 await userService.Logout(data);

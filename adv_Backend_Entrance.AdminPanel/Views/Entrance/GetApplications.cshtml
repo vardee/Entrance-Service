@@ -105,8 +105,9 @@
             <div class="application-details row g-3">
                 <div class="col-md-12">
                     <p class="application-name">
-                        <strong>ФИО:</strong> @application.ApplicantFullName
+                        <strong>ФИО:</strong> <a href="@Url.Action("ApplicantProfile", "ApplicantProfile", new { userId = application.ApplicantId })">@application.ApplicantFullName</a>
                     </p>
+
                     <p class="application-status">
                         <strong>Статус заявки:</strong> @application.ApplicationStatus.ToString()
                     </p>

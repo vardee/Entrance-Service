@@ -47,7 +47,13 @@ namespace adv_Backend_Entrance.FacultyService.DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("ImportWas")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");

@@ -10,6 +10,8 @@ namespace adv_Backend_Entrance.FacultyService.DAL.Data.Models
     public class Import
     {
         public Guid Id { get; set; }
+        public ImportType Type { get; set; }
         public ImportStatus Status { get; set; }
+        public DateTime ImportWas {  get; set; }
     }
 }

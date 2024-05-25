@@ -231,6 +231,7 @@ public class EntranceController : Controller
                 Filter = model,
                 Applications = response.Applications.Select(a => new ApplicationModel
                 {
+                    ApplicantId = a.ApplicantId,
                     ApplicationId = a.ApplicationId,
                     ApplicationStatus = a.ApplicationStatus,
                     ApplicantFullName = a.ApplicantFullName,

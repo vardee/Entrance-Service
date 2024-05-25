@@ -15,6 +15,11 @@ using adv_Backend_Entrance.Common.DTO.FacultyService;
 using RabbitMQ.Client;
 using adv_Backend_Entrance.Common.DTO.NotificationService;
 using adv_Backend_Entrance.Common.Interfaces.FacultyService;
+using adv_Backend_Entrance.Common.DTO.UserService;
+using adv_Backend_Entrance.Common.DTO;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.IdentityModel.Tokens;
 
 namespace adv_Backend_Entrance.FacultyService.BL.Services
 {
@@ -33,7 +38,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             _configuration = configuration;
             _httpClient = httpClient;
             _baseUrl = _configuration.GetValue<string>("BaseUrl");
-            _username = _configuration.GetValue<string>("Username");
+            _username = "student";
             _password = _configuration.GetValue<string>("Password");
 
 
@@ -46,6 +51,8 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
         {
             string endpoint = "education_levels";
             string _apiUrl = _baseUrl + endpoint;
+            Console.WriteLine(_username);
+            Console.WriteLine(_password);
             HttpResponseMessage response = await _httpClient.GetAsync(_apiUrl);
 
             if (response.IsSuccessStatusCode)
@@ -82,11 +89,12 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                 }
 
                 await _facultyDBContext.SaveChangesAsync();
+                await AddImportStatus(ImportStatus.Imported, ImportType.EducationLevels);
             }
             else
             {
                 Console.WriteLine("Error occurred while fetching education levels.");
-                await AddImportStatus(ImportStatus.Failed);
+                await AddImportStatus(ImportStatus.Failed, ImportType.EducationLevels);
                 throw new BadRequestException("Bad request bruh!");
             }
         }
@@ -151,11 +159,12 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                 }
 
                 await _facultyDBContext.SaveChangesAsync();
+                await AddImportStatus(ImportStatus.Imported, ImportType.DocumentTypes);
             }
             else
             {
                 Console.WriteLine("Error occurred while fetching document types.");
-                await AddImportStatus(ImportStatus.Failed);
+                await AddImportStatus(ImportStatus.Failed, ImportType.DocumentTypes);
                 throw new BadRequestException("Bad request bruh!");
             }
         }
@@ -194,11 +203,12 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                 }
 
                 await _facultyDBContext.SaveChangesAsync();
+                await AddImportStatus(ImportStatus.Imported, ImportType.Faculties);
             }
             else
             {
                 Console.WriteLine("Error occurred while fetching faculties.");
-                await AddImportStatus(ImportStatus.Failed);
+                await AddImportStatus(ImportStatus.Failed, ImportType.Faculties);
                 throw new BadRequestException("Bad request bruh!");
             }
 
@@ -262,17 +272,18 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                 }
 
                 await _facultyDBContext.SaveChangesAsync();
+                await AddImportStatus(ImportStatus.Imported, ImportType.Programs);
             }
             else
             {
-                await AddImportStatus(ImportStatus.Failed);
+                await AddImportStatus(ImportStatus.Failed, ImportType.Programs);
                 throw new BadRequestException("Bad request bruh!");
             }
         }
 
-        private async Task AddImportStatus(ImportStatus status)
+        private async Task AddImportStatus(ImportStatus status, ImportType type)
         {
-            var import = new Import { Id = Guid.NewGuid(), Status = status };
+            var import = new Import { Id = Guid.NewGuid(), Status = status, ImportWas = DateTime.UtcNow, Type = type };
             _facultyDBContext.Imports.Add(import);
             await _facultyDBContext.SaveChangesAsync();
         }
@@ -287,7 +298,6 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                     await GetDocumentType();
                     await GetFaculties();
                     await GetPrograms();
-                    await AddImportStatus(ImportStatus.Imported);
                 }
                 else if (importTypes != null && importTypes.Contains(ImportType.DocumentTypes))
                 {
@@ -305,24 +315,11 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                 {
                     await GetPrograms();
                 }
-                var sendNotificationDTO = new SendNotificationDTO
-                {
-                    Message = "Импорт произошел успешно",
-                    SendTo = "admin@admin.com"
-                };
-
-                var factory = new ConnectionFactory() { HostName = "localhost" };
-                using (var connection = factory.CreateConnection())
-                using (var channel = connection.CreateModel())
-                {
-                    channel.QueueDeclare(queue: "notification-queue", durable: false, exclusive: false, autoDelete: false, arguments: null);
-                    var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(sendNotificationDTO));
-                    channel.BasicPublish(exchange: "", routingKey: "notification-queue", basicProperties: null, body: body);
-                }
             }
-            catch (Exception ex)
+            catch (BadRequestException ex)
             {
-                await AddImportStatus(ImportStatus.Failed);
+
+                throw;
             }
         }
     }

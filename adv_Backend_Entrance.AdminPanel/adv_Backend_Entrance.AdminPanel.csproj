@@ -15,4 +15,9 @@
     <ProjectReference Include="..\adv_Backend_Entrance.Common\adv_Backend_Entrance.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\ApplicantProfile\" />
+    <Folder Include="Models\Entrance\" />
+  </ItemGroup>
+
 </Project>

@@ -39,5 +39,15 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllerRoute(
+    name: "ApplicantProfile",
+    pattern: "ApplicantProfile/{userId:Guid}",
+    defaults: new { controller = "ApplicantProfile", action = "ApplicantProfile" }
+);
+app.MapControllerRoute(
+    name: "ApplicantEntrance",
+    pattern: "ApplicantEntrance/{userId:Guid}",
+    defaults: new { controller = "ApplicantEntrance", action = "ApplicantEntrance" }
+);
 
 app.Run();

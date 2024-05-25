@@ -9,10 +9,6 @@
 <div class="container mt-3 justify-content-center">
     <label id="filterLabel" class="fs-4 fw-bold mb-3">Фильтры</label>
     <form id="formfilter" class="row g-3 mx-auto border p-2 rounded" asp-action="GettingManagers" asp-controller="Managers" method="post">
-        <div class="col-md-6 border p-3 rounded">
-            <label asp-for="Filter.Name" class="form-label">Имя</label>
-            <input asp-for="Filter.Name" id="Name" name="Name" class="form-control" placeholder="Введите имя" />
-        </div>
         <div class="col-md-4 border p-3 rounded">
             <label asp-for="Filter.Page" class="form-label">Номер страницы</label>
             <input asp-for="Filter.Page" id="Page" name="Page" class="form-control" placeholder="Введите номер страницы" />

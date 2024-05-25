@@ -22,6 +22,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Configurations
                 var connectionString = configuration.GetConnectionString("RedisDBContext");
                 return new RedisDBContext(connectionString);
             });
+            services.AddHttpClient();
             services.AddScoped<IFacultyService, FacultyInformationService>();
             services.AddScoped<IFacultyInteractionsService, FacultyInteractionsService>();
             services.AddSingleton<TokenHelper>();

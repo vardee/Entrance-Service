@@ -186,6 +186,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     string managerEmail = manager.Email;
                     return new GetApplicationsDTO
                     {
+                        ApplicantId = p.ApplicantId,
                         ApplicationId = p.Id,
                         ApplicationStatus = p.ApplicationStatus,
                         ApplicantFullName = applicantName,
@@ -266,6 +267,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 Patronymic = applicant.Patronymic,
                 Id = applicant.Id,
                 Nationality = applicant.Nationality,
+                UserId = applicant.UserId,
             };
         return applicantInfo;
         }

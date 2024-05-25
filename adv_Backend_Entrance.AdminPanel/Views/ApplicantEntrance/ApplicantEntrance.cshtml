@@ -1,0 +1,159 @@
+﻿@using adv_Backend_Entrance.Common.Enums
+@model ApplicantEntranceViewModel
+@{
+    ViewBag.Title = "Редактировать профиль";
+    Layout = "_Layout";
+}
+
+<div id="documentsId" class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 mt-5">
+            <div class="card">
+                <div class="card-header">
+                    Данные паспорта
+                </div>
+                <div class="card-body" id="passportProfileId">
+                    <form id="passportForm" asp-controller="ApplicantEntrance" asp-action="EditPassport" method="post">
+                        <input type="hidden" name="id" asp-for="@Model.Id" id="id" value="@Model.Id" />
+                        <div class="form-group">
+                            <label asp-for="PassportModel.PassportNumber" id="PassportNumber" name="PassportNumber" class="form-label">Номер паспорта</label>
+                            <input asp-for="PassportModel.PassportNumber" id="PassportNumber" name="PassportNumber" class="form-control" />
+                            <span asp-validation-for="PassportModel.PassportNumber" id="PassportNumber" name="PassportNumber" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="PassportModel.BirthPlace" id="BirthPlace" name="BirthPlace" class="form-label">Место рождения</label>
+                            <input asp-for="PassportModel.BirthPlace" id="BirthPlace" name="BirthPlace" class="form-control" />
+                            <span asp-validation-for="PassportModel.BirthPlace" id="BirthPlace" name="BirthPlace" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="PassportModel.IssuedWhen" id="IssuedWhen" name="IssuedWhen" class="form-label">Дата выдачи</label>
+                            <input asp-for="PassportModel.IssuedWhen" id="IssuedWhen" name="IssuedWhen" class="form-control" type="date" />
+                            <span asp-validation-for="PassportModel.IssuedWhen" id="IssuedWhen" name="IssuedWhen" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="PassportModel.IssuedWhom" id="IssuedWhom" name="IssuedWhom" class="form-label">Кем выдан</label>
+                            <input asp-for="PassportModel.IssuedWhom" id="IssuedWhom" name="IssuedWhom" class="form-control" />
+                            <span asp-validation-for="PassportModel.IssuedWhom" id="IssuedWhom" name="IssuedWhom" class="text-danger"></span>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Поменять</button>
+                             <form id="passportDeleteForm" asp-controller="ApplicantEntrance" asp-action="add" method="delete">
+                                <input type="hidden" name="id" asp-for="@Model.Id" id="id" value="@Model.Id" />
+                            <button type="button" class="btn btn-success" id="addPassport">Добавить</button>
+                            </form>
+                            <form id="passportDeleteForm" asp-controller="ApplicantEntrance" asp-action="DeletePassport" method="post">
+                                <input type="hidden" name="id" asp-for="@Model.Id" id="id" value="@Model.Id" />
+                                <button type="submit" class="btn btn-primary">Удалить</button>
+                            </form>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mt-5">
+            <div class="card">
+                <div class="card-header">
+                    Документы об образовании
+                </div>
+                <div class="card-body" id="educationFormId">
+                    <form id="educationForm" asp-controller="ApplicantEntrance" asp-action="EditEducationDocument" method="post">
+                        <input type="hidden" name="id" asp-for="@Model.Id" id="id" value="@Model.Id" />
+                        <div class="form-group">
+                            <label asp-for="EducationDocumentModel.EducationLevel" class="form-label"></label>
+
+                            @if (Model.EducationDocumentModel?.EducationLevel != null)
+                            {
+                                <div class="mb-2">
+                                    <strong>Текущий уровень образования:</strong> @Model.EducationDocumentModel.EducationLevel
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="mb-2">
+                                    <strong>Текущий уровень образования:</strong> Не указан
+                                </div>
+                            }
+
+                            <select asp-for="EducationDocumentModel.EducationLevel" class="form-select">
+                                <option value="Bachelor" id="Bachelor">Бакалавриат</option>
+                                <option value="Magistracy" id="Magistracy">Магистратура</option>
+                                <option value="Postgraduate" id="Postgraduate">Аспирантура</option>
+                                <option value="Specialty" id="Specialty">Специалитет</option>
+                                <option value="BasicGeneralEducation" id="BasicGeneralEducation">Основное общее образование</option>
+                                <option value="SecondaryGeneralEducation" id="SecondaryGeneralEducation">Среднее общее образование</option>
+                                <option value="SecondaryVocationalEducation" id="SecondaryVocationalEducation">Среднее профессиональное образование</option>
+                            </select>
+                            <span asp-validation-for="EducationDocumentModel.EducationLevel" class="text-danger"></span>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Поменять</button>
+                            <button type="button" class="btn btn-success" id="addEducation">Добавить</button>
+                            <button type="button" class="btn btn-danger" id="deleteEducation">Удалить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#passportForm").on("submit", function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: $(this).attr("action"),
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        $("#passportProfileId").html($(response).find("#passportProfileId").html());
+                    },
+                    error: function () {
+                        alert("Произошла ошибка при отправке формы.");
+                    }
+                });
+            });
+
+            $("#educationForm").on("submit", function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: $(this).attr("action"),
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        $("#educationFormId").html($(response).find("#educationFormId").html());
+                    },
+                    error: function () {
+                        alert("Произошла ошибка при отправке формы.");
+                    }
+                });
+            });
+            $(document).ready(function () {
+                $("#passportDeleteForm").on("submit", function (event) {
+                    event.preventDefault();
+                    $.ajax({
+                        type: "POST",
+                        url: $(this).attr("action"),
+                        data: $(this).serialize(),
+                        success: function (response) {
+                            $("#passportProfileId").html($(response).find("#passportProfileId").html());
+                        },
+                        error: function () {
+                            alert("Произошла ошибка при отправке формы.");
+                        }
+                    });
+                });
+
+            $("#addEducation").on("click", function () {
+                alert("Функция добавления уровня образования");
+            });
+
+            $("#deleteEducation").on("click", function () {
+                alert("Функция удаления уровня образования");
+            });
+        });
+    </script>
+}
+
