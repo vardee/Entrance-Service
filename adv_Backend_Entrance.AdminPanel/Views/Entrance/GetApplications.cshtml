@@ -1,4 +1,5 @@
 ﻿@using adv_Backend_Entrance.Common.Enums
+@using Microsoft.AspNetCore.Identity
 @model ApplicationFilterViewModel
 @{
     ViewData["Title"] = "Заявки на поступление";
@@ -104,10 +105,18 @@
         <div class="application-card mt-5 mb-3 border p-3 rounded mx-auto col-md-8" data-application-id="@application.ApplicationId">
             <div class="application-details row g-3">
                 <div class="col-md-12">
-                    <p class="application-name">
-                        <strong>ФИО:</strong> <a href="@Url.Action("ApplicantProfile", "ApplicantProfile", new { userId = application.ApplicantId })">@application.ApplicantFullName</a>
-                    </p>
-
+                    @if (application.ManagerId == Model.CurrentManagerId || (Model.Roles.Contains(RoleType.Admin) || (Model.Roles.Contains(RoleType.MainManager))))
+                    {
+                        <p class="application-name">
+                            <strong>ФИО:</strong> <a href="@Url.Action("ApplicantProfile", "ApplicantProfile", new { userId = application.ApplicantId })">@application.ApplicantFullName</a>
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="application-name">
+                            <strong>ФИО:</strong> <a>@application.ApplicantFullName</a>
+                        </p>
+                    }
                     <p class="application-status">
                         <strong>Статус заявки:</strong> @application.ApplicationStatus.ToString()
                     </p>
@@ -122,7 +131,7 @@
                         }
                     </p>
 
-                    @if (application.ManagerId == Model.CurrentManagerId)
+                    @if (application.ManagerId == Model.CurrentManagerId || (Model.Roles.Contains(RoleType.Admin) || (Model.Roles.Contains(RoleType.MainManager))))
                     {
                         <div class="mb-3">
                             <form id="formChange_@application.ApplicationId" asp-action="ChangeStatus" asp-controller="GetApplications" method="post">
@@ -136,6 +145,7 @@
                             </form>
                         </div>
                     }
+                    @if (Model.Roles.Contains(RoleType.Admin) || Model.Roles.Contains(RoleType.MainManager)){
                     <div>
                     <form id="formChangeManager_@application.ApplicationId" asp-action="RemoveRoleUser" asp-controller="Users" method="post" class="mt-2">
                         <input type="hidden" name="ApplicationId" value="@application.ApplicationId" />
@@ -152,6 +162,7 @@
                         <button type="button" onclick="changeManager('@application.ApplicationId')" class="btn btn-danger mt-2">Поменять менеджера</button>
                     </form>
                     </div>
+                    }
                     <div>
                         @if (application.ManagerId == Model.CurrentManagerId)
                         {

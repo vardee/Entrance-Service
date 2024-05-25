@@ -40,7 +40,10 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
                     b.Property<string>("Nationality")
                         .HasColumnType("text");
 
-                    b.Property<int>("PassportId")
+                    b.Property<Guid>("PassportId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PassportNumber")
                         .HasColumnType("integer");
 
                     b.Property<string>("Patronymic")

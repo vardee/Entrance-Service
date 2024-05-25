@@ -5,11 +5,13 @@ using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
 using EasyNetQ;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace adv_Backend_Entrance.AdminPanel.Controllers
 {
     [Route("Imports")]
+    [Authorize(Roles = "Admin")]
     public class ImportsController : Controller
     {
         private readonly ILogger<ImportsController> _logger;

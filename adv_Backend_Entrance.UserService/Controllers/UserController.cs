@@ -65,7 +65,6 @@ namespace adv_Backend_Entrance.UserService.Controllers
         }
         [HttpPost]
         [Authorize(Policy = "TokenNotInBlackList")]
-
         [Route("logout")]
         [ProducesResponseType(typeof(Error), 200)]
         [ProducesResponseType(typeof(Error), 400)]
@@ -143,6 +142,7 @@ namespace adv_Backend_Entrance.UserService.Controllers
         [HttpGet]
         [Authorize(Policy = "TokenNotInBlackList")]
         [Route("role/my")]
+        [Authorize(Roles = "User,Applicant,Admin,Manager,MainManager")]
         [ProducesResponseType(typeof(GetMyRolesDTO), 200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]
@@ -161,6 +161,7 @@ namespace adv_Backend_Entrance.UserService.Controllers
         [HttpPut]
         [Authorize(Policy = "TokenNotInBlackList")]
         [Route("password")]
+        [Authorize(Roles = "User,Applicant,Admin,Manager,MainManager")]
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(Error), 400)]
         [ProducesResponseType(typeof(Error), 401)]

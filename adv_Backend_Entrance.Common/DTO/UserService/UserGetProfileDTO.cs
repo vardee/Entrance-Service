@@ -14,6 +14,7 @@ namespace adv_Backend_Entrance.Common.DTO.UserService
         public string patronymic { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
+        public string Nationality { get; set; }
         public DateTime BirthDate { get; set; }
     }
 }

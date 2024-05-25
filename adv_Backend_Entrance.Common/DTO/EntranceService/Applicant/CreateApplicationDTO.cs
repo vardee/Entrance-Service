@@ -10,7 +10,7 @@ namespace adv_Backend_Entrance.Common.DTO.EntranceService.Applicant
 {
     public class CreateApplicationDTO
     {
-        public int PassportId { get; set; }
+        public Guid PassportId { get; set; }
         public Guid EducationId { get; set; }
         public List<SetProgramsPriorityDTO> ProgramsPriority { get; set; }
     }

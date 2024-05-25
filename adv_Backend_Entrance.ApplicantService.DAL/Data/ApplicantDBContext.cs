@@ -17,7 +17,6 @@ namespace adv_Backend_Entrance.ApplicantService.DAL.Data
         public DbSet<EducationDocumentImportFile> educationDocumentImportFiles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Passport>().HasKey(p => new { p.PassportNumber });
         }
     }
 }

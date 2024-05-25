@@ -209,6 +209,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             }
             var passportInfo = new GetPassportInformationDTO
             {
+                PassportId = passport.Id,
                 birthPlace = passport.BirthPlace,
                 issuedWhen = passport.IssuedWhen,
                 issuedWhom = passport.IssuedWhom,

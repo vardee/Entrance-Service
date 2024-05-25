@@ -14,7 +14,8 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Data.Models
         public string? LastName { get; set; }
         public string? Patronymic { get; set; }
         public string? Nationality { get; set; }
-        public int PassportId { get; set; }
+        public int PassportNumber { get; set; }
+        public Guid PassportId { get; set; }
         public Guid EducationId { get; set; }
     }
 }

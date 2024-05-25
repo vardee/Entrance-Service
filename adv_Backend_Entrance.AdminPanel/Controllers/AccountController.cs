@@ -35,6 +35,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,MainManager,Manager")]
         public async Task<IActionResult> EditProfile()
         {
             var token = _tokenHelper.GetTokenFromSession();
@@ -58,6 +59,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,MainManager,Manager")]
         public IActionResult ChangePassword()
         {
             return View();
@@ -93,6 +95,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,MainManager,Manager")]
         public async Task<IActionResult> EditProfile(EditProfileModel model)
         {
             if (!ModelState.IsValid)
@@ -141,6 +144,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,MainManager,Manager")]
         public async Task<IActionResult> Logout()
         {
             var token = _tokenHelper.GetTokenFromSession();
@@ -151,6 +155,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,MainManager,Manager")]
         public async Task<IActionResult> ChangePassword(ChangePasswordModel model)
         {
             if (!ModelState.IsValid)
@@ -182,6 +187,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,MainManager,Manager")]
         public IActionResult CheckSession()
         {
             var accessToken = HttpContext.Session.GetString("AccessToken");

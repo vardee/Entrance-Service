@@ -12,7 +12,7 @@ using adv_Backend_Entrance.ApplicantService.DAL.Data;
 namespace adv_Backend_Entrance.ApplicantService.DAL.Migrations
 {
     [DbContext(typeof(ApplicantDBContext))]
-    [Migration("20240502062241_Init")]
+    [Migration("20240525155604_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -68,11 +68,9 @@ namespace adv_Backend_Entrance.ApplicantService.DAL.Migrations
 
             modelBuilder.Entity("adv_Backend_Entrance.ApplicantService.DAL.Data.Entites.Passport", b =>
                 {
-                    b.Property<int>("PassportNumber")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PassportNumber"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("BirthPlace")
                         .IsRequired()
@@ -88,10 +86,13 @@ namespace adv_Backend_Entrance.ApplicantService.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("PassportNumber")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("PassportNumber");
+                    b.HasKey("Id");
 
                     b.ToTable("Passports");
                 });

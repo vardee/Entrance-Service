@@ -8,6 +8,7 @@ namespace adv_Backend_Entrance.Common.DTO.ApplicantService
 {
     public class GetPassportInformationDTO
     {
+        public Guid PassportId { get; set; }    
         public int passportNumber { get; set; }
         public string birthPlace { get; set; }
         public DateOnly issuedWhen { get; set; }

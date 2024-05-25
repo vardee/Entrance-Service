@@ -4,11 +4,13 @@ using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Helpers;
 using EasyNetQ;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace adv_Backend_Entrance.AdminPanel.Controllers
 {
     [Route("Managers")]
+    [Authorize(Roles = "Admin,MainManager")]
     public class ManagersController : Controller
     {
         private readonly ILogger<ManagersController> _logger;

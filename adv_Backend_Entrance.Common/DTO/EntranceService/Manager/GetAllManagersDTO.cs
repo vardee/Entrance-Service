@@ -4,6 +4,7 @@ namespace adv_Backend_Entrance.Common.DTO.EntranceService.Manager
 {
     public class GetAllManagersDTO
     {
+        public Guid UserId { get; set; }
         public Guid ManagerId { get; set; }
         public string FullName { get; set; }
         public string Email { get; set; }

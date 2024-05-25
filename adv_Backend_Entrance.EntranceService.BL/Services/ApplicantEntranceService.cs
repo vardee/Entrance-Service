@@ -34,29 +34,15 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
         private readonly TokenHelper _tokenHelper;
         private readonly IBus _bus;
 
-        private string _baseUrl;
-        private string _getProfileUrl;
-        private string _getEducationInformation;
-        private string _getPassportInformation;
-        private string _getDocumentTypes;
         public ApplicantEntranceService(EntranceDBContext entranceDBContext, IConfiguration configuration, HttpClient httpClient, TokenHelper tokenHelper)
         {
             _entranceDBContext = entranceDBContext;
             _configuration = configuration;
             _httpClient = httpClient;
             _tokenHelper = tokenHelper;
-            _baseUrl = _configuration.GetValue<string>("BaseUrl");
-            _getProfileUrl = _configuration.GetValue<string>("GetProfileUrl");
-            _getEducationInformation = _configuration.GetValue<string>("GetEducationInfo");
-            _getPassportInformation = _configuration.GetValue<string>("GetPassportInfo");
-            _getDocumentTypes = _configuration.GetValue<string>("GetDocumentTypes");
             _bus = RabbitHutch.CreateBus("host=localhost");
             var token = _tokenHelper.GetTokenFromHeader();
 
-            if (!string.IsNullOrEmpty(token))
-            {
-                _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            }
         }
 
         public async Task CreateApplication(CreateApplicationDTO createApplicationDTO, string token)
@@ -76,7 +62,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             {
                 throw new BadRequestException("Your education document is not valid! Check your document value and retry!");
             }
-            if (passportInfo.passportNumber != createApplicationDTO.PassportId)
+            if (passportInfo.PassportId != createApplicationDTO.PassportId)
             {
                 throw new BadRequestException("Your passport is not valid! Check your passport value and retry!");
             }
@@ -90,6 +76,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     Patronymic = userProfileResponse.patronymic,
                     EducationId = createApplicationDTO.EducationId,
                     PassportId = createApplicationDTO.PassportId,
+                    PassportNumber = passportInfo.passportNumber,
                     UserId = Guid.Parse(userId)
                 };
                 _entranceDBContext.Applicants.Add(applicant);

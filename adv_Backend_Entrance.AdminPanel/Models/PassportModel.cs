@@ -2,6 +2,7 @@
 {
     public class PassportModel
     {
+        public Guid PassportId { get; set; }
         public int PassportNumber { get; set; }
         public string BirthPlace { get; set; }
         public DateOnly IssuedWhen { get; set; }

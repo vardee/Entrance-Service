@@ -82,5 +82,34 @@ namespace adv_Backend_Entrance.Common.Helpers
                 return null;
             }
         }
+        public IEnumerable<string> GetRolesFromToken(string token)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = securityKey,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false
+            };
+
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var claimsPrincipal = handler.ValidateToken(token, validationParameters, out var validatedToken);
+
+                if (claimsPrincipal is null || !(validatedToken is JwtSecurityToken jwtSecurityToken))
+                    return Enumerable.Empty<string>();
+
+                var roleClaims = claimsPrincipal.FindAll(ClaimTypes.Role);
+                return roleClaims.Select(rc => rc.Value);
+            }
+            catch (Exception)
+            {
+                return Enumerable.Empty<string>();
+            }
+        }
     }
 }

@@ -99,10 +99,15 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             {
                 return await fullManagerService.GetApplicantion(request);
             }, x => x.WithQueueName("getApplicantProgramsMVC"));
+            bus.Rpc.Respond<Guid, GetAllQuerybleManagersDTO>(async request =>
+            {
+                return await fullManagerService.GetManagers(1000, 1, "", null);
+            }, x => x.WithQueueName("getManagerInformationMVC"));
             bus.PubSub.Subscribe<ChangeProgramPriorityDTO>("changePriorityProgramMVC", async data =>
             {
                 await applicantService.ChangeProgramPriority(data);
             });
+
         }
     }
 }

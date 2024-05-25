@@ -7,11 +7,13 @@ using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Helpers;
 using EasyNetQ;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace adv_Backend_Entrance.AdminPanel.Controllers
 {
     [Route("ApplicantEntrance")]
+    [Authorize(Roles = "Admin,MainManager,Manager")]
     public class ApplicantEntranceController : Controller
     {
         private readonly ILogger<ApplicantEntranceController> _logger;
@@ -46,6 +48,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     Id = userId,
                     PassportModel = new PassportModel
                     {
+                        PassportId = passportProfile.PassportId,
                         BirthPlace = passportProfile.birthPlace,
                         IssuedWhen = passportProfile.issuedWhen,
                         IssuedWhom = passportProfile.issuedWhom,
@@ -107,7 +110,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("EditPassport")]
-        public async Task<IActionResult> EditPassport(PassportModel model, Guid id)
+        public async Task<IActionResult> EditPassport(PassportModel model, Guid userId)
         {
             if (!ModelState.IsValid)
             {
@@ -116,7 +119,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
 
             try
             {
-                var response = await _bus.Rpc.RequestAsync<Guid, GetApplicantInformationDTO>(id, c => c.WithQueueName("getApplicantInformationMVC"));
+                var response = await _bus.Rpc.RequestAsync<Guid, GetApplicantInformationDTO>(userId, c => c.WithQueueName("getApplicantInformationMVC"));
                 var passportInfo = new AddPassportMVCDTO
                 {
                     Id = response.UserId,
@@ -135,9 +138,10 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 var educationLevelProfile = await _bus.Rpc.RequestAsync<Guid, GetEducationInformationDTO>(response.UserId, c => c.WithQueueName("getEducationLevelProfileMVC"));
                 var viewModel = new ApplicantEntranceViewModel
                 {
-                    Id = id,
+                    Id = userId,
                     PassportModel = new PassportModel
                     {
+                        PassportId = passportProfile.PassportId,
                         BirthPlace = passportProfile.birthPlace,
                         IssuedWhen = passportProfile.issuedWhen,
                         IssuedWhom = passportProfile.issuedWhom,
@@ -190,6 +194,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     Id = id,
                     PassportModel = new PassportModel
                     {
+                        PassportId = passportProfile.PassportId,
                         BirthPlace = passportProfile.birthPlace,
                         IssuedWhen = passportProfile.issuedWhen,
                         IssuedWhom = passportProfile.issuedWhom,
@@ -212,29 +217,34 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
             }
         }
         [HttpPost]
-        [Route("DeletePassport")]
-        public async Task<IActionResult> DeletePassport(Guid id)
+        [Route("EditInfoPassport")]
+        public async Task<IActionResult> EditInfoPassport(PassportModel model, Guid userId)
         {
             try
             {
-                var response = await _bus.Rpc.RequestAsync<Guid, GetApplicantInformationDTO>(id, c => c.WithQueueName("getApplicantInformationMVC"));
+                var response = await _bus.Rpc.RequestAsync<Guid, GetApplicantInformationDTO>(userId, c => c.WithQueueName("getApplicantInformationMVC"));
                 var request = new GetUserProfileMVCDTO
                 {
                     UserId = response.UserId,
                 };
-                var requestPassport = new DeletePassportMVCDTO
+                var passportInfo = new EditPassportInfoMVCDTO
                 {
-                    UserId = response.UserId,
+                    Id = response.UserId,
+                    IssuedWhen = model.IssuedWhen,
+                    IssuedWhom = model.IssuedWhom,
+                    BirthPlace = model.BirthPlace,
+                    PassportNumber = model.PassportNumber,
                 };
-                await _bus.PubSub.PublishAsync(requestPassport, "deletePassportMVC");
+                await _bus.PubSub.PublishAsync(passportInfo, "editPassportInformationMVC");
                 var applicantProfile = await _bus.Rpc.RequestAsync<GetUserProfileMVCDTO, UserGetProfileDTO>(request, c => c.WithQueueName("getUserProfileMVC"));
                 var passportProfile = await GetPassportInformationWithErrorHandling(response.UserId);
                 var educationLevelProfile = await GetEducationInformationWithErrorHandling(response.UserId);
                 var viewModel = new ApplicantEntranceViewModel
                 {
-                    Id = id,
+                    Id = userId,
                     PassportModel = new PassportModel
                     {
+                        PassportId = passportProfile.PassportId,
                         BirthPlace = passportProfile.birthPlace,
                         IssuedWhen = passportProfile.issuedWhen,
                         IssuedWhom = passportProfile.issuedWhom,
@@ -257,29 +267,31 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
         }
 
         [HttpPost]
-        [Route("DeleteEducation")]
-        public async Task<IActionResult> DeleteEducation(Guid id)
+        [Route("EditEducationInfoEntrance")]
+        public async Task<IActionResult> EditEducationInfoEntrance(EducationDocumentModel model, Guid userId)
         {
             try
             {
-                var response = await _bus.Rpc.RequestAsync<Guid, GetApplicantInformationDTO>(id, c => c.WithQueueName("getApplicantInformationMVC"));
+                var response = await _bus.Rpc.RequestAsync<Guid, GetApplicantInformationDTO>(userId, c => c.WithQueueName("getApplicantInformationMVC"));
                 var request = new GetUserProfileMVCDTO
                 {
                     UserId = response.UserId,
                 };
-                var requestPassport = new DeleteEducationMVCDTO
+                var educationInfo = new EditEducationInfoMVCDTO
                 {
-                    UserId = response.UserId,
+                    Id = response.UserId,
+                    EducationLevel = model.EducationLevel
                 };
-                await _bus.PubSub.PublishAsync(requestPassport, "deleteEducationMVC");
+                await _bus.PubSub.PublishAsync(educationInfo, "editApplicantEducationInformationMVC");
                 var applicantProfile = await _bus.Rpc.RequestAsync<GetUserProfileMVCDTO, UserGetProfileDTO>(request, c => c.WithQueueName("getUserProfileMVC"));
                 var passportProfile = await GetPassportInformationWithErrorHandling(response.UserId);
                 var educationLevelProfile = await GetEducationInformationWithErrorHandling(response.UserId);
                 var viewModel = new ApplicantEntranceViewModel
                 {
-                    Id = id,
+                    Id = userId,
                     PassportModel = new PassportModel
                     {
+                        PassportId = passportProfile.PassportId,
                         BirthPlace = passportProfile.birthPlace,
                         IssuedWhen = passportProfile.issuedWhen,
                         IssuedWhom = passportProfile.issuedWhom,
@@ -330,6 +342,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     Id = userId,
                     PassportModel = new PassportModel
                     {
+                        PassportId = passportProfile.PassportId,
                         BirthPlace = passportProfile.birthPlace,
                         IssuedWhen = passportProfile.issuedWhen,
                         IssuedWhom = passportProfile.issuedWhom,
@@ -389,6 +402,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     Id = userId,
                     PassportModel = new PassportModel
                     {
+                        PassportId = passportProfile.PassportId,
                         BirthPlace = passportProfile.birthPlace,
                         IssuedWhen = passportProfile.issuedWhen,
                         IssuedWhom = passportProfile.issuedWhom,

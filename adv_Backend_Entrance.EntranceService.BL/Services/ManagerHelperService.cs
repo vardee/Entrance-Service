@@ -32,6 +32,27 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
         public async Task EditApplicantInformation(EditApplicantProfileInformationDTO editApplicantProfileInformation)
         {
             var applicant = await _entranceDBContext.Applicants.FirstOrDefaultAsync(a => a.UserId == editApplicantProfileInformation.UserId);
+            var manager = await _entranceDBContext.Managers.FirstOrDefaultAsync(m=> m.UserId == editApplicantProfileInformation.UserId);
+            if(manager != null)
+            {
+                string fullname = "";
+                if (editApplicantProfileInformation.FirstName != "")
+                {
+                    fullname = editApplicantProfileInformation.FirstName;
+                }
+                if (editApplicantProfileInformation.LastName != "")
+                {
+                    fullname = editApplicantProfileInformation.FirstName + editApplicantProfileInformation.LastName;
+                }
+                if (editApplicantProfileInformation.Patronymic != "")
+                {
+                    fullname = editApplicantProfileInformation.FirstName + editApplicantProfileInformation.LastName+ editApplicantProfileInformation.Patronymic;
+                }
+                if(editApplicantProfileInformation.Email != "")
+                {
+                    manager.Email = editApplicantProfileInformation.Email;
+                }
+            }
             if(applicant != null)
             {
                 if (editApplicantProfileInformation.FirstName != "")
@@ -42,7 +63,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 {
                     applicant.LastName = editApplicantProfileInformation.LastName;
                 }
-                if (editApplicantProfileInformation.LastName != "")
+                if (editApplicantProfileInformation.Patronymic != "")
                 {
                     applicant.Patronymic = editApplicantProfileInformation.Patronymic;
                 }
@@ -51,9 +72,9 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     applicant.Nationality = editApplicantProfileInformation.Nationality;
                 }
             }
-            else
+            else if(applicant== null && manager == null)
             {
-                throw new NotFoundException("This applicant not found!");
+                throw new NotFoundException("This person not found!");
             }
             await _entranceDBContext.SaveChangesAsync();
         }

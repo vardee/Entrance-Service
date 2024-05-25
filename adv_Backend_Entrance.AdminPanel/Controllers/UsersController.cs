@@ -5,12 +5,14 @@ using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
 using EasyNetQ;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 
 namespace adv_Backend_Entrance.AdminPanel.Controllers
 {
     [Route("Users")]
+    [Authorize(Roles = "Admin")]
     public class UsersController : Controller
     {
         private readonly ILogger<UsersController> _logger;
@@ -108,6 +110,8 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
         {
             try
             {
+                var token = _tokenHelper.GetTokenFromSession();
+                var roles = _tokenHelper.GetRolesFromToken(token).Select(r => (RoleType)Enum.Parse(typeof(RoleType), r)).ToList();
                 var usersDto = new GetUsersMVCDTO
                 {
                     Size = model.Size,
@@ -134,6 +138,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     }).ToList(),
                     Filters = model,
                     CurrentId = myId,
+                    Roles = roles.ToList(),
                 };
 
                 return viewModel;

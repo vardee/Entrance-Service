@@ -5,7 +5,10 @@ using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
 using EasyNetQ;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using adv_Backend_Entrance.Common.Enums;
+
 
 [Route("Entrance")]
 public class EntranceController : Controller
@@ -22,6 +25,7 @@ public class EntranceController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin,MainManager,Manager")]
     public async Task<IActionResult> GetApplications()
     {
         var faculties = await GetFaculties();
@@ -75,6 +79,7 @@ public class EntranceController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Route("GettingApplications")]
+    [Authorize(Roles = "Admin,MainManager,Manager")]
     public async Task<IActionResult> GettingApplications(GetApplicationsFilter model)
     {
         if (!ModelState.IsValid)
@@ -100,6 +105,7 @@ public class EntranceController : Controller
 
     [HttpPost]
     [Route("TakeApplicantApplication")]
+    [Authorize(Roles = "Admin,MainManager,Manager")]
     public async Task<IActionResult> TakeApplicantApplication(Guid applicationId)
     {
         try
@@ -122,6 +128,7 @@ public class EntranceController : Controller
 
     [HttpPost]
     [Route("RejectApplicantApplication")]
+    [Authorize(Roles = "Admin,MainManager,Manager")]
     public async Task<IActionResult> RejectApplicantApplication(Guid applicationId)
     {
         try
@@ -144,6 +151,7 @@ public class EntranceController : Controller
 
     [HttpPost]
     [Route("ChangeApplicationStatus")]
+    [Authorize(Roles = "Admin,MainManager,Manager")]
     public async Task<IActionResult> ChangeApplicationStatus(Guid applicationId, EntranceApplicationStatus status)
     {
         try
@@ -166,6 +174,7 @@ public class EntranceController : Controller
     }
     [HttpPost]
     [Route("ChangeApplicationManager")]
+    [Authorize(Roles = "Admin,MainManager,Manager")]
     public async Task<IActionResult> ChangeApplicationManager(Guid applicationId, Guid managerId)
     {
         try
@@ -198,6 +207,9 @@ public class EntranceController : Controller
     {
         try
         {
+            var token = _tokenHelper.GetTokenFromSession();
+            var roles = _tokenHelper.GetRolesFromToken(token).Select(r => (RoleType)Enum.Parse(typeof(RoleType), r)).ToList();
+
             var facultyIds = model.Faculties?.Select(f => f.Id).ToList() ?? new List<Guid>();
 
             var applicationDto = new GetApplicationsMVCDTO
@@ -239,7 +251,8 @@ public class EntranceController : Controller
                     ManagerEmail = a.ManagerEmail,
                     ManagerModels = managers
                 }).ToList(),
-                CurrentManagerId = currentManagerId
+                CurrentManagerId = currentManagerId,
+                Roles = roles.ToList()
             };
 
             return viewModel;

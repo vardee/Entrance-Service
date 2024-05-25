@@ -56,19 +56,23 @@
                 {
                     <form id="formRole_@user.Id" asp-action="AddRoleUser" asp-controller="Users" method="post">
                         <input type="hidden" name="userId" value="@user.Id" />
-                    <select class="form-control w-100 border p-1" name="role" id="roleType">
-                        <option selected disabled>Выберите роль</option>
-                            @if (user.Roles.Contains(RoleType.Manager))
-                            {
-                                <option value="MainManager" id="MainManager">Главный менеджер</option>
-                            }
-                            @if (!user.Roles.Contains(RoleType.Manager) && !user.Roles.Contains(RoleType.MainManager))
-                            {
-                                <option value="Manager" id="Manager">Менеджер</option>
-                                <option value="MainManager" id="MainManager">Главный менеджер</option>
-                            }
-                    </select>
-                    <button type="button" onclick="addRole('@user.Id')" class="btn btn-primary mt-2">Выдать роль</button>
+                        @if (!user.Roles.Contains(RoleType.MainManager))
+                        {
+                            <select class="form-control w-100 border p-1" name="role" id="roleType">
+                                <option selected disabled>Выберите роль</option>
+                                @if (user.Roles.Contains(RoleType.Manager))
+                                {
+                                    <option value="MainManager" id="MainManager">Главный менеджер</option>
+                                }
+                                @if (!user.Roles.Contains(RoleType.Manager) && !user.Roles.Contains(RoleType.MainManager))
+                                {
+                                    <option value="Manager" id="Manager">Менеджер</option>
+                                    <option value="MainManager" id="MainManager">Главный менеджер</option>
+                                }
+                            </select>
+
+                            <button type="button" onclick="addRole('@user.Id')" class="btn btn-primary mt-2">Выдать роль</button>
+                        }
                 </form>
                 }
                 @if (user.Id != Model.CurrentId){

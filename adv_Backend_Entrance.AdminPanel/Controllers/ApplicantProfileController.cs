@@ -7,10 +7,12 @@ using EasyNetQ;
 using Microsoft.AspNetCore.Mvc;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
 using adv_Backend_Entrance.Common.DTO.ApplicantService;
+using Microsoft.AspNetCore.Authorization;
 
 namespace adv_Backend_Entrance.AdminPanel.Controllers
 {
     [Route("ApplicantProfile")]
+    [Authorize(Roles = "Admin,MainManager,Manager")]
     public class ApplicantProfileController : Controller
     {
         private readonly ILogger<ApplicantProfileController> _logger;
@@ -81,6 +83,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 var applicantProfile = await _bus.Rpc.RequestAsync<GetUserProfileMVCDTO, UserGetProfileDTO>(request, c => c.WithQueueName("getUserProfileMVC"));
                 var viewModel = new EditApplicantProfileModel
                 {
+                    Id = model.Id,
                     Email = applicantProfile.Email,
                     BirthDate = applicantProfile.BirthDate,
                     FirstName = applicantProfile.firstname,

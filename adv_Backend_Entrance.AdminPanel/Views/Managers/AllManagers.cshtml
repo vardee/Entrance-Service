@@ -36,7 +36,9 @@
     {
         <div class="card mt-5 mb-3 mx-auto col-md-8">
             <div class="card-header">
-                <h5 class="card-title">@manager.FullName</h5>
+                <h5 class="card-title">
+                    <a asp-controller="ManagerProfile" asp-action="ManagerProfile" asp-route-managerId="@manager.ManagerId">@manager.FullName</a>
+                </h5>
             </div>
             <div class="card-body">
                 <p class="card-text">Email: @manager.Email</p>
@@ -47,6 +49,7 @@
         </div>
     }
 </div>
+
 @section Scripts {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>

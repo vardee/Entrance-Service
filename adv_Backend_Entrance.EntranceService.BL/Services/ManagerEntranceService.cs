@@ -215,10 +215,6 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
         public async Task ChangeApplicationStatus(ChangeApplicationStatusDTO changeApplicationStatusDTO, Guid userId)
         {
             var application = await _entranceDBContext.Applications.FirstOrDefaultAsync(a => a.Id == changeApplicationStatusDTO.ApplicationId);
-            if (application.ManagerId != userId)
-            {
-                throw new BadRequestException("You cant change status in this application!");
-            }
             if (application == null)
             {
                 throw new BadRequestException("This application not found!");
@@ -350,6 +346,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             {
                 Managers = managersList.Select(p => new GetAllManagersDTO
                 {
+                    UserId = p.UserId,
                     ManagerId = p.Id,
                     FullName = p.FullName,
                     Email = p.Email,

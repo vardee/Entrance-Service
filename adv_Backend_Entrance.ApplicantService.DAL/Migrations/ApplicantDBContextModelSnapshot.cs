@@ -65,11 +65,9 @@ namespace adv_Backend_Entrance.ApplicantService.DAL.Migrations
 
             modelBuilder.Entity("adv_Backend_Entrance.ApplicantService.DAL.Data.Entites.Passport", b =>
                 {
-                    b.Property<int>("PassportNumber")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PassportNumber"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("BirthPlace")
                         .IsRequired()
@@ -85,10 +83,13 @@ namespace adv_Backend_Entrance.ApplicantService.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("PassportNumber")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("PassportNumber");
+                    b.HasKey("Id");
 
                     b.ToTable("Passports");
                 });

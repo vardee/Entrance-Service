@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -57,8 +56,8 @@ namespace adv_Backend_Entrance.ApplicantService.DAL.Migrations
                 name: "Passports",
                 columns: table => new
                 {
-                    PassportNumber = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PassportNumber = table.Column<int>(type: "integer", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     BirthPlace = table.Column<string>(type: "text", nullable: false),
                     IssuedWhen = table.Column<DateOnly>(type: "date", nullable: false),
@@ -67,7 +66,7 @@ namespace adv_Backend_Entrance.ApplicantService.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Passports", x => x.PassportNumber);
+                    table.PrimaryKey("PK_Passports", x => x.Id);
                 });
         }
 

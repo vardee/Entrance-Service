@@ -21,7 +21,8 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
                     LastName = table.Column<string>(type: "text", nullable: true),
                     Patronymic = table.Column<string>(type: "text", nullable: true),
                     Nationality = table.Column<string>(type: "text", nullable: true),
-                    PassportId = table.Column<int>(type: "integer", nullable: false),
+                    PassportNumber = table.Column<int>(type: "integer", nullable: false),
+                    PassportId = table.Column<Guid>(type: "uuid", nullable: false),
                     EducationId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -50,8 +51,10 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     FullName = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "text", nullable: false)
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    Role = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -64,6 +67,9 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
                 {
                     ApplicationId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProgramId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FacultyName = table.Column<string>(type: "text", nullable: false),
+                    FacultyId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProgramCode = table.Column<string>(type: "text", nullable: false),
                     ProgramName = table.Column<string>(type: "text", nullable: false),
                     Priority = table.Column<int>(type: "integer", nullable: false)
                 },

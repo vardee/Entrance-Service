@@ -254,6 +254,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                         BirthDate = user.BirthDate,
                         Email = user.Email,
                         Phone = user.PhoneNumber,
+                        Nationality = user.Nationality,
                     };
                 }
                 else
@@ -287,6 +288,10 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                     {
                         user.Email = editUserProfileDTO.Email;
                     }
+                    if (editUserProfileDTO.Nationality != "")
+                    {
+                        user.Nationality = editUserProfileDTO.Nationality;
+                    }
                     if (editUserProfileDTO.Phone != "")
                     {
                         user.PhoneNumber = editUserProfileDTO.Phone;
@@ -316,6 +321,7 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                         FirstName = editUserProfileDTO.FirstName,
                         LastName = editUserProfileDTO.LastName,
                         Patronymic = editUserProfileDTO.Patronymic,
+                        Nationality = editUserProfileDTO.Nationality,
                     };
                     await SyncProfile(editedProfile);
                 }

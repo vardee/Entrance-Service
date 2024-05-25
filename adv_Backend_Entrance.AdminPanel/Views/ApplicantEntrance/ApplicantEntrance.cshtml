@@ -14,6 +14,7 @@
                 </div>
                 <div class="card-body" id="passportProfileId">
                     <form id="passportForm" asp-controller="ApplicantEntrance" asp-action="EditPassport" method="post">
+                        <input type="hidden" name="userId" asp-for="@Model.Id" id="userId" value="@Model.Id" />
                         <div class="form-group">
                             <label asp-for="PassportModel.PassportNumber" id="PassportNumber" name="PassportNumber" class="form-label">Номер паспорта</label>
                             <input asp-for="PassportModel.PassportNumber" id="PassportNumber" name="PassportNumber" class="form-control" />
@@ -36,12 +37,11 @@
                         </div>
                         <div class="text-center">
                             <button type="button" class="btn btn-primary" id="editPassport">Добавить</button>
-                            <form id="passportDeleteForm" asp-controller="ApplicantEntrance" asp-action="DeletePassport" method="post">
-                                <input type="hidden" name="id" asp-for="@Model.Id" id="id" value="@Model.Id" />
-                                <button type="button" class="btn btn-primary" id="deletePassport">Удалить</button>
-                            </form>
                         </div>
                     </form>
+                    <div class="mb-3" id="editInfoPassport">
+                        <button id="editInfoPassport" onclick="editInfoPassport()" class="btn btn-danger">Изменить</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -52,7 +52,7 @@
                 </div>
                 <div class="card-body" id="educationFormId">
                     <form id="educationForm" asp-controller="ApplicantEntrance" asp-action="EditEducationDocument" method="post">
-                        <input type="hidden" name="id" asp-for="@Model.Id" id="id" value="@Model.Id" />
+                                                <input type="hidden" name="userId" asp-for="@Model.Id" id="userId" value="@Model.Id" />
                         <div class="form-group">
                             <label asp-for="EducationDocumentModel.EducationLevel" class="form-label"></label>
 
@@ -82,12 +82,11 @@
                         </div>
                         <div class="text-center">
                             <button type="submit" class="btn btn-primary">Добавить</button>
-                            <form id="educationDelete" asp-controller="ApplicantEntrance" asp-action="DeleteEducation" method="post">
-                                <input type="hidden" name="id" asp-for="@Model.Id" id="id" value="@Model.Id" />
-                                <button type="button" class="btn btn-primary" id="deleteEducation">Удалить</button>
-                            </form>
                         </div>
                     </form>
+                    <div class="mb-3" id="editEducationInfoEntrance">
+                        <button type="button" id="editEducationInfoEntrance" class="btn btn-danger" onclick="editEducationInfoEntrance()">Изменить</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -152,8 +151,27 @@
                 }
             });
         }
-
-
+        function editInfoPassport() {
+            $.ajax({
+                url: '/ApplicantEntrance/EditInfoPassport',
+                type: "POST",
+                data: $("#passportForm").serialize(),
+                success: function (response) {
+                    alert("Паспорт успешно изменен!");
+                }
+            });
+        }
+        function editEducationInfoEntrance() {
+            $.ajax({
+                type: "POST",
+                url: '/ApplicantEntrance/EditEducationInfoEntrance',
+                data: $("#educationForm").serialize(),
+                success: function (response) {
+                    $("#educationFormId").html($(response).find("#educationFormId").html());
+                    alert("Документ об образовании успешно изменен!");
+                }
+            });
+        }
         $(document).ready(function () {
             $("#editPassport").on("click", function () {
                 $.ajax({
@@ -184,29 +202,9 @@
                 });
             });
 
-            $("#deletePassport").on("click", function () {
-                $.ajax({
-                    type: "POST",
-                    url: $("#passportDeleteForm").attr("action"),
-                    data: $("#passportDeleteForm").serialize(),
-                    success: function (response) {
-                        $("#passportProfileId").html($(response).find("#passportProfileId").html());
-                        alert("Паспорт успешно удален!");
-                    },
-                });
-            });
+            $("#editInfoPassport").on("click", editInfoPassport);
 
-            $("#deleteEducation").on("click", function () {
-                $.ajax({
-                    type: "POST",
-                    url: $("#educationDelete").attr("action"),
-                    data: $("#educationDelete").serialize(),
-                    success: function (response) {
-                        $("#educationFormId").html($(response).find("#educationFormId").html());
-                        alert("Документ об образовании успешно удален!");
-                    },
-                });
-            });
+            $("#editEducationInfoEntrance").on("click", editEducationInfoEntrance);
 
             $(".program-priority").on("change", function () {
                 var programId = $(this).data("program-id");

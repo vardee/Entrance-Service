@@ -12,8 +12,8 @@ using adv_Backend_Entrance.EntranceService.DAL.Data;
 namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
 {
     [DbContext(typeof(EntranceDBContext))]
-    [Migration("20240515084025_Init2")]
-    partial class Init2
+    [Migration("20240525160318_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,7 +43,10 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
                     b.Property<string>("Nationality")
                         .HasColumnType("text");
 
-                    b.Property<int>("PassportId")
+                    b.Property<Guid>("PassportId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PassportNumber")
                         .HasColumnType("integer");
 
                     b.Property<string>("Patronymic")
@@ -127,6 +130,12 @@ namespace adv_Backend_Entrance.EntranceService.DAL.Migrations
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
