@@ -1,4 +1,4 @@
-﻿@using adv_Backend_Entrance.Common.Enums
+﻿﻿@using adv_Backend_Entrance.Common.Enums
 @model ApplicantEntranceViewModel
 @{
     ViewBag.Title = "Редактировать профиль";
@@ -14,7 +14,6 @@
                 </div>
                 <div class="card-body" id="passportProfileId">
                     <form id="passportForm" asp-controller="ApplicantEntrance" asp-action="EditPassport" method="post">
-                        <input type="hidden" name="id" asp-for="@Model.Id" id="id" value="@Model.Id" />
                         <div class="form-group">
                             <label asp-for="PassportModel.PassportNumber" id="PassportNumber" name="PassportNumber" class="form-label">Номер паспорта</label>
                             <input asp-for="PassportModel.PassportNumber" id="PassportNumber" name="PassportNumber" class="form-control" />
@@ -36,14 +35,10 @@
                             <span asp-validation-for="PassportModel.IssuedWhom" id="IssuedWhom" name="IssuedWhom" class="text-danger"></span>
                         </div>
                         <div class="text-center">
-                            <button type="submit" class="btn btn-primary">Поменять</button>
-                             <form id="passportDeleteForm" asp-controller="ApplicantEntrance" asp-action="add" method="delete">
-                                <input type="hidden" name="id" asp-for="@Model.Id" id="id" value="@Model.Id" />
-                            <button type="button" class="btn btn-success" id="addPassport">Добавить</button>
-                            </form>
+                            <button type="button" class="btn btn-primary" id="editPassport">Добавить</button>
                             <form id="passportDeleteForm" asp-controller="ApplicantEntrance" asp-action="DeletePassport" method="post">
                                 <input type="hidden" name="id" asp-for="@Model.Id" id="id" value="@Model.Id" />
-                                <button type="submit" class="btn btn-primary">Удалить</button>
+                                <button type="button" class="btn btn-primary" id="deletePassport">Удалить</button>
                             </form>
                         </div>
                     </form>
@@ -74,23 +69,63 @@
                                 </div>
                             }
 
-                            <select asp-for="EducationDocumentModel.EducationLevel" class="form-select">
-                                <option value="Bachelor" id="Bachelor">Бакалавриат</option>
-                                <option value="Magistracy" id="Magistracy">Магистратура</option>
-                                <option value="Postgraduate" id="Postgraduate">Аспирантура</option>
-                                <option value="Specialty" id="Specialty">Специалитет</option>
-                                <option value="BasicGeneralEducation" id="BasicGeneralEducation">Основное общее образование</option>
-                                <option value="SecondaryGeneralEducation" id="SecondaryGeneralEducation">Среднее общее образование</option>
-                                <option value="SecondaryVocationalEducation" id="SecondaryVocationalEducation">Среднее профессиональное образование</option>
+                            <select asp-for="EducationDocumentModel.EducationLevel" class="form-select" name="EducationLevel">
+                                <option value="Bachelor" id="Bachelor" name="Bachelor">Бакалавриат</option>
+                                <option value="Magistracy" id="Magistracy" name="Magistracy">Магистратура</option>
+                                <option value="Postgraduate" id="Postgraduate" name="Postgraduate">Аспирантура</option>
+                                <option value="Specialty" id="Specialty" name="Specialty">Специалитет</option>
+                                <option value="BasicGeneralEducation" id="BasicGeneralEducation" name="BasicGeneralEducation">Основное общее образование</option>
+                                <option value="SecondaryGeneralEducation" id="SecondaryGeneralEducation" name="SecondaryGeneralEducation">Среднее общее образование</option>
+                                <option value="SecondaryVocationalEducation" id="SecondaryVocationalEducation" name="SecondaryVocationalEducation">Среднее профессиональное образование</option>
                             </select>
                             <span asp-validation-for="EducationDocumentModel.EducationLevel" class="text-danger"></span>
                         </div>
                         <div class="text-center">
-                            <button type="submit" class="btn btn-primary">Поменять</button>
-                            <button type="button" class="btn btn-success" id="addEducation">Добавить</button>
-                            <button type="button" class="btn btn-danger" id="deleteEducation">Удалить</button>
+                            <button type="submit" class="btn btn-primary">Добавить</button>
+                            <form id="educationDelete" asp-controller="ApplicantEntrance" asp-action="DeleteEducation" method="post">
+                                <input type="hidden" name="id" asp-for="@Model.Id" id="id" value="@Model.Id" />
+                                <button type="button" class="btn btn-primary" id="deleteEducation">Удалить</button>
+                            </form>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="programsId" class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12 mt-5">
+            <div class="card">
+                <div class="card-header">
+                    Программы абитуриента
+                </div>
+                <div class="card-body" id="programsProfileId">
+                    @if (Model.Programs != null && Model.Programs.Any())
+                    {
+                        foreach (var program in Model.Programs)
+                        {
+                            <div class="form-group">
+                                <label>Название программы: @program.ProgramName</label><br />
+                                <label>Факультет: @program.FacultyName</label><br />
+                                <label>Приоритет: </label>
+                                <input type="number" value="@program.Priority" min="1" max="5" class="form-control program-priority" data-program-id="@program.ProgramId" />
+                                <form id="formChange_@program.ProgramId" asp-action="ChangePriority" asp-controller="ApplicantEntrance" method="post">
+                                    <input type="hidden" name="userId" value="@Model.Id" />
+                                    <input type="hidden" name="ProgramId" value="@program.ProgramId" />
+                                    <input type="hidden" name="ApplicationId" value="@program.ApplicationId" />
+                                    <input type="hidden" name="Priority" class="priority-input" />
+                                </form>
+                                <div class="mb-3">
+                                    <button onclick="removeProgram('@program.ApplicationId', '@program.ProgramId', '@Model.Id')" class="btn btn-danger">Удалить</button>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p>Нет данных о программах абитуриента.</p>
+                    }
                 </div>
             </div>
         </div>
@@ -100,18 +135,36 @@
 @section Scripts {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+        function removeProgram(applicationId, programId, userId) {
+            $.ajax({
+                url: '/ApplicantEntrance/RemoveProgram',
+                type: 'POST',
+                data: {
+                    applicationId: applicationId,
+                    programId: programId,
+                    userId: userId
+                },
+                success: function () {
+                    alert("Успешно удалена!");
+                },
+                error: function () {
+                    alert("Произошла ошибка при возвращении заявки.");
+                }
+            });
+        }
+
+
         $(document).ready(function () {
-            $("#passportForm").on("submit", function (event) {
-                event.preventDefault();
+            $("#editPassport").on("click", function () {
                 $.ajax({
                     type: "POST",
-                    url: $(this).attr("action"),
-                    data: $(this).serialize(),
+                    url: $("#passportForm").attr("action"),
+                    data: $("#passportForm").serialize(),
                     success: function (response) {
                         $("#passportProfileId").html($(response).find("#passportProfileId").html());
                     },
                     error: function () {
-                        alert("Произошла ошибка при отправке формы.");
+                        alert("Паспорт успешно добавлен!");
                     }
                 });
             });
@@ -126,34 +179,54 @@
                         $("#educationFormId").html($(response).find("#educationFormId").html());
                     },
                     error: function () {
-                        alert("Произошла ошибка при отправке формы.");
+                        alert("Документ об образовании успешно добавлен!");
                     }
                 });
             });
-            $(document).ready(function () {
-                $("#passportDeleteForm").on("submit", function (event) {
-                    event.preventDefault();
-                    $.ajax({
-                        type: "POST",
-                        url: $(this).attr("action"),
-                        data: $(this).serialize(),
-                        success: function (response) {
-                            $("#passportProfileId").html($(response).find("#passportProfileId").html());
-                        },
-                        error: function () {
-                            alert("Произошла ошибка при отправке формы.");
-                        }
-                    });
-                });
 
-            $("#addEducation").on("click", function () {
-                alert("Функция добавления уровня образования");
+            $("#deletePassport").on("click", function () {
+                $.ajax({
+                    type: "POST",
+                    url: $("#passportDeleteForm").attr("action"),
+                    data: $("#passportDeleteForm").serialize(),
+                    success: function (response) {
+                        $("#passportProfileId").html($(response).find("#passportProfileId").html());
+                        alert("Паспорт успешно удален!");
+                    },
+                });
             });
 
             $("#deleteEducation").on("click", function () {
-                alert("Функция удаления уровня образования");
+                $.ajax({
+                    type: "POST",
+                    url: $("#educationDelete").attr("action"),
+                    data: $("#educationDelete").serialize(),
+                    success: function (response) {
+                        $("#educationFormId").html($(response).find("#educationFormId").html());
+                        alert("Документ об образовании успешно удален!");
+                    },
+                });
+            });
+
+            $(".program-priority").on("change", function () {
+                var programId = $(this).data("program-id");
+                var priority = $(this).val();
+                $("#formChange_" + programId + " .priority-input").val(priority);
+
+                $.ajax({
+                    type: "POST",
+                    url: $("#formChange_" + programId).attr("action"),
+                    data: $("#formChange_" + programId).serialize(),
+                    success: function () {
+                        alert("Приоритет успешно изменен!");
+                    },
+                    error: function () {
+                        alert("Произошла ошибка при изменении приоритета.");
+                    }
+                });
             });
         });
     </script>
 }
+
 

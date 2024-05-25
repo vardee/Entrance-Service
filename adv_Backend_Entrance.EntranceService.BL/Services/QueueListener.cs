@@ -1,7 +1,10 @@
-﻿using adv_Backend_Entrance.Common.DTO.AdminPanel;
+﻿using adv_Backend_Entrance.Common.DTO;
+using adv_Backend_Entrance.Common.DTO.AdminPanel;
+using adv_Backend_Entrance.Common.DTO.EntranceService.Applicant;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
+using adv_Backend_Entrance.Common.Interfaces.ApplicantService;
 using adv_Backend_Entrance.Common.Interfaces.EntranceService;
 using adv_Backend_Entrance.Common.Interfaces.UserService;
 using EasyNetQ;
@@ -22,6 +25,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             var bus = RabbitHutch.CreateBus("host=localhost");
             var managerService = serviceProvider.GetRequiredService<ManagerHelperService>();
             var fullManagerService = serviceProvider.GetRequiredService<IManagerService>();
+            var applicantService = serviceProvider.GetRequiredService<IEntranceService>();
             bus.PubSub.Subscribe<EditApplicantProfileInformationDTO>("applicantProfile_edit", async data =>
             {
                 await managerService.EditApplicantInformation(data);
@@ -67,6 +71,10 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             {
                 await fullManagerService.ChangeApplicationManager(data.ApplicationId,data.ManagerId);
             });
+            bus.PubSub.Subscribe<DeleteProgramFromApplicationDTO>("deleteApplicationProgramMVC", async data =>
+            {
+                await applicantService.DeleteProgramFromApplication(data);
+            });
             bus.Rpc.Respond<GetApplicationsMVCDTO, GetAllQuerybleApplicationsDTO>(async request =>
             {
                 return await fullManagerService.GetQuerybleApplications(request.size,request.page,request.name,request.ProgramId,request.Faculties,request.entranceApplicationStatuses,request.haveManager, request.isMy,request.managerId,request.timeSorting);
@@ -87,6 +95,14 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 };
                 return await fullManagerService.GetApplicantInformation(applicantInfo);
             }, x => x.WithQueueName("getApplicantInformationMVC"));
+            bus.Rpc.Respond<GetApplicantDTO, GetApplicationsDTO>(async request =>
+            {
+                return await fullManagerService.GetApplicantion(request);
+            }, x => x.WithQueueName("getApplicantProgramsMVC"));
+            bus.PubSub.Subscribe<ChangeProgramPriorityDTO>("changePriorityProgramMVC", async data =>
+            {
+                await applicantService.ChangeProgramPriority(data);
+            });
         }
     }
 }

@@ -58,9 +58,24 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
                 };
                 await documentService.AddPassport(passport,data.Id);
             });
+            bus.PubSub.Subscribe<EditPassportMVCDTO>("editPassportInfoMVC", async data =>
+            {
+                var passport = new AddPassportDTO
+                {
+                    IssuedWhen = data.IssuedWhen,
+                    BirthPlace = data.BirthPlace,
+                    IssuedWhom = data.IssuedWhom,
+                    PassportNumber = data.PassportNumber,
+                };
+                await documentService.EditPaspportInformation(passport, data.Id);
+            }); 
             bus.PubSub.Subscribe<DeletePassportMVCDTO>("addApplicantPassportMVC", async data =>
             {
                 await documentService.DeletePassportInformation(data.UserId);
+            });
+            bus.PubSub.Subscribe<DeleteEducationMVCDTO>("deleteEducationMVC", async data =>
+            {
+                await documentService.DeleteEducationInformation(data.UserId);
             });
         }
     }

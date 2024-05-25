@@ -54,7 +54,7 @@ namespace adv_Backend_Entrance.EntranceService.Controllers
             {
                 throw new UnauthorizedException("Данный пользователь не авторизован");
             }
-            await _entranceService.DeleteProgramFromApplication(deleteProgramFromApplicationDTO, token);
+            await _entranceService.DeleteProgramFromApplication(deleteProgramFromApplicationDTO);
             return Ok();
         }
         [HttpPut]

@@ -1,6 +1,8 @@
 ﻿using adv_Backend_Entrance.AdminPanel.Models;
+using adv_Backend_Entrance.Common.DTO;
 using adv_Backend_Entrance.Common.DTO.AdminPanel;
 using adv_Backend_Entrance.Common.DTO.ApplicantService;
+using adv_Backend_Entrance.Common.DTO.EntranceService.Applicant;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Helpers;
@@ -9,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace adv_Backend_Entrance.AdminPanel.Controllers
 {
+    [Route("ApplicantEntrance")]
     public class ApplicantEntranceController : Controller
     {
         private readonly ILogger<ApplicantEntranceController> _logger;
@@ -33,7 +36,11 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 };
                 var applicantProfile = await _bus.Rpc.RequestAsync<GetUserProfileMVCDTO, UserGetProfileDTO>(request, c => c.WithQueueName("getUserProfileMVC"));
                 var passportProfile = await GetPassportInformationWithErrorHandling(response.UserId);
-                var educationLevelProfile = await GetEducationInformationWithErrorHandling(response.UserId); // Обработка ошибок для информации об образовании
+                var educationLevelProfile = await GetEducationInformationWithErrorHandling(response.UserId);
+                var programsRequest = new GetApplicantDTO { ApplicantId = userId };
+                var programsResponse = await _bus.Rpc.RequestAsync<GetApplicantDTO, GetApplicationsDTO>(programsRequest, c => c.WithQueueName("getApplicantProgramsMVC"));
+                var programs = programsResponse.ProgramsPriority; 
+
                 var viewModel = new ApplicantEntranceViewModel
                 {
                     Id = userId,
@@ -48,7 +55,17 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     {
                         EducationLevel = educationLevelProfile.EducationLevel,
                         id = educationLevelProfile.id,
-                    }
+                    },
+                    Programs = programs.Select(program => new ProgramsModel
+                    {
+                        ProgramId = program.ProgramId,
+                        ApplicationId = program.ApplicationId,
+                        Priority = program.Priority,
+                        ProgramName = program.ProgramName,
+                        FacultyName = program.FacultyName,
+                        FacultyId = program.FacultyId,
+                        ProgramCode = program.ProgramCode
+                    }).ToList() 
                 };
 
                 return View("ApplicantEntrance", viewModel);
@@ -90,7 +107,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("EditPassport")]
-        public async Task<IActionResult> EditPassport(PassportModel model,Guid id)
+        public async Task<IActionResult> EditPassport(PassportModel model, Guid id)
         {
             if (!ModelState.IsValid)
             {
@@ -157,7 +174,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 var response = await _bus.Rpc.RequestAsync<Guid, GetApplicantInformationDTO>(id, c => c.WithQueueName("getApplicantInformationMVC"));
                 var educationInfo = new AddEducationDocumentMVCDTO
                 {
-                    Id = id,
+                    Id = response.UserId,
                     EducationLevel = model.EducationLevel
                 };
                 await _bus.PubSub.PublishAsync(educationInfo, "addApplicantEducationDocumentMVC");
@@ -238,5 +255,170 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 return Json(new { success = false, message = "Error rejecting application." });
             }
         }
+
+        [HttpPost]
+        [Route("DeleteEducation")]
+        public async Task<IActionResult> DeleteEducation(Guid id)
+        {
+            try
+            {
+                var response = await _bus.Rpc.RequestAsync<Guid, GetApplicantInformationDTO>(id, c => c.WithQueueName("getApplicantInformationMVC"));
+                var request = new GetUserProfileMVCDTO
+                {
+                    UserId = response.UserId,
+                };
+                var requestPassport = new DeleteEducationMVCDTO
+                {
+                    UserId = response.UserId,
+                };
+                await _bus.PubSub.PublishAsync(requestPassport, "deleteEducationMVC");
+                var applicantProfile = await _bus.Rpc.RequestAsync<GetUserProfileMVCDTO, UserGetProfileDTO>(request, c => c.WithQueueName("getUserProfileMVC"));
+                var passportProfile = await GetPassportInformationWithErrorHandling(response.UserId);
+                var educationLevelProfile = await GetEducationInformationWithErrorHandling(response.UserId);
+                var viewModel = new ApplicantEntranceViewModel
+                {
+                    Id = id,
+                    PassportModel = new PassportModel
+                    {
+                        BirthPlace = passportProfile.birthPlace,
+                        IssuedWhen = passportProfile.issuedWhen,
+                        IssuedWhom = passportProfile.issuedWhom,
+                        PassportNumber = passportProfile.passportNumber,
+                    },
+                    EducationDocumentModel = new EducationDocumentModel
+                    {
+                        EducationLevel = educationLevelProfile.EducationLevel,
+                        id = educationLevelProfile.id,
+                    }
+                };
+
+                return View("ApplicantEntrance", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during rejecting application");
+                return Json(new { success = false, message = "Error rejecting application." });
+            }
+        }
+        [HttpPost]
+        [Route("ChangePriority")]
+        public async Task<IActionResult> ChangePriority(ProgramsModel model,Guid userId)
+        {
+            try
+            {
+                var response = await _bus.Rpc.RequestAsync<Guid, GetApplicantInformationDTO>(userId, c => c.WithQueueName("getApplicantInformationMVC"));
+                var requestPriority = new ChangeProgramPriorityDTO
+                {
+                    ApplicationId = model.ApplicationId,
+                    ProgramId = model.ProgramId,
+                    ProgramPriority = model.Priority,
+                };
+                var request = new GetUserProfileMVCDTO
+                {
+                    UserId = response.UserId,
+                };
+                await _bus.PubSub.PublishAsync(requestPriority, "changePriorityProgramMVC");
+                var applicantProfile = await _bus.Rpc.RequestAsync<GetUserProfileMVCDTO, UserGetProfileDTO>(request, c => c.WithQueueName("getUserProfileMVC"));
+                var passportProfile = await GetPassportInformationWithErrorHandling(response.UserId);
+                var educationLevelProfile = await GetEducationInformationWithErrorHandling(response.UserId);
+                var programsRequest = new GetApplicantDTO { ApplicantId = userId };
+                var programsResponse = await _bus.Rpc.RequestAsync<GetApplicantDTO, GetApplicationsDTO>(programsRequest, c => c.WithQueueName("getApplicantProgramsMVC"));
+                var programs = programsResponse.ProgramsPriority;
+
+                var viewModel = new ApplicantEntranceViewModel
+                {
+                    Id = userId,
+                    PassportModel = new PassportModel
+                    {
+                        BirthPlace = passportProfile.birthPlace,
+                        IssuedWhen = passportProfile.issuedWhen,
+                        IssuedWhom = passportProfile.issuedWhom,
+                        PassportNumber = passportProfile.passportNumber,
+                    },
+                    EducationDocumentModel = new EducationDocumentModel
+                    {
+                        EducationLevel = educationLevelProfile.EducationLevel,
+                        id = educationLevelProfile.id,
+                    },
+                    Programs = programs.Select(program => new ProgramsModel
+                    {
+                        ProgramId = program.ProgramId,
+                        ApplicationId = program.ApplicationId,
+                        Priority = program.Priority,
+                        ProgramName = program.ProgramName,
+                        FacultyName = program.FacultyName,
+                        FacultyId = program.FacultyId,
+                        ProgramCode = program.ProgramCode
+                    }).ToList()
+                };
+
+                return View("ApplicantEntrance", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during rejecting application");
+                return Json(new { success = false, message = "Error rejecting application." });
+            }
+        }
+        [HttpPost]
+        [Route("RemoveProgram")]
+        public async Task<IActionResult> RemoveProgram(ProgramsModel model, Guid userId)
+        {
+            try
+            {
+                var response = await _bus.Rpc.RequestAsync<Guid, GetApplicantInformationDTO>(userId, c => c.WithQueueName("getApplicantInformationMVC"));
+                var requestPriority = new DeleteProgramFromApplicationDTO
+                {
+                    ApplicationId = model.ApplicationId,
+                    ProgramId = model.ProgramId,
+                };
+                var request = new GetUserProfileMVCDTO
+                {
+                    UserId = response.UserId,
+                };
+                await _bus.PubSub.PublishAsync(requestPriority, "deleteApplicationProgramMVC");
+                var applicantProfile = await _bus.Rpc.RequestAsync<GetUserProfileMVCDTO, UserGetProfileDTO>(request, c => c.WithQueueName("getUserProfileMVC"));
+                var passportProfile = await GetPassportInformationWithErrorHandling(response.UserId);
+                var educationLevelProfile = await GetEducationInformationWithErrorHandling(response.UserId);
+                var programsRequest = new GetApplicantDTO { ApplicantId = userId };
+                var programsResponse = await _bus.Rpc.RequestAsync<GetApplicantDTO, GetApplicationsDTO>(programsRequest, c => c.WithQueueName("getApplicantProgramsMVC"));
+                var programs = programsResponse.ProgramsPriority;
+
+                var viewModel = new ApplicantEntranceViewModel
+                {
+                    Id = userId,
+                    PassportModel = new PassportModel
+                    {
+                        BirthPlace = passportProfile.birthPlace,
+                        IssuedWhen = passportProfile.issuedWhen,
+                        IssuedWhom = passportProfile.issuedWhom,
+                        PassportNumber = passportProfile.passportNumber,
+                    },
+                    EducationDocumentModel = new EducationDocumentModel
+                    {
+                        EducationLevel = educationLevelProfile.EducationLevel,
+                        id = educationLevelProfile.id,
+                    },
+                    Programs = programs.Select(program => new ProgramsModel
+                    {
+                        ProgramId = program.ProgramId,
+                        ApplicationId = program.ApplicationId,
+                        Priority = program.Priority,
+                        ProgramName = program.ProgramName,
+                        FacultyName = program.FacultyName,
+                        FacultyId = program.FacultyId,
+                        ProgramCode = program.ProgramCode
+                    }).ToList()
+                };
+
+                return View("ApplicantEntrance", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during rejecting application");
+                return Json(new { success = false, message = "Error rejecting application." });
+            }
+        }
+
     }
 }

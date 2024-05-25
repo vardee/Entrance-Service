@@ -183,7 +183,16 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     var applicant = await _entranceDBContext.Applicants.FirstOrDefaultAsync(ap => ap.Id == p.ApplicantId);
                     string applicantName = applicant == null ? "Имя не указано" : $"{applicant.FirstName} {applicant.LastName} {applicant.Patronymic}";
                     var manager = await _entranceDBContext.Managers.FirstOrDefaultAsync(m => m.Id == p.ManagerId);
-                    string managerEmail = manager.Email;
+                    string managerEmail;
+                    if (manager != null)
+                    {
+                        managerEmail = manager.Email;
+                    }
+                    else
+                    {
+                        managerEmail = "";
+                    }
+                   
                     return new GetApplicationsDTO
                     {
                         ApplicantId = p.ApplicantId,

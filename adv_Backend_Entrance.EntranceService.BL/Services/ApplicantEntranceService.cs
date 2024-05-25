@@ -164,9 +164,8 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             await _bus.PubSub.PublishAsync(message, "application_created");
         }
 
-        public async Task DeleteProgramFromApplication(DeleteProgramFromApplicationDTO deleteProgramFromApplicationDTO, string token)
+        public async Task DeleteProgramFromApplication(DeleteProgramFromApplicationDTO deleteProgramFromApplicationDTO)
         {
-            string userId = _tokenHelper.GetUserIdFromToken(token);
 
             var userProgram = await _entranceDBContext.ApplicationPrograms.FirstOrDefaultAsync(aP => aP.ApplicationId == deleteProgramFromApplicationDTO.ApplicationId && aP.ProgramId == deleteProgramFromApplicationDTO.ProgramId);
             if (userProgram == null)
@@ -278,6 +277,10 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 throw new BadRequestException("You don't this program in application!");
             }
             var samePriorityProgram = await _entranceDBContext.ApplicationPrograms.FirstOrDefaultAsync(sP => sP.ApplicationId == changeProgramPriorityDTO.ApplicationId && sP.Priority == changeProgramPriorityDTO.ProgramPriority);
+            if(samePriorityProgram == null)
+            {
+                throw new BadRequestException("You cant do this, you dont have program with this prirority in your application!");
+            }
             samePriorityProgram.Priority = currentProgram.Priority;
             currentProgram.Priority = changeProgramPriorityDTO.ProgramPriority;
             await _entranceDBContext.SaveChangesAsync();

@@ -27,7 +27,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Configuration
                 var connectionString = configuration.GetConnectionString("RedisDBContext");
                 return new RedisDBContext(connectionString);
             });
-          
+            services.AddHttpClient();
             services.AddScoped<IEntranceService, ApplicantEntranceService>();
             services.AddScoped<IManagerService, ManagerEntranceService>();
             services.AddScoped<ManagerHelperService>();
