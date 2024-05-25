@@ -1,7 +1,9 @@
 ﻿using adv_Backend_Entrance.Common.DTO;
 using adv_Backend_Entrance.Common.DTO.AdminPanel;
+using adv_Backend_Entrance.Common.DTO.ApplicantService;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Applicant;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
+using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
 using adv_Backend_Entrance.Common.Interfaces.ApplicantService;
@@ -106,6 +108,22 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             bus.PubSub.Subscribe<ChangeProgramPriorityDTO>("changePriorityProgramMVC", async data =>
             {
                 await applicantService.ChangeProgramPriority(data);
+            });
+            bus.PubSub.Subscribe<SyncPassportDTO>("passportSyncEntrance", async data =>
+            {
+                await managerService.SyncPassport(data);
+            });
+            bus.PubSub.Subscribe<SyncEducationLevelDTO>("educationLevelSyncEntrance", async data =>
+            {
+                await managerService.SyncEducationLevel(data);
+            });
+            bus.PubSub.Subscribe<List<SyncProgramsEntranceDTO>>("syncProgramsEntrance", async data =>
+            {
+                await managerService.SyncPrograms(data);
+            });
+            bus.PubSub.Subscribe<List<SyncFacultiesDTO>>("syncFacultiesEntrance", async data =>
+            {
+                await managerService.SyncFaculties(data);
             });
 
         }

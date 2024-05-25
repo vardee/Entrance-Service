@@ -20,6 +20,8 @@ using adv_Backend_Entrance.Common.DTO;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.IdentityModel.Tokens;
+using EasyNetQ;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace adv_Backend_Entrance.FacultyService.BL.Services
 {
@@ -28,6 +30,8 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
         private readonly FacultyDBContext _facultyDBContext;
         private readonly IConfiguration _configuration;
         private readonly HttpClient _httpClient;
+        private readonly IBus _bus;
+
 
         private string _baseUrl;
         private string _username;
@@ -40,6 +44,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             _baseUrl = _configuration.GetValue<string>("BaseUrl");
             _username = "student";
             _password = _configuration.GetValue<string>("Password");
+            _bus = RabbitHutch.CreateBus("host=localhost");
 
 
             var base64Credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_username}:{_password}"));
@@ -172,8 +177,8 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
         private async Task GetFaculties()
         {
             string endpoint = "faculties";
-            string _apiUrl = _baseUrl + endpoint;
-            HttpResponseMessage response = await _httpClient.GetAsync(_apiUrl);
+            string apiUrl = _baseUrl + endpoint;
+            HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
 
             if (response.IsSuccessStatusCode)
             {
@@ -198,7 +203,9 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                     }
                     else
                     {
-                        Console.WriteLine($"Record with ID {faculty.id} already exists.");
+                        existingFaculty.CreateTime = createTimeUtc;
+                        existingFaculty.Name = faculty.name;
+                        _facultyDBContext.FacultyModels.Update(existingFaculty);
                     }
                 }
 
@@ -209,16 +216,63 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             {
                 Console.WriteLine("Error occurred while fetching faculties.");
                 await AddImportStatus(ImportStatus.Failed, ImportType.Faculties);
-                throw new BadRequestException("Bad request bruh!");
+                throw new BadRequestException("Bad request occurred while fetching faculties.");
             }
-
         }
 
+        private async Task CheckDeletedFaculties()
+        {
+            var remoteFaculties = await GetRemoteFaculties();
+            var localFaculties = await _facultyDBContext.FacultyModels.ToListAsync();
+            var deletedFacultyIds = localFaculties
+                .Where(lf => !remoteFaculties.Any(rf => rf.id == lf.Id))
+                .Select(lf => lf.Id)
+                .ToList();
+
+            foreach (var deletedFacultyId in deletedFacultyIds)
+            {
+                var deletedFaculty = await _facultyDBContext.FacultyModels.FindAsync(deletedFacultyId);
+                if (deletedFaculty != null)
+                {
+                    _facultyDBContext.FacultyModels.Remove(deletedFaculty);
+                }
+            }
+
+            await _facultyDBContext.SaveChangesAsync();
+            var syncFacultiesEntranceList = deletedFacultyIds.Select(id => new SyncFacultiesDTO { Id = id }).ToList();
+            await SyncFacultiesEntrance(syncFacultiesEntranceList);
+        }
+
+        private async Task SyncFacultiesEntrance(List<SyncFacultiesDTO> syncFacultiesEntrance)
+        {
+            await _bus.PubSub.PublishAsync(syncFacultiesEntrance, "syncFacultiesEntrance");
+        }
+
+        private async Task<List<GetFacultiesDTO>> GetRemoteFaculties()
+        {
+            string endpoint = "faculties";
+            string apiUrl = _baseUrl + endpoint;
+            HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseBody = await response.Content.ReadAsStringAsync();
+                var faculties = JsonSerializer.Deserialize<List<GetFacultiesDTO>>(responseBody);
+                Console.WriteLine(responseBody);
+
+                return faculties;
+            }
+            else
+            {
+                Console.WriteLine("Error while fetching faculties from remote server");
+                return new List<GetFacultiesDTO>();
+            }
+        }
         private async Task GetPrograms()
         {
-            string endpoint = "programs?page=1&size=10000";
-            string _apiUrl = _baseUrl + endpoint;
-            HttpResponseMessage response = await _httpClient.GetAsync(_apiUrl);
+            string endpoint = "programs?page=1&size=1000";
+            string apiUrl = _baseUrl + endpoint;
+            HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
 
             if (response.IsSuccessStatusCode)
             {
@@ -239,8 +293,8 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                     if (existingProgram == null)
                     {
                         if (EducationChecker.TryParseEducationLanguage(program.language, out EducationLanguage languageEnum) &&
-                            EducationChecker.TryParseEducationForm(program.educationForm, out EducationForm formEnum)
-                            && EducationChecker.TryParseEducationLevel(program.educationLevel.name, out EducationLevel enumValue))
+                            EducationChecker.TryParseEducationForm(program.educationForm, out EducationForm formEnum) &&
+                            EducationChecker.TryParseEducationLevel(program.educationLevel.name, out EducationLevel enumValue))
                         {
                             _facultyDBContext.EducationProgrammModels.Add(new EducationProgrammModel
                             {
@@ -271,6 +325,8 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
                     }
                 }
 
+                await CheckDeletedPrograms();
+
                 await _facultyDBContext.SaveChangesAsync();
                 await AddImportStatus(ImportStatus.Imported, ImportType.Programs);
             }
@@ -278,6 +334,78 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             {
                 await AddImportStatus(ImportStatus.Failed, ImportType.Programs);
                 throw new BadRequestException("Bad request bruh!");
+            }
+        }
+
+        private async Task CheckDeletedPrograms()
+        {
+            var remotePrograms = await GetRemotePrograms();
+            var localPrograms = await _facultyDBContext.EducationProgrammModels.ToListAsync();
+            var deletedProgramIds = localPrograms
+                .Where(lp => !remotePrograms.Any(rp => rp.Id == lp.Id))
+                .Select(lp => lp.Id)
+                .ToList();
+
+            foreach (var deletedProgramId in deletedProgramIds)
+            {
+                var deletedProgram = await _facultyDBContext.EducationProgrammModels.FindAsync(deletedProgramId);
+                if (deletedProgram != null)
+                {
+                    _facultyDBContext.EducationProgrammModels.Remove(deletedProgram);
+                }
+            }
+
+            await _facultyDBContext.SaveChangesAsync();
+            var syncProgramsEntranceList = deletedProgramIds.Select(id => new SyncProgramsEntranceDTO { Id = id }).ToList();
+            await SyncProgramsEntrance(syncProgramsEntranceList);
+        }
+
+        private async Task SyncProgramsEntrance(List<SyncProgramsEntranceDTO> syncProgramsEntrance)
+        {
+            await _bus.PubSub.PublishAsync(syncProgramsEntrance, "syncProgramsEntrance");
+        }
+
+
+        private async Task<List<EducationProgrammModel>> GetRemotePrograms()
+        {
+            string endpoint = "programs?page=1&size=1";
+            string apiUrl = _baseUrl + endpoint;
+
+            HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseBody = await response.Content.ReadAsStringAsync();
+                var programsWithPagination = JsonSerializer.Deserialize<GetProgramsWithPaginationDTO>(responseBody);
+                List<EducationProgrammModel> educationPrograms = new List<EducationProgrammModel>();
+                foreach (var programDTO in programsWithPagination.programs)
+                {
+                    DateTime createTimeUtc = programDTO.createTime.ToUniversalTime();
+                    DateTime createFacultyTime = programDTO.faculty.createTime.ToUniversalTime();
+
+                    EducationProgrammModel educationProgram = new EducationProgrammModel
+                    {
+                        Id = programDTO.id,
+                        CreateTime = createTimeUtc,
+                        Name = programDTO.name,
+                        Code = programDTO.code,
+                        Language = programDTO.language,
+                        EducationForm = programDTO.educationForm,
+                        FacultyId = programDTO.faculty.id,
+                        EducationLevelId = programDTO.educationLevel.id,
+                        EducationLevelName = programDTO.educationLevel.name,
+                        FacultyCreateTime = createFacultyTime,
+                        FacultyName = programDTO.faculty.name
+                    };
+                    educationPrograms.Add(educationProgram);
+                }
+
+                return educationPrograms;
+            }
+            else
+            {
+                Console.WriteLine("Error while fetching programs from remote server");
+                return new List<EducationProgrammModel>();
             }
         }
 

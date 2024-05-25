@@ -35,11 +35,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.Applic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.ApplicantService", "adv_Backend_Entrance.ApplicantService\adv_Backend_Entrance.ApplicantService.csproj", "{74F96B08-0D1C-495B-92F5-1E4A535763EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance.AdminPanel", "adv_Backend_Entrance.AdminPanel\adv_Backend_Entrance.AdminPanel.csproj", "{916C6D0C-E047-42B3-8146-1D553A862E2A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.AdminPanel", "adv_Backend_Entrance.AdminPanel\adv_Backend_Entrance.AdminPanel.csproj", "{916C6D0C-E047-42B3-8146-1D553A862E2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance.AdminPanel.BL", "adv_Backend_Entrance.AdminPanel.BL\adv_Backend_Entrance.AdminPanel.BL.csproj", "{6F13716C-ED4D-4778-BE0C-1E924672D397}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.AdminPanel.BL", "adv_Backend_Entrance.AdminPanel.BL\adv_Backend_Entrance.AdminPanel.BL.csproj", "{6F13716C-ED4D-4778-BE0C-1E924672D397}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "adv_Backend_Entrance.AdminPanel.DAL", "adv_Backend_Entrance.AdminPanel.DAL\adv_Backend_Entrance.AdminPanel.DAL.csproj", "{9CE0A7A3-1C9D-43E1-87BD-68A2DCBF1B61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "adv_Backend_Entrance.AdminPanel.DAL", "adv_Backend_Entrance.AdminPanel.DAL\adv_Backend_Entrance.AdminPanel.DAL.csproj", "{9CE0A7A3-1C9D-43E1-87BD-68A2DCBF1B61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

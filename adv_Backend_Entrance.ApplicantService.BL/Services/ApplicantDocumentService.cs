@@ -3,6 +3,7 @@ using adv_Backend_Entrance.ApplicantService.DAL.Data;
 using adv_Backend_Entrance.ApplicantService.DAL.Data.Entites;
 using adv_Backend_Entrance.Common.DTO.ApplicantService;
 using adv_Backend_Entrance.Common.DTO.FacultyService;
+using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
 using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces.ApplicantService;
 using adv_Backend_Entrance.Common.Middlewares;
@@ -116,6 +117,11 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
                 throw new ForbiddenException("This user not found in system!");
             }
             var education = await _applicantDBContext.EducationDocuments.FirstOrDefaultAsync(eD => eD.UserId == userId);
+            var sameDocument = await _applicantDBContext.EducationDocuments.FirstOrDefaultAsync(eD => eD.UserId == userId && eD.EducationLevel == editEducationLevelDTO.EducationLevel);
+            if(sameDocument != null)
+            {
+                throw new BadRequestException("You already have document like this!");
+            }
             if (education == null)
             {
                 throw new NotFoundException("This education document not found!");
@@ -129,12 +135,29 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
                 education.EducationLevelId = selectedEducationLevel.id;
             }
             await _applicantDBContext.SaveChangesAsync();
+            var syncInfo = new SyncEducationLevelDTO
+            {
+                UserId = userId,
+                EducationDocumentId = education.Id,
+                EducationLevel = education.EducationLevel
+            };
+            await SyncEducationLevel(syncInfo);
             var educationInfo = new GetEducationInformationDTO
             {
                 id = education.Id,
                 EducationLevel = education.EducationLevel
             };
             return educationInfo;
+        }
+        private async Task SyncEducationLevel(SyncEducationLevelDTO syncEducationLevel)
+        {
+            var message = new SyncEducationLevelDTO
+            {
+                UserId = syncEducationLevel.UserId,
+                EducationDocumentId = syncEducationLevel.EducationDocumentId,
+                EducationLevel = syncEducationLevel.EducationLevel,
+            };
+            await _bus.PubSub.PublishAsync(message, "educationLevelSyncEntrance");
         }
 
         public async Task<GetPassportInformationDTO> EditPaspportInformation(AddPassportDTO editPassportDTO, Guid userId)
@@ -173,9 +196,32 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
                 issuedWhom = passport.IssuedWhom,
                 passportNumber = passport.PassportNumber,
             };
+            var syncInfo = new SyncPassportDTO
+            {
+                PassportId = passport.Id,
+                UserId = passport.UserId,
+                birthPlace = passport.BirthPlace,
+                issuedWhen = passport.IssuedWhen,
+                issuedWhom = passport.IssuedWhom,
+                passportNumber = passport.PassportNumber,
+            };
+            await SyncPassport(syncInfo);
+
             return editedPassportInfo;
         }
-
+        private async Task SyncPassport(SyncPassportDTO syncPassportDTO)
+        {
+            var message = new SyncPassportDTO
+            {
+                UserId = syncPassportDTO.UserId,
+                birthPlace = syncPassportDTO.birthPlace,
+                issuedWhen = syncPassportDTO.issuedWhen,
+                issuedWhom = syncPassportDTO.issuedWhom,
+                PassportId = syncPassportDTO.PassportId,
+                passportNumber = syncPassportDTO.passportNumber
+            };
+            await _bus.PubSub.PublishAsync(message, "passportSyncEntrance");
+        }
         public async Task<GetEducationInformationDTO> GetEducationInformation(Guid userId)
         {
             if (userId == null)

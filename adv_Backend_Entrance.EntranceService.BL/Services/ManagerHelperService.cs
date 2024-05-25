@@ -16,6 +16,8 @@ using System.Threading.Tasks;
 using adv_Backend_Entrance.EntranceService.DAL.Data.Models;
 using static System.Net.Mime.MediaTypeNames;
 using adv_Backend_Entrance.Common.Enums;
+using adv_Backend_Entrance.Common.DTO.ApplicantService;
+using adv_Backend_Entrance.Common.DTO.FacultyService;
 
 namespace adv_Backend_Entrance.EntranceService.BL.Services
 {
@@ -115,6 +117,94 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 throw new BadRequestException($"This user is already have this role {removeManagerFromDb.Role}");
             }
             _entranceDBContext.Managers.Remove(currentUser);
+            await _entranceDBContext.SaveChangesAsync();
+        }
+        public async Task SyncPassport(SyncPassportDTO syncPassportDTO)
+        {
+            var applicant = await _entranceDBContext.Applicants.FirstOrDefaultAsync(a => a.UserId == syncPassportDTO.UserId);
+            if(applicant != null)
+            {
+                applicant.PassportNumber = syncPassportDTO.passportNumber;
+                applicant.PassportId = syncPassportDTO.PassportId;
+                await _entranceDBContext.SaveChangesAsync();
+            }
+            else
+            {
+                throw new NotFoundException("This applicant not found");
+            }
+        }
+        public async Task SyncEducationLevel(SyncEducationLevelDTO syncEducationLevel)
+        {
+            var applicant = await _entranceDBContext.Applicants.FirstOrDefaultAsync(a => a.UserId == syncEducationLevel.UserId);
+            if (applicant == null)
+            {
+                throw new NotFoundException("This applicant not found!");
+            }
+            else
+            {
+                applicant.EducationId = syncEducationLevel.EducationDocumentId;
+                var application = await _entranceDBContext.Applications.FirstOrDefaultAsync(a => a.ApplicantId == applicant.Id);
+                if (application != null)
+                {
+                    var programs = await _entranceDBContext.ApplicationPrograms.Where(aP => aP.ApplicationId == application.Id).ToListAsync();
+                    _entranceDBContext.ApplicationPrograms.RemoveRange(programs); 
+                    _entranceDBContext.Applications.Remove(application);
+                    await _entranceDBContext.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new NotFoundException("This applicant doesn't have an application!");
+                }
+            }
+        }
+        public async Task SyncPrograms(List<SyncProgramsEntranceDTO> syncProgramsEntrance)
+        {
+            var deletedProgramIds = syncProgramsEntrance.Select(p => p.Id).ToList();
+            var affectedApplicationPrograms = await _entranceDBContext.ApplicationPrograms
+                .Where(ap => deletedProgramIds.Contains(ap.ProgramId))
+                .ToListAsync();
+            var affectedApplicationIds = affectedApplicationPrograms
+                .Select(ap => ap.ApplicationId)
+                .Distinct()
+                .ToList();
+            foreach (var applicationId in affectedApplicationIds)
+            {
+                var application = await _entranceDBContext.Applications.FindAsync(applicationId);
+                if (application != null)
+                {
+                    var programsToRemove = affectedApplicationPrograms
+                        .Where(ap => ap.ApplicationId == applicationId)
+                        .ToList();
+
+                    _entranceDBContext.ApplicationPrograms.RemoveRange(programsToRemove);
+                    _entranceDBContext.Applications.Remove(application);
+                }
+            }
+            await _entranceDBContext.SaveChangesAsync();
+        }
+        public async Task SyncFaculties(List<SyncFacultiesDTO> syncFacultiesEntrance)
+        {
+            var deletedFacultyIds = syncFacultiesEntrance.Select(p => p.Id).ToList();
+            var affectedApplicationPrograms = await _entranceDBContext.ApplicationPrograms
+                .Where(ap => deletedFacultyIds.Contains(ap.FacultyId))
+                .ToListAsync();
+            var affectedApplicationIds = affectedApplicationPrograms
+                .Select(ap => ap.ApplicationId)
+                .Distinct()
+                .ToList();
+            foreach (var applicationId in affectedApplicationIds)
+            {
+                var application = await _entranceDBContext.Applications.FindAsync(applicationId);
+                if (application != null)
+                {
+                    var programsToRemove = affectedApplicationPrograms
+                        .Where(ap => ap.ApplicationId == applicationId)
+                        .ToList();
+
+                    _entranceDBContext.ApplicationPrograms.RemoveRange(programsToRemove);
+                    _entranceDBContext.Applications.Remove(application);
+                }
+            }
             await _entranceDBContext.SaveChangesAsync();
         }
     }
