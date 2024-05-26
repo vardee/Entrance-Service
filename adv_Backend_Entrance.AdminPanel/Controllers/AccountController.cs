@@ -143,8 +143,6 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin,MainManager,Manager")]
         public async Task<IActionResult> Logout()
         {
             var token = _tokenHelper.GetTokenFromSession();
@@ -154,7 +152,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
             };
             await _bus.PubSub.PublishAsync(logoutdto, "logoutUser");
             HttpContext.Session.Clear();
-            return RedirectToAction("Index", "Home"); // Перенаправление на главную страницу
+            return RedirectToAction("Index", "Home");
         }
 
 
