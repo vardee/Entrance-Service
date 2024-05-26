@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("adv_Backend_Entrance_Notification.BL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+25e4427fdb6cd7f3fda83500c0f90f75ff4c1c58")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+78df1222f872efc563d5c529be2f90caddd5701c")]
 [assembly: System.Reflection.AssemblyProductAttribute("adv_Backend_Entrance_Notification.BL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("adv_Backend_Entrance_Notification.BL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

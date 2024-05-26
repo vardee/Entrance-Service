@@ -41,7 +41,7 @@
                                 <a class="nav-link" asp-controller="Account" asp-action="EditProfile">Редактировать профиль</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Logout">Выйти</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
                             </li>
                         }
                         else
@@ -72,6 +72,17 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        function logout() {
+            $.ajax({
+                url: '/Account/Logout',
+                type: 'POST',
+                success: function () {
+                    window.location.href = "/Home/Index"
+                }
+            });
+        }
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

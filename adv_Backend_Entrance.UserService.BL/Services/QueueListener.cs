@@ -46,7 +46,8 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                     Gender = data.Gender,
                     Phone = data.Phone,
                     Email = data.Email,
-                    BirthDate = data.BirthDate
+                    BirthDate = data.BirthDate,
+                    Nationality = data.Nationality,
                 };
                 await userService.EditProfile(data.UserId, editProfile);
             });
@@ -60,7 +61,8 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                     Gender = data.Gender,
                     Phone = data.Phone,
                     Email = data.Email,
-                    BirthDate = data.BirthDate
+                    BirthDate = data.BirthDate,
+                    Nationality = data.Nationality,
                 };
                 await userService.EditProfile(data.UserId, editProfile);
             });
@@ -74,13 +76,13 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                     Gender = data.Gender,
                     Phone = data.Phone,
                     Email = data.Email,
-                    BirthDate = data.BirthDate
+                    BirthDate = data.BirthDate,
                 };
                 await userService.EditProfile(data.UserId, editProfile);
             });
-            bus.PubSub.Subscribe<string>("logoutUser", async data =>
+            bus.PubSub.Subscribe<LogoutDTO>("logoutUser", async data =>
             {
-                await userService.Logout(data);
+                await userService.Logout(data.Token);
             });
             bus.PubSub.Subscribe<AddRoleUserMVCDTO>("addRoleToUserMVC", async data =>
             {

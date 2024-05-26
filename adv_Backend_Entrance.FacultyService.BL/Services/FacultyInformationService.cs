@@ -368,7 +368,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
 
         private async Task<List<EducationProgrammModel>> GetRemotePrograms()
         {
-            string endpoint = "programs?page=1&size=1";
+            string endpoint = "programs?page=1&size=1000";
             string apiUrl = _baseUrl + endpoint;
 
             HttpResponseMessage response = await _httpClient.GetAsync(apiUrl);

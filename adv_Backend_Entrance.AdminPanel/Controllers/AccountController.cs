@@ -148,10 +148,15 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
         public async Task<IActionResult> Logout()
         {
             var token = _tokenHelper.GetTokenFromSession();
-            await _bus.PubSub.PublishAsync(token, "logoutUser");
+            var logoutdto = new LogoutDTO
+            {
+                Token = token,
+            };
+            await _bus.PubSub.PublishAsync(logoutdto, "logoutUser");
             HttpContext.Session.Clear();
-            return Ok();
+            return RedirectToAction("Index", "Home"); // Перенаправление на главную страницу
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

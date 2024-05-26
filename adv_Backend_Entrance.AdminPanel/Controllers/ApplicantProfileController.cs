@@ -53,9 +53,6 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 Patronymic = response.patronymic,
                 Phone = response.Phone,
                 Nationality = response.Nationality,
-                ApplicantManagerId = currentManager,
-                CurrentId = currentPerson,
-                Roles =roles,
                 Gender = response.Gender,
             };
             Console.WriteLine(viewModel.Id);
@@ -75,7 +72,6 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
 
                 if (!ModelState.IsValid)
                 {
-                    // Если ModelState невалидно, добавляем ошибки в ModelState
                     foreach (var modelState in ModelState.Values)
                     {
                         foreach (var error in modelState.Errors)
@@ -121,9 +117,6 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     Patronymic = applicantProfile.patronymic,
                     Phone = applicantProfile.Phone,
                     Nationality = applicantProfile.Nationality,
-                    ApplicantManagerId = currentManager,
-                    CurrentId = currentPerson,
-                    Roles = roles,
                     Gender = applicantProfile.Gender,
                 };
                 return PartialView("ApplicantProfile", viewModel);

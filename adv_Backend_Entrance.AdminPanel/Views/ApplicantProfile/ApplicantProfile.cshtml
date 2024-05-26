@@ -38,9 +38,9 @@
                                 <span asp-validation-for="Patronymic" class="text-danger"></span>
                             </div>
                             <div class="form-group">
-                                <label asp-for="Nationality" class="form-label">Гражданство</label>
-                                <input asp-for="Nationality" class="form-control" />
-                                <span asp-validation-for="Nationality" class="text-danger"></span>
+                                <label asp-for="Nationality" name="Nationality" class="form-label">Гражданство</label>
+                                <input asp-for="Nationality" name="Nationality" class="form-control" />
+                                <span asp-validation-for="Nationality" name="Nationality" class="text-danger"></span>
                             </div>
                             <div class="form-group">
                                 <label asp-for="Phone" class="form-label">Номер телефона</label>
@@ -62,12 +62,9 @@
                                 </select>
                                 <span asp-validation-for="Gender" class="text-danger"></span>
                             </div>
-                            @if ((Model.ApplicantManagerId == Model.CurrentId))
-                            { 
                             <div class="text-center">
                                 <button type="submit" class="btn btn-primary">Поменять</button>
                             </div>
-                                }
                             <div class="text-center">
                                 <a class="nav-link" asp-controller="ApplicantEntrance" asp-action="ApplicantEntrance" asp-route-userId="@Model.Id">Посмотреть информацию о поступлении</a>
                             </div>
@@ -91,12 +88,14 @@
                     url: $(this).attr("action"),
                     data: $(this).serialize(),
                     success: function (response) {
-                        $("#applicantProfileId").html($(response).find("#applicantProfileId").html());
+                        $("body").html(response);
                     },
                     error: function () {
                         alert("Произошла ошибка при отправке формы.");
                     }
                 });
             });
+        });
+
     </script>
 }
