@@ -62,9 +62,12 @@
                                 </select>
                                 <span asp-validation-for="Gender" class="text-danger"></span>
                             </div>
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary">Поменять</button>
-                            </div>
+                            @if ((Model.Roles.Contains(RoleType.Admin) || Model.Roles.Contains(RoleType.MainManager)) || (Model.CurrentManager == Model.Person))
+                            {
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary">Поменять</button>
+                                </div>
+                            }
                             <div class="text-center">
                                 <a class="nav-link" asp-controller="ApplicantEntrance" asp-action="ApplicantEntrance" asp-route-userId="@Model.Id">Посмотреть информацию о поступлении</a>
                             </div>

@@ -54,6 +54,9 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 Phone = response.Phone,
                 Nationality = response.Nationality,
                 Gender = response.Gender,
+                CurrentManager = currentManager,
+                Person = currentPerson,
+                Roles = roles
             };
             Console.WriteLine(viewModel.Id);
             
@@ -69,18 +72,6 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
         {
             try
             {
-
-                if (!ModelState.IsValid)
-                {
-                    foreach (var modelState in ModelState.Values)
-                    {
-                        foreach (var error in modelState.Errors)
-                        {
-                            ModelState.AddModelError("", error.ErrorMessage);
-                        }
-                    }
-                    return PartialView("ApplicantProfile", model);
-                }
                 var response = await _bus.Rpc.RequestAsync<Guid, GetApplicantInformationDTO>(model.Id, c => c.WithQueueName("getApplicantInformationMVC"));
                 var applicantManager = await _bus.Rpc.RequestAsync<Guid, GetManagerIdMVCDTO>(response.Id, c => c.WithQueueName("getApplicantManagerMVC"));
                 var token = _tokenHelper.GetTokenFromSession();
@@ -118,6 +109,9 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     Phone = applicantProfile.Phone,
                     Nationality = applicantProfile.Nationality,
                     Gender = applicantProfile.Gender,
+                    CurrentManager = currentManager,
+                    Person = currentPerson,
+                    Roles = roles
                 };
                 return PartialView("ApplicantProfile", viewModel);
             }
@@ -128,7 +122,5 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 return PartialView("ApplicantProfile", model);
             }
         }
-
-
     }
 }

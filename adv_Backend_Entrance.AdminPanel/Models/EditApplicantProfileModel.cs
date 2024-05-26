@@ -5,6 +5,9 @@ namespace adv_Backend_Entrance.AdminPanel.Models
 {
     public class EditApplicantProfileModel
     {
+        public Guid CurrentManager { get; set; }
+        public Guid Person { get; set; }
+        public List<RoleType> Roles { get; set; }
         public Guid Id { get; set; }
         [DataType(DataType.Text)]
         [Display(Name = "Имя")]

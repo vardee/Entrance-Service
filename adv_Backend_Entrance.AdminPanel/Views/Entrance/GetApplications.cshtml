@@ -105,18 +105,9 @@
         <div class="application-card mt-5 mb-3 border p-3 rounded mx-auto col-md-8" data-application-id="@application.ApplicationId">
             <div class="application-details row g-3">
                 <div class="col-md-12">
-                    @if (application.ManagerId == Model.CurrentManagerId || (Model.Roles.Contains(RoleType.Admin) || (Model.Roles.Contains(RoleType.MainManager))))
-                    {
                         <p class="application-name">
                             <strong>ФИО:</strong> <a href="@Url.Action("ApplicantProfile", "ApplicantProfile", new { userId = application.ApplicantId })">@application.ApplicantFullName</a>
                         </p>
-                    }
-                    else
-                    {
-                        <p class="application-name">
-                            <strong>ФИО:</strong> <a>@application.ApplicantFullName</a>
-                        </p>
-                    }
                     <p class="application-status">
                         <strong>Статус заявки:</strong> @application.ApplicationStatus.ToString()
                     </p>
