@@ -88,10 +88,10 @@ namespace adv_Backend_Entrance.FacultyService.MVCPanel.Controllers
         public async Task<ActionResult<List<GetEducationLevelsDTO>>> GetQueryblePrograms(
             [FromQuery] List<EducationLanguage> LanguageEnum,
             [FromQuery] List<EducationLevel> EducationLevelEnum,
-            [FromQuery] List<EducationForm> EducationFormEnum, Guid? FacultyId, Guid? Id,
+            [FromQuery] List<EducationForm> EducationFormEnum, Guid? Id,string? name, string? code,
             [FromQuery] int size = 10, int page = 1)
         {
-            var result = await _interactionService.GetQueryblePrograms(size, page, LanguageEnum, EducationLevelEnum, EducationFormEnum, FacultyId, Id);
+            var result = await _interactionService.GetQueryblePrograms(size, page, LanguageEnum, EducationLevelEnum, EducationFormEnum, name,code, Id);
             return Ok(result);
         }
 

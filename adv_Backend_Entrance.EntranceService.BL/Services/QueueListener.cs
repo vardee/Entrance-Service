@@ -83,8 +83,9 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             }, x => x.WithQueueName("getApplicationsMVC"));
             bus.Rpc.Respond<GetManagersMVCDTO, GetAllQuerybleManagersDTO>(async request =>
             {
-                return await fullManagerService.GetManagers(request.Size, request.Page,request.Name,request.Role);
-            }, x => x.WithQueueName("gettingManagers_withMvc"));
+                var result = await fullManagerService.GetManagers(request.Size, request.Page, request.Name, request.Role);
+                return result;
+            }, c => c.WithQueueName("gettingManagers_withMvc"));
             bus.Rpc.Respond<Guid, GetAllQuerybleManagersDTO>(async request =>
             {
                 return await fullManagerService.GetManagers(1000, 1, "", null);
@@ -105,6 +106,10 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             {
                 return await fullManagerService.GetManagers(1000, 1, "", null);
             }, x => x.WithQueueName("getManagerInformationMVC"));
+            bus.Rpc.Respond<Guid, GetManagerIdMVCDTO>(async request =>
+            {
+                return await managerService.GetApplicantManager(request);
+            }, x => x.WithQueueName("getApplicantManagerMVC"));
             bus.PubSub.Subscribe<ChangeProgramPriorityDTO>("changePriorityProgramMVC", async data =>
             {
                 await applicantService.ChangeProgramPriority(data);

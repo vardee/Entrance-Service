@@ -1,4 +1,5 @@
-﻿@model EditApplicantProfileModel
+﻿﻿@using adv_Backend_Entrance.Common.Enums
+@model EditApplicantProfileModel
 
 @{
     ViewBag.Title = "Профиль заявителя";
@@ -61,11 +62,14 @@
                                 </select>
                                 <span asp-validation-for="Gender" class="text-danger"></span>
                             </div>
+                            @if ((Model.ApplicantManagerId == Model.CurrentId))
+                            { 
                             <div class="text-center">
                                 <button type="submit" class="btn btn-primary">Поменять</button>
                             </div>
+                                }
                             <div class="text-center">
-                                <a class="nav-link" asp-controller="ApplicantEntrance" asp-action="ApplicantEntrance" asp-route-userId="@Model.Id">Поменять дополнительную информацию</a>
+                                <a class="nav-link" asp-controller="ApplicantEntrance" asp-action="ApplicantEntrance" asp-route-userId="@Model.Id">Посмотреть информацию о поступлении</a>
                             </div>
                         </form>
                     </div>
@@ -77,6 +81,7 @@
 
 @section Scripts {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
     <script>
         $(document).ready(function () {
             $("#applicantProfileForm").on("submit", function (event) {

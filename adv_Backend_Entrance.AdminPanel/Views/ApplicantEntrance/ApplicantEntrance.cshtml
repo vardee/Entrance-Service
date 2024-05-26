@@ -35,13 +35,19 @@
                             <input asp-for="PassportModel.IssuedWhom" id="IssuedWhom" name="IssuedWhom" class="form-control" />
                             <span asp-validation-for="PassportModel.IssuedWhom" id="IssuedWhom" name="IssuedWhom" class="text-danger"></span>
                         </div>
+                        @if ((Model.Roles.Contains(RoleType.Admin) || Model.Roles.Contains(RoleType.MainManager)) || (Model.CurrentManagerId == Model.PersonId))
+                        {
                         <div class="text-center">
                             <button type="button" class="btn btn-primary" id="editPassport">Добавить</button>
                         </div>
+                        }
                     </form>
-                    <div class="mb-3" id="editInfoPassport">
-                        <button id="editInfoPassport" onclick="editInfoPassport()" class="btn btn-danger">Изменить</button>
-                    </div>
+                    @if ((Model.Roles.Contains(RoleType.Admin) || Model.Roles.Contains(RoleType.MainManager)) || (Model.CurrentManagerId == Model.PersonId))
+                    {
+                        <div class="mb-3" id="editInfoPassport">
+                            <button id="editInfoPassport" onclick="editInfoPassport()" class="btn btn-danger">Изменить</button>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -80,13 +86,19 @@
                             </select>
                             <span asp-validation-for="EducationDocumentModel.EducationLevel" class="text-danger"></span>
                         </div>
+                        @if ((Model.Roles.Contains(RoleType.Admin) || Model.Roles.Contains(RoleType.MainManager)) || (Model.CurrentManagerId == Model.PersonId))
+                        {
                         <div class="text-center">
                             <button type="submit" class="btn btn-primary">Добавить</button>
                         </div>
+                        }
                     </form>
+                    @if ((Model.Roles.Contains(RoleType.Admin) || Model.Roles.Contains(RoleType.MainManager)) || (Model.CurrentManagerId == Model.PersonId))
+                    {
                     <div class="mb-3" id="editEducationInfoEntrance">
                         <button type="button" id="editEducationInfoEntrance" class="btn btn-danger" onclick="editEducationInfoEntrance()">Изменить</button>
                     </div>
+                    }
                 </div>
             </div>
         </div>
@@ -115,9 +127,12 @@
                                     <input type="hidden" name="ApplicationId" value="@program.ApplicationId" />
                                     <input type="hidden" name="Priority" class="priority-input" />
                                 </form>
-                                <div class="mb-3">
-                                    <button onclick="removeProgram('@program.ApplicationId', '@program.ProgramId', '@Model.Id')" class="btn btn-danger">Удалить</button>
-                                </div>
+                                @if ((Model.Roles.Contains(RoleType.Admin) || Model.Roles.Contains(RoleType.MainManager)) || (Model.CurrentManagerId == Model.PersonId))
+                                {
+                                    <div class="mb-3">
+                                        <button onclick="removeProgram('@program.ApplicationId', '@program.ProgramId', '@Model.Id')" class="btn btn-danger">Удалить</button>
+                                    </div>
+                                }
                             </div>
                         }
                     }

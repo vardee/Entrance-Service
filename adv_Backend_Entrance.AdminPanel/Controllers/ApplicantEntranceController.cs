@@ -5,6 +5,7 @@ using adv_Backend_Entrance.Common.DTO.ApplicantService;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Applicant;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
 using adv_Backend_Entrance.Common.DTO.UserService;
+using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
 using EasyNetQ;
 using Microsoft.AspNetCore.Authorization;
@@ -41,7 +42,15 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 var educationLevelProfile = await GetEducationInformationWithErrorHandling(response.UserId);
                 var programsRequest = new GetApplicantDTO { ApplicantId = userId };
                 var programsResponse = await _bus.Rpc.RequestAsync<GetApplicantDTO, GetApplicationsDTO>(programsRequest, c => c.WithQueueName("getApplicantProgramsMVC"));
-                var programs = programsResponse.ProgramsPriority; 
+                var programs = programsResponse.ProgramsPriority;
+
+                var applicantManager = await _bus.Rpc.RequestAsync<Guid, GetManagerIdMVCDTO>(userId, c => c.WithQueueName("getApplicantManagerMVC"));
+                var token = _tokenHelper.GetTokenFromSession();
+                var IdFromToken = _tokenHelper.GetUserIdFromToken(token);
+                var roles = _tokenHelper.GetRolesFromToken(token).Select(r => (RoleType)Enum.Parse(typeof(RoleType), r)).ToList();
+                Guid currentManager = applicantManager.ManagerId;
+                Guid currentPerson = Guid.Parse(IdFromToken);
+
 
                 var viewModel = new ApplicantEntranceViewModel
                 {
@@ -68,7 +77,10 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                         FacultyName = program.FacultyName,
                         FacultyId = program.FacultyId,
                         ProgramCode = program.ProgramCode
-                    }).ToList() 
+                    }).ToList(),
+                    CurrentManagerId = applicantManager.ManagerId,
+                    Roles= roles,
+                    PersonId = Guid.Parse(IdFromToken),
                 };
 
                 return View("ApplicantEntrance", viewModel);
@@ -395,6 +407,12 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 var educationLevelProfile = await GetEducationInformationWithErrorHandling(response.UserId);
                 var programsRequest = new GetApplicantDTO { ApplicantId = userId };
                 var programsResponse = await _bus.Rpc.RequestAsync<GetApplicantDTO, GetApplicationsDTO>(programsRequest, c => c.WithQueueName("getApplicantProgramsMVC"));
+
+
+
+
+
+
                 var programs = programsResponse.ProgramsPriority;
 
                 var viewModel = new ApplicantEntranceViewModel

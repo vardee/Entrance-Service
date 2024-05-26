@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
 using adv_Backend_Entrance.Common.DTO.ApplicantService;
 using Microsoft.AspNetCore.Authorization;
+using adv_Backend_Entrance.Common.Enums;
 
 namespace adv_Backend_Entrance.AdminPanel.Controllers
 {
@@ -35,7 +36,13 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 UserId = applicantInfo.UserId,
             };
             var response = await _bus.Rpc.RequestAsync<GetUserProfileMVCDTO, UserGetProfileDTO>(request, c => c.WithQueueName("getUserProfileMVC"));
-            Console.WriteLine(userId);
+            var applicantManager = await _bus.Rpc.RequestAsync<Guid, GetManagerIdMVCDTO>(userId, c => c.WithQueueName("getApplicantManagerMVC"));
+            var token = _tokenHelper.GetTokenFromSession();
+            var IdFromToken = _tokenHelper.GetUserIdFromToken(token);
+            var roles = _tokenHelper.GetRolesFromToken(token).Select(r => (RoleType)Enum.Parse(typeof(RoleType), r)).ToList();
+            Guid currentManager = applicantManager.ManagerId;
+            Guid currentPerson = Guid.Parse(IdFromToken);
+
             var viewModel = new EditApplicantProfileModel
             {
                 Id = userId,
@@ -46,6 +53,10 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 Patronymic = response.patronymic,
                 Phone = response.Phone,
                 Nationality = response.Nationality,
+                ApplicantManagerId = currentManager,
+                CurrentId = currentPerson,
+                Roles =roles,
+                Gender = response.Gender,
             };
             Console.WriteLine(viewModel.Id);
             
@@ -59,13 +70,29 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
         [Route("EditApplicantProfile")]
         public async Task<IActionResult> EditApplicantProfile(EditApplicantProfileModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return PartialView("ApplicantProfile", model);
-            }
             try
             {
+
+                if (!ModelState.IsValid)
+                {
+                    // Если ModelState невалидно, добавляем ошибки в ModelState
+                    foreach (var modelState in ModelState.Values)
+                    {
+                        foreach (var error in modelState.Errors)
+                        {
+                            ModelState.AddModelError("", error.ErrorMessage);
+                        }
+                    }
+                    return PartialView("ApplicantProfile", model);
+                }
                 var response = await _bus.Rpc.RequestAsync<Guid, GetApplicantInformationDTO>(model.Id, c => c.WithQueueName("getApplicantInformationMVC"));
+                var applicantManager = await _bus.Rpc.RequestAsync<Guid, GetManagerIdMVCDTO>(response.Id, c => c.WithQueueName("getApplicantManagerMVC"));
+                var token = _tokenHelper.GetTokenFromSession();
+                var IdFromToken = _tokenHelper.GetUserIdFromToken(token);
+                var roles = _tokenHelper.GetRolesFromToken(token).Select(r => (RoleType)Enum.Parse(typeof(RoleType), r)).ToList();
+                Guid currentManager = applicantManager.ManagerId;
+                Guid currentPerson = Guid.Parse(IdFromToken);
+
                 var editProfile = new EditApplicantProfileInformationDTO
                 {
                     UserId = response.UserId,
@@ -75,7 +102,8 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     Nationality = model.Nationality,
                     BirthDate = DateTime.SpecifyKind(model.BirthDate, DateTimeKind.Utc),
                     Phone = model.Phone,
-                    Email = model.Email
+                    Email = model.Email,
+                    Gender = model.Gender,
                 };
                 await _bus.PubSub.PublishAsync(editProfile, "applicantEditProfileMVC");
                 var request = new GetUserProfileMVCDTO
@@ -93,6 +121,10 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     Patronymic = applicantProfile.patronymic,
                     Phone = applicantProfile.Phone,
                     Nationality = applicantProfile.Nationality,
+                    ApplicantManagerId = currentManager,
+                    CurrentId = currentPerson,
+                    Roles = roles,
+                    Gender = applicantProfile.Gender,
                 };
                 return PartialView("ApplicantProfile", viewModel);
             }

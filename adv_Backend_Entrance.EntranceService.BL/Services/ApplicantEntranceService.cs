@@ -23,6 +23,7 @@ using EasyNetQ;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 using adv_Backend_Entrance.UserService.DAL.Data.Entities;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Applicant;
+using Newtonsoft.Json.Linq;
 
 namespace adv_Backend_Entrance.EntranceService.BL.Services
 {
@@ -53,19 +54,23 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             {
                 throw new BadRequestException("Server response is bad, server problems. Oops!");
             }
+
             var educationInfo = await _bus.Rpc.RequestAsync<Guid, GetEducationInformationDTO>(Guid.Parse(userId), x => x.WithQueueName("application_educationInfo"));
             if (educationInfo == null)
             {
-                throw new BadRequestException("You dont have education document!");
+                throw new BadRequestException("You don't have an education document!");
             }
+
             if (educationInfo.id != createApplicationDTO.EducationId)
             {
                 throw new BadRequestException("Your education document is not valid! Check your document value and retry!");
             }
+
             if (passportInfo.PassportId != createApplicationDTO.PassportId)
             {
                 throw new BadRequestException("Your passport is not valid! Check your passport value and retry!");
             }
+
             var userProfileResponse = await _bus.Rpc.RequestAsync<Guid, UserGetProfileDTO>(Guid.Parse(userId), x => x.WithQueueName("application_profileResponse"));
             if (userProfileResponse != null)
             {
@@ -80,6 +85,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     UserId = Guid.Parse(userId)
                 };
                 _entranceDBContext.Applicants.Add(applicant);
+
                 var application = new ApplicationModel
                 {
                     ApplicantId = applicant.Id,
@@ -88,69 +94,78 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     ChangedTime = DateTime.UtcNow,
                 };
                 _entranceDBContext.Applications.Add(application);
+
                 if (createApplicationDTO.ProgramsPriority.Count() < 1)
                 {
                     throw new BadRequestException("You must choose at least 1 program in your application!");
                 }
+
                 if (createApplicationDTO.ProgramsPriority.Count() > 5)
                 {
-                    throw new BadRequestException("You cant choose more than 5 program in your application!");
+                    throw new BadRequestException("You can't choose more than 5 programs in your application!");
                 }
+
                 var documentTypes = await _bus.Rpc.RequestAsync<Guid, List<GetDocumentTypesDTO>>(Guid.Parse(userId), x => x.WithQueueName("application_facultyDocuments"));
                 var programsWithPagination = await _bus.Rpc.RequestAsync<Guid, GetQuerybleProgramsDTO>(Guid.Parse(userId), x => x.WithQueueName("application_facultyPrograms"));
 
                 var nextEducationLevels = documentTypes
                     .Where(dt => dt.educationLevel.id == educationInfo.educationId)
-                    .Select(dt => dt.nextEducationLevels)
-                    .FirstOrDefault();
+                    .SelectMany(dt => dt.nextEducationLevels)
+                    .ToList();
+
                 var usedPriorities = new HashSet<int>();
+                var selectedProgramLevels = new HashSet<int>();
+
                 foreach (var program in createApplicationDTO.ProgramsPriority)
                 {
                     if (program.Priority < 1 || program.Priority > createApplicationDTO.ProgramsPriority.Count())
                     {
-                        throw new BadRequestException("You cant put priority less than 1, and more than count of your chosen programs");
+                        throw new BadRequestException("You can't put priority less than 1, and more than the count of your chosen programs");
                     }
+
                     if (usedPriorities.Contains(program.Priority))
                     {
                         throw new BadRequestException("You cannot use the same priority for multiple programs!");
                     }
                     usedPriorities.Add(program.Priority);
 
-                    if (programsWithPagination != null)
+                    var programs = programsWithPagination.Programs;
+                    var matchingProgram = programs.FirstOrDefault(p => p.id == program.ProgramId);
+                    if (matchingProgram == null)
                     {
-                        var programs = programsWithPagination.Programs;
-                        var matchingProgram = programs.FirstOrDefault(p => p.id == program.ProgramId);
-                        if (matchingProgram != null)
-                        {
-                            if (nextEducationLevels != null && nextEducationLevels.Any() && nextEducationLevels.Select(e => e.id).Contains(matchingProgram.educationLevel.id))
-                            {
-                                var applicationProgram = new ApplicationProgram
-                                {
-                                    ApplicationId = application.Id,
-                                    ProgramId = program.ProgramId,
-                                    ProgramName = matchingProgram.name,
-                                    Priority = program.Priority,
-                                    ProgramCode = matchingProgram.code,
-                                    FacultyId = matchingProgram.faculty.id,
-                                    FacultyName = matchingProgram.faculty.name,
-                                };
-                                _entranceDBContext.ApplicationPrograms.Add(applicationProgram);
-                            }
-                            else
-                            {
-                                throw new BadRequestException("You cannot apply for these levels of education!");
-                            }
-                        }
-                        else
-                        {
-                            throw new BadRequestException("This program not found!");
-                        }
+                        throw new BadRequestException("This program was not found!");
                     }
+
+                    if (matchingProgram.educationLevel.id != educationInfo.educationId && !nextEducationLevels.Any(e => e.id == matchingProgram.educationLevel.id))
+                    {
+                        throw new BadRequestException("You cannot apply for this level of education!");
+                    }
+
+                    if (selectedProgramLevels.Count > 0 && !selectedProgramLevels.Contains(matchingProgram.educationLevel.id))
+                    {
+                        throw new BadRequestException("All selected programs must be of the same education level!");
+                    }
+                    selectedProgramLevels.Add(matchingProgram.educationLevel.id);
+
+                    var applicationProgram = new ApplicationProgram
+                    {
+                        ApplicationId = application.Id,
+                        ProgramId = program.ProgramId,
+                        ProgramName = matchingProgram.name,
+                        Priority = program.Priority,
+                        ProgramCode = matchingProgram.code,
+                        FacultyId = matchingProgram.faculty.id,
+                        FacultyName = matchingProgram.faculty.name,
+                    };
+                    _entranceDBContext.ApplicationPrograms.Add(applicationProgram);
                 }
+
                 await _entranceDBContext.SaveChangesAsync();
                 await AddUserRole(Guid.Parse(userId));
             }
         }
+
+
 
 
         private async Task AddUserRole(Guid userId)
@@ -161,7 +176,6 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
 
         public async Task DeleteProgramFromApplication(DeleteProgramFromApplicationDTO deleteProgramFromApplicationDTO)
         {
-
             var userProgram = await _entranceDBContext.ApplicationPrograms.FirstOrDefaultAsync(aP => aP.ApplicationId == deleteProgramFromApplicationDTO.ApplicationId && aP.ProgramId == deleteProgramFromApplicationDTO.ProgramId);
             if (userProgram == null)
             {
@@ -192,6 +206,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
         }
         public async Task AddProgramsInApplication(AddProgramsDTO addProgramsDTO, string token)
         {
+            string userId = _tokenHelper.GetUserIdFromToken(token);
             var userProgram = await _entranceDBContext.ApplicationPrograms.Where(ap => ap.ApplicationId == addProgramsDTO.ApplicationId).ToListAsync();
             if(userProgram == null)
             {
@@ -209,7 +224,6 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             {
                 throw new BadRequestException("You cant choose more than 5 program in your application!");
             }
-            string userId = _tokenHelper.GetUserIdFromToken(token);
             var educationInfo = await _bus.Rpc.RequestAsync<Guid, GetEducationInformationDTO>(Guid.Parse(userId), x => x.WithQueueName("application_educationInfo"));
             if (educationInfo == null)
             {
@@ -292,7 +306,10 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 {
                     ProgramId = aP.ProgramId,
                     Priority = aP.Priority,
-                    ProgramName = aP.ProgramName
+                    ProgramName = aP.ProgramName,
+                    FacultyId = aP.FacultyId,
+                    FacultyName = aP.FacultyName,
+                    ProgramCode = aP.ProgramCode
                 })
                 .ToListAsync();
             var myApplication = new GetMyApplicationDTO

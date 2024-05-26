@@ -43,14 +43,14 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
 
             bus.Rpc.Respond<Guid, GetQuerybleProgramsDTO>(async request =>
             {
-                var result = await documentService.GetQueryblePrograms(1000, 1, null, null, null, null, null);
+                var result = await documentService.GetQueryblePrograms(1000, 1, null, null, null, null,null, null);
                 Console.WriteLine(result);
                 return result;
             }, x => x.WithQueueName("application_facultyPrograms"));
 
             bus.Rpc.Respond<Guid, GetQuerybleProgramsDTO>(async request =>
             {
-                var result = await documentService.GetQueryblePrograms(1000, 1, null, null, null, null, null);
+                var result = await documentService.GetQueryblePrograms(1000, 1, null, null, null, null, null,null);
                 Console.WriteLine(result);
                 return result;
             }, x => x.WithQueueName("getProgramsForAppMVC"));

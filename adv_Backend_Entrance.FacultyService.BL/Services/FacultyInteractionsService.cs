@@ -90,7 +90,7 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             return educationLevels;
         }
 
-        public async Task<GetQuerybleProgramsDTO> GetQueryblePrograms(int size, int page, List<EducationLanguage> LanguageEnum, List<EducationLevel> EducationLevelEnum, List<EducationForm> EducationFormEnum, Guid? FacultyId, Guid? Id)
+        public async Task<GetQuerybleProgramsDTO> GetQueryblePrograms(int size, int page, List<EducationLanguage> LanguageEnum, List<EducationLevel> EducationLevelEnum, List<EducationForm> EducationFormEnum, string? name,string? code, Guid? Id)
         {
             var programsQuery = _facultyDBContext.EducationProgrammModels.AsQueryable();
             var programs = await programsQuery.ToListAsync();
@@ -106,9 +106,13 @@ namespace adv_Backend_Entrance.FacultyService.BL.Services
             {
                 programsQuery = programsQuery.Where(p => EducationFormEnum.Contains(p.EducationFormEnum));
             }
-            if (FacultyId != null)
+            if (name != null)
             {
-                programsQuery = programsQuery.Where(p => p.FacultyId == FacultyId);
+                programsQuery = programsQuery.Where(p => p.Name.Contains(name));
+            }
+            if (code != null)
+            {
+                programsQuery = programsQuery.Where(p => p.Code.Contains(code));
             }
             if (Id != null)
             {

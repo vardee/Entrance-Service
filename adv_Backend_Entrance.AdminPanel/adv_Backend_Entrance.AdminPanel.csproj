@@ -18,6 +18,12 @@
   <ItemGroup>
     <Folder Include="Models\ApplicantProfile\" />
     <Folder Include="Models\Entrance\" />
+    <Folder Include="Models\Imports\" />
+    <Folder Include="Models\Managers\" />
+    <Folder Include="Models\ManagerProfile\" />
+    <Folder Include="Models\Account\" />
+    <Folder Include="Models\Users\" />
+    <Folder Include="Models\ApplicantEntrance\" />
   </ItemGroup>
 
 </Project>

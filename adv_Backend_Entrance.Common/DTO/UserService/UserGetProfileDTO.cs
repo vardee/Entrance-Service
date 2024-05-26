@@ -1,4 +1,5 @@
-﻿using System;
+﻿using adv_Backend_Entrance.Common.Enums;
+using System;
 using System.Collections.Generic;
 
 using System.Linq;
@@ -16,5 +17,6 @@ namespace adv_Backend_Entrance.Common.DTO.UserService
         public string Phone { get; set; }
         public string Nationality { get; set; }
         public DateTime BirthDate { get; set; }
+        public Gender Gender { get; set; }  
     }
 }

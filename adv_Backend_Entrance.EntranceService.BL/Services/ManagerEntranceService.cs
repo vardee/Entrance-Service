@@ -1,7 +1,7 @@
 ﻿using adv_Backend_Entrance.Common.DTO;
+using adv_Backend_Entrance.Common.DTO.EntranceService;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Applicant;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
-using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.DTO.NotificationService;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Enums;
@@ -10,16 +10,8 @@ using adv_Backend_Entrance.Common.Interfaces.EntranceService;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.EntranceService.DAL.Data;
 using adv_Backend_Entrance.EntranceService.DAL.Data.Models;
-using adv_Backend_Entrance.UserService.DAL.Data;
 using EasyNetQ;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace adv_Backend_Entrance.EntranceService.BL.Services
 {
@@ -134,7 +126,10 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 applicationsQuery = applicationsQuery.Where(aP => aP.ManagerId == Guid.Empty);
             }
 
-
+            if (managerId != null)
+            {
+                applicationsQuery = applicationsQuery.Where(aP => aP.ManagerId == managerId);
+            }
             applicationsQuery = FilterApplications(timeSorting, applicationsQuery);
 
             int sizeOfPage = size;
@@ -220,14 +215,10 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
         public async Task ChangeApplicationStatus(ChangeApplicationStatusDTO changeApplicationStatusDTO, Guid userId)
         {
             var application = await _entranceDBContext.Applications.FirstOrDefaultAsync(a => a.Id == changeApplicationStatusDTO.ApplicationId);
-            if (application == null)
-            {
-                throw new BadRequestException("This application not found!");
-            }
-            application.ApplicationStatus = changeApplicationStatusDTO.Status;
-            await _entranceDBContext.SaveChangesAsync();
             var applicant = await _entranceDBContext.Applicants.FirstOrDefaultAsync(aP => aP.Id == application.ApplicantId);
             var userInfo = await _bus.Rpc.RequestAsync<Guid, UserGetProfileDTO>(applicant.UserId, x => x.WithQueueName("getProfileFromEntrance"));
+            application.ApplicationStatus = changeApplicationStatusDTO.Status;
+            await _entranceDBContext.SaveChangesAsync();
             var mail = new SendNotificationDTO
             {
                 Message = $"Статус вашей заявки изменен {changeApplicationStatusDTO.Status}!",
@@ -348,28 +339,20 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 managersQuery = managersQuery.Where(aR => aR.Role == roleType);
             }
 
+            var managersList = await managersQuery.ToListAsync();
+
             int totalManagers = await managersQuery.CountAsync();
-            int sizeOfPage = size;
-            var countOfPages = (int)Math.Ceiling((double)totalManagers / sizeOfPage);
+            var countOfPages = (int)Math.Ceiling((double)totalManagers / size);
 
             if (page <= countOfPages && totalManagers > 0)
             {
-                var lowerBound = (page - 1) * sizeOfPage;
-                managersQuery = managersQuery.Skip(lowerBound).Take(sizeOfPage);
+                var lowerBound = (page - 1) * size;
+                managersQuery = managersQuery.Skip(lowerBound).Take(size);
             }
             else
             {
                 managersQuery = Enumerable.Empty<ManagerModel>().AsQueryable();
             }
-
-            var pagination = new PaginationInformation
-            {
-                Current = page,
-                Page = countOfPages,
-                Size = size
-            };
-
-            var managersList = await managersQuery.ToListAsync();
 
             var managersDTO = new GetAllQuerybleManagersDTO
             {
@@ -380,11 +363,18 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     FullName = p.FullName,
                     Email = p.Email,
                     Role = p.Role,
-                }).AsQueryable(),
-                PaginationInformation = pagination
+                }).ToList(),
+                PaginationInformation = new PaginationInformation
+                {
+                    Current = page,
+                    Page = countOfPages,
+                    Size = size
+                }
             };
 
             return managersDTO;
         }
+
+
     }
 }

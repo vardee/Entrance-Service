@@ -17,6 +17,8 @@ using adv_Backend_Entrance.Common.Interfaces.UserService;
 using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
 using EasyNetQ;
 using adv_Backend_Entrance.Common.Helpers;
+using adv_Backend_Entrance.Common.DTO.ApplicantService;
+
 
 namespace adv_Backend_Entrance.UserService.BL.Services
 {
@@ -50,10 +52,29 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             {
                 throw new BadRequestException("Email is empty");
             }
-
+            if (!FullNameValidator.ValidateFullName(userRegisterDTO.FullName))
+            {
+                throw new BadRequestException("The name must be from 2 to 30 letters!");
+            }
+            if (!FullNameValidator.ValidateFullName(userRegisterDTO.LastName))
+            {
+                throw new BadRequestException("The lastname must be from 2 to 30 letters!");
+            }
+            if (!FullNameValidator.ValidateFullName(userRegisterDTO.Patronymic))
+            {
+                throw new BadRequestException("The patronymic must be from 2 to 30 letters!");
+            }
+            if (!EmailValidator.ValidateEmail(userRegisterDTO.Email))
+            {
+                throw new BadRequestException("You should to write the correct Email!");
+            }
             if (userRegisterDTO.Password == null)
             {
                 throw new BadRequestException("Password is empty");
+            }
+            if (!PasswordValidator.ValidatePassword(userRegisterDTO.Password))
+            {
+                throw new BadRequestException("Password should be 8-15 symbols, and should include uppercase and lowercase letters and numbers!");
             }
             if (userRegisterDTO.Password != userRegisterDTO.ConfirmPassword)
             {
@@ -150,7 +171,6 @@ namespace adv_Backend_Entrance.UserService.BL.Services
         }
         public async Task ChangePassword(Guid userId, changePasswordDTO changePasswordDTO)
         {
-
             var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user == null)
             {
@@ -273,7 +293,6 @@ namespace adv_Backend_Entrance.UserService.BL.Services
         }
         public async Task EditProfile(Guid userId, EditUserProfileDTO editUserProfileDTO)
         {
-            
             if (userId != null)
             {
                 
@@ -282,14 +301,26 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                 {
                     if (editUserProfileDTO.FirstName != "")
                     {
+                        if (!FullNameValidator.ValidateFullName(editUserProfileDTO.FirstName))
+                        {
+                            throw new BadRequestException("The lastname must be from 2 to 30 letters!");
+                        }
                         user.FullName = editUserProfileDTO.FirstName;
                     }
                     if (editUserProfileDTO.LastName != "")
                     {
+                        if (!FullNameValidator.ValidateFullName(editUserProfileDTO.LastName))
+                        {
+                            throw new BadRequestException("The lastname must be from 2 to 30 letters!");
+                        }
                         user.LastName = editUserProfileDTO.LastName;
                     }
                     if (editUserProfileDTO.Email != "")
                     {
+                        if (!EmailValidator.ValidateEmail(editUserProfileDTO.Email))
+                        {
+                            throw new BadRequestException("You should to write the correct Email!");
+                        }
                         user.Email = editUserProfileDTO.Email;
                     }
                     if (editUserProfileDTO.Nationality != "")
@@ -319,6 +350,10 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                     }
                     if (editUserProfileDTO.Patronymic != "")
                     {
+                        if (!FullNameValidator.ValidateFullName(editUserProfileDTO.Patronymic))
+                        {
+                            throw new BadRequestException("The lastname must be from 2 to 30 letters!");
+                        }
                         user.Patronymic = editUserProfileDTO.Patronymic;
                     }
                     await _authDBContext.SaveChangesAsync();

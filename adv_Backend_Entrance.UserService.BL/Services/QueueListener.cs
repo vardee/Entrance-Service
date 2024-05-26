@@ -8,6 +8,7 @@ using adv_Backend_Entrance.Common.DTO.ApplicantService;
 using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
 using adv_Backend_Entrance.Common.DTO.AdminPanel;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
+using adv_Backend_Entrance.Common.DTO.EntranceService;
 
 namespace adv_Backend_Entrance.UserService.BL.Services
 {
@@ -108,6 +109,10 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             {
                 return await userService.GetProfile(request);
             }, x => x.WithQueueName("getProfileFromEntrance"));
+            bus.Rpc.Respond<Guid, GetMyRolesDTO>(async request =>
+            {
+                return await userService.GetMyRoles(request);
+            }, x => x.WithQueueName("getUserRolesTypes"));
         }
     }
 }

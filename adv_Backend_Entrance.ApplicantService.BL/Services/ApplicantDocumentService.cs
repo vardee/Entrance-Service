@@ -4,6 +4,7 @@ using adv_Backend_Entrance.ApplicantService.DAL.Data.Entites;
 using adv_Backend_Entrance.Common.DTO.ApplicantService;
 using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.DTO.UserService.ManagerAccountService;
+using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
 using adv_Backend_Entrance.Common.Interfaces.ApplicantService;
 using adv_Backend_Entrance.Common.Middlewares;
@@ -37,7 +38,11 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
             var educationLevels = await _bus.Rpc.RequestAsync<Guid, List<GetEducationLevelsDTO>>(userId, c => c.WithQueueName("getEducationLevelsFromEL"));
             var educationLevelDescription = addEducationLevelDTO.EducationLevel.GetDescription();
             var selectedEducationLevel = educationLevels.FirstOrDefault(ed => ed.name == educationLevelDescription);
-
+            var educationDocument = await _applicantDBContext.EducationDocuments.FirstOrDefaultAsync(e => e.UserId == userId);
+            if(educationDocument != null)
+            {
+                throw new BadRequestException("You can add only 1 education document!");
+            }
             if (selectedEducationLevel == null)
             {
                 throw new BadRequestException("Specified education level not found.");
@@ -191,6 +196,7 @@ namespace adv_Backend_Entrance.ApplicantService.BL.Services
 
             var editedPassportInfo = new GetPassportInformationDTO
             {
+                PassportId = passport.Id,
                 birthPlace = passport.BirthPlace,
                 issuedWhen = passport.IssuedWhen,
                 issuedWhom = passport.IssuedWhom,

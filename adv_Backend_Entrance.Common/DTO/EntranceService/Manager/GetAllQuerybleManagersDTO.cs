@@ -8,7 +8,7 @@ namespace adv_Backend_Entrance.Common.DTO.EntranceService.Manager
 {
     public class GetAllQuerybleManagersDTO
     {
-        public IQueryable<GetAllManagersDTO> Managers { get; set; }
+        public List<GetAllManagersDTO> Managers { get; set; }
         public PaginationInformation PaginationInformation { get; set; }
     }
 }

@@ -21,6 +21,7 @@ using adv_Backend_Entrance.Common.DTO.FacultyService;
 using adv_Backend_Entrance.Common.DTO.NotificationService;
 using EasyNetQ;
 using adv_Backend_Entrance.Common.DTO.UserService;
+using adv_Backend_Entrance.Common.DTO.AdminPanel;
 
 namespace adv_Backend_Entrance.EntranceService.BL.Services
 {
@@ -245,6 +246,24 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 }
             }
             await _entranceDBContext.SaveChangesAsync();
+        }
+
+        public async Task<GetManagerIdMVCDTO> GetApplicantManager(Guid userId)
+        {
+            var applicantion = await _entranceDBContext.Applications.FirstOrDefaultAsync(a => a.ApplicantId == userId);
+            if(applicantion == null)
+            {
+                throw new NotFoundException("Applicant with this applicaation not found");
+            }
+            var maganer = new GetManagerIdMVCDTO
+            {
+                ManagerId = applicantion.ManagerId
+            };
+            if(maganer == null)
+            {
+                throw new BadRequestException("This application dont have maganer!");
+            }
+            return maganer;
         }
     }
 }
