@@ -11,6 +11,9 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.FileProviders;
 using adv_Backend_Entrance.ApplicantService.BL.Services;
+using System;
+using adv_Backend_Entrance.ApplicantService.DAL.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,7 +82,9 @@ if (app.Environment.IsDevelopment())
 
 // Add middleware for exception handling
 app.UseMiddleware<ExceptionMiddleware>();
-
+using var serviceScope = app.Services.CreateScope();
+var dbContext = serviceScope.ServiceProvider.GetService<ApplicantDBContext>();
+dbContext?.Database.Migrate();
 // Enable HTTPS redirection
 app.UseHttpsRedirection();
 

@@ -3,7 +3,9 @@ using adv_Backend_Entrance.Common.JWT;
 using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.FacultyService.BL.Configurations;
 using adv_Backend_Entrance.FacultyService.BL.Services;
+using adv_Backend_Entrance.FacultyService.MVCPanel.Data;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 
@@ -70,7 +72,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+using var serviceScope = app.Services.CreateScope();
+var dbContext = serviceScope.ServiceProvider.GetService<FacultyDBContext>();
+dbContext?.Database.Migrate();
 // Add middleware for exception handling
 app.UseMiddleware<ExceptionMiddleware>();
 

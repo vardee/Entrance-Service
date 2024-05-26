@@ -5,9 +5,11 @@ using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.UserService.BL.Configurations;
 using adv_Backend_Entrance.UserService.BL.Services;
 using adv_Backend_Entrance.UserService.DAL;
+using adv_Backend_Entrance.UserService.DAL.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Reflection;
@@ -77,7 +79,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+using var serviceScope = app.Services.CreateScope();
+var dbContext = serviceScope.ServiceProvider.GetService<AuthDbContext>();
+dbContext?.Database.Migrate();
 // Add middleware for exception handling
 app.UseMiddleware<ExceptionMiddleware>();
 
