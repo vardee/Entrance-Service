@@ -103,6 +103,11 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             {
                 return await userService.GetProfile(request.UserId);
             }, x => x.WithQueueName("getUserProfileMVC"));
+
+            bus.Rpc.Respond<Guid, UserGetProfileDTO>(async request =>
+            {
+                return await userService.GetProfile(request);
+            }, x => x.WithQueueName("getProfileFromEntrance"));
         }
     }
 }

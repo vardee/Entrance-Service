@@ -61,7 +61,11 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             }
             if (!BirthDateValidator.ValidateDateOfBirth(userRegisterDTO.BirthDate))
             {
-                throw new BadRequestException("Неверная дата рождения. Вам должно быть не менее 13 лет и не более 100 лет.");
+                throw new BadRequestException("Incorrect date of birth. You must be at least 18 years old and no more than 60 years old.");
+            }
+            if (!PhoneValidator.IsValidPhoneNumber(userRegisterDTO.Phone))
+            {
+                throw new BadRequestException("Incorrect phone number format: for example, 79991234567 or 89991234567");
             }
 
             var user = new User
@@ -292,8 +296,12 @@ namespace adv_Backend_Entrance.UserService.BL.Services
                     {
                         user.Nationality = editUserProfileDTO.Nationality;
                     }
-                    if (editUserProfileDTO.Phone != "")
+                    if (editUserProfileDTO.Phone != null)
                     {
+                        if (!PhoneValidator.IsValidPhoneNumber(editUserProfileDTO.Phone))
+                        {
+                            throw new BadRequestException("Incorrect phone number format: for example, 79991234567 or 89991234567");
+                        }
                         user.PhoneNumber = editUserProfileDTO.Phone;
                     }
                     if (editUserProfileDTO.Gender != null)

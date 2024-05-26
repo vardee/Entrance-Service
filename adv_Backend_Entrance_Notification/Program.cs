@@ -5,6 +5,7 @@ using adv_Backend_Entrance.Common.JWT;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
+using adv_Backend_Entrance_Notification.BL.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ builder.Services.AddControllers().AddJsonOptions(opts =>
 builder.Services.AddNotificationBlServiceDependencies(builder.Configuration);
 
 
+builder.Services.QueueNotificationSubscribe();
 // Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(option =>

@@ -132,3 +132,5 @@ C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_N
 C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification\obj\Debug\net8.0\adv_Backend_Entrance_Notification.genruntimeconfig.cache
 C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification\obj\Debug\net8.0\ref\adv_Backend_Entrance_Notification.dll
 C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification\bin\Debug\net8.0\RabbitMQ.Client.dll
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification\bin\Debug\net8.0\EasyNetQ.dll
+C:\Users\rusma\Documents\adv_Backend\adv_Backend_Entrance\adv_Backend_Entrance_Notification\bin\Debug\net8.0\Newtonsoft.Json.dll

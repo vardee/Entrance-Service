@@ -9,6 +9,6 @@ namespace adv_Backend_Entrance.Common.Interfaces.NotificationService
 {
     public interface INotificationService
     {
-        Task SendEmailNotification(SendNotificationDTO sendNotificationDTO);
+        Task SendNotificationAsync(SendNotificationDTO sendNotificationDTO);
     }
 }

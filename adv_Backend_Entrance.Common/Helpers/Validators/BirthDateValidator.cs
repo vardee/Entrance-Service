@@ -18,7 +18,7 @@ namespace adv_Backend_Entrance.Common.Helpers.Validators
                 age--;
             }
 
-            if (age < 13 || age > 100)
+            if (age < 18 || age > 60)
             {
                 return false;
             }

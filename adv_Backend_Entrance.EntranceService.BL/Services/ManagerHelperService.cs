@@ -18,6 +18,9 @@ using static System.Net.Mime.MediaTypeNames;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.DTO.ApplicantService;
 using adv_Backend_Entrance.Common.DTO.FacultyService;
+using adv_Backend_Entrance.Common.DTO.NotificationService;
+using EasyNetQ;
+using adv_Backend_Entrance.Common.DTO.UserService;
 
 namespace adv_Backend_Entrance.EntranceService.BL.Services
 {
@@ -25,10 +28,12 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
     {
         private readonly EntranceDBContext _entranceDBContext;
         private readonly TokenHelper _tokenHelper;
+        private readonly IBus _bus;
         public ManagerHelperService(EntranceDBContext entranceDBContext, TokenHelper tokenHelper)
         {
             _entranceDBContext = entranceDBContext;
             _tokenHelper = tokenHelper;
+            _bus = RabbitHutch.CreateBus("host=localhost");
         }
 
         public async Task EditApplicantInformation(EditApplicantProfileInformationDTO editApplicantProfileInformation)
@@ -84,7 +89,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
         {
             var currentUser = await _entranceDBContext.Managers.FirstOrDefaultAsync(m => m.UserId == addManagerInDb.UserId);
             var sameRole = await _entranceDBContext.Managers.FirstOrDefaultAsync(m => m.UserId == addManagerInDb.UserId && m.Role == addManagerInDb.Role);
-            if(sameRole != null)
+            if (sameRole != null)
             {
                 throw new BadRequestException($"This user is already have this role {addManagerInDb.Role}");
             }
@@ -108,6 +113,21 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 _entranceDBContext.Managers.Add(manager);
                 await _entranceDBContext.SaveChangesAsync();
             }
+            var mail = new SendNotificationDTO
+            {
+                Message = $"Вам была успешно выдана роль {addManagerInDb.Role}",
+                SendTo = addManagerInDb.Email,
+            };
+            await SendNotification(mail);
+        }
+        private async Task SendNotification(SendNotificationDTO sendNotification)
+        {
+            var message = new SendNotificationDTO
+            {
+                Message = sendNotification.Message,
+                SendTo = sendNotification.SendTo,
+            };
+            await _bus.PubSub.PublishAsync(message, "notification_send_queue");
         }
         public async Task RemoveManagerFromDb(RemoveManagerFromDbDTO removeManagerFromDb)
         {
@@ -118,6 +138,12 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             }
             _entranceDBContext.Managers.Remove(currentUser);
             await _entranceDBContext.SaveChangesAsync();
+            var mail = new SendNotificationDTO
+            {
+                Message = $"У вас была роль {removeManagerFromDb.Role}!",
+                SendTo = removeManagerFromDb.Email,
+            };
+            await SendNotification(mail);
         }
         public async Task SyncPassport(SyncPassportDTO syncPassportDTO)
         {
@@ -175,7 +201,14 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     var programsToRemove = affectedApplicationPrograms
                         .Where(ap => ap.ApplicationId == applicationId)
                         .ToList();
-
+                    var applicant = await _entranceDBContext.Applicants.FirstOrDefaultAsync(aP => aP.Id == application.ApplicantId);
+                    var userInfo = await _bus.Rpc.RequestAsync<Guid, UserGetProfileDTO>(applicant.UserId, x => x.WithQueueName("getProfileFromEntrance"));
+                    var mail = new SendNotificationDTO
+                    {
+                        Message = $"Ваша заявка была удалена из-за обновлений в системе, была удалена программа!",
+                        SendTo = userInfo.Email,
+                    };
+                    await SendNotification(mail);
                     _entranceDBContext.ApplicationPrograms.RemoveRange(programsToRemove);
                     _entranceDBContext.Applications.Remove(application);
                 }
@@ -200,7 +233,13 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                     var programsToRemove = affectedApplicationPrograms
                         .Where(ap => ap.ApplicationId == applicationId)
                         .ToList();
-
+                    var applicant = await _entranceDBContext.Applicants.FirstOrDefaultAsync(aP => aP.Id == application.ApplicantId);
+                    var userInfo = await _bus.Rpc.RequestAsync<Guid, UserGetProfileDTO>(applicant.UserId, x => x.WithQueueName("getProfileFromEntrance"));
+                    var mail = new SendNotificationDTO
+                    {
+                        Message = $"Ваша заявка была удалена из-за обновлений в системе, был удален факультет!",
+                        SendTo = userInfo.Email,
+                    };
                     _entranceDBContext.ApplicationPrograms.RemoveRange(programsToRemove);
                     _entranceDBContext.Applications.Remove(application);
                 }

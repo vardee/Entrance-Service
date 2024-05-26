@@ -45,6 +45,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 LastName = response.lastname,
                 Patronymic = response.patronymic,
                 Phone = response.Phone,
+                Nationality = response.Nationality,
             };
             Console.WriteLine(viewModel.Id);
             
@@ -71,6 +72,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     FirstName = model.FirstName,
                     LastName = model.LastName,
                     Patronymic = model.Patronymic,
+                    Nationality = model.Nationality,
                     BirthDate = DateTime.SpecifyKind(model.BirthDate, DateTimeKind.Utc),
                     Phone = model.Phone,
                     Email = model.Email
@@ -90,6 +92,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     LastName = applicantProfile.lastname,
                     Patronymic = applicantProfile.patronymic,
                     Phone = applicantProfile.Phone,
+                    Nationality = applicantProfile.Nationality,
                 };
                 return PartialView("ApplicantProfile", viewModel);
             }

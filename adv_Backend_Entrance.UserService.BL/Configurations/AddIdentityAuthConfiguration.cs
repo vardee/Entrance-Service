@@ -14,7 +14,10 @@ namespace adv_Backend_Entrance.UserService.BL.Configurations
     {
         public static IServiceCollection AddIdentityDependenciesConfiguration(this IServiceCollection services)
         {
-            services.AddIdentity<User, IdentityRole<Guid>>()
+            services.AddIdentity<User, IdentityRole<Guid>>( (options =>
+            {
+                options.SignIn.RequireConfirmedEmail = false;
+                options.User.RequireUniqueEmail = true;}))
                 .AddEntityFrameworkStores<AuthDbContext>()
                 .AddDefaultTokenProviders()
                 .AddSignInManager<SignInManager<User>>()

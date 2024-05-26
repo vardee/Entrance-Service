@@ -26,12 +26,16 @@ namespace adv_Backend_Entrance.AdminPanel.Models
         [Display(Name = "Отчество")]
         public string? Patronymic { get; set; }
 
+
+        [DataType(DataType.Text)]
+        [Display(Name = "Гражданство")]
+        public string? Nationality { get; set; }
+
         [DataType(DataType.Text)]
         [Display(Name = "Пол")]
         public Gender Gender { get; set; }
 
-        [DataType(DataType.PhoneNumber)]
-        [Phone]
+        [DataType(DataType.Text)]
         [Display(Name = "Телефон")]
         public string? Phone { get; set; }
 

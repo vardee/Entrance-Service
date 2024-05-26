@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "cI7DIE8C8S7vx6WegvFx0sCgusmVfInVrje49kaR6wE7iWetmQywcw/miROEz+ql31HO8j2jgHeyP6vOhHbfMA==",
+  "dgSpecHash": "Jy4+ayIKeuF2AO/302rIg8FdCuhnuyYRnRr0o1eYPTNYFqIEcyk5jl3kDmTgkXtOCnEnItFIzdLCSnh8tyKbMg==",
   "success": true,
   "projectFilePath": "C:\\Users\\rusma\\Documents\\adv_Backend\\adv_Backend_Entrance\\adv_Backend_Entrance_Notification.DAL\\adv_Backend_Entrance_Notification.DAL.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\rusma\\.nuget\\packages\\easynetq\\7.8.0\\easynetq.7.8.0.nupkg.sha512",
     "C:\\Users\\rusma\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\rusma\\.nuget\\packages\\microsoft.aspnetcore.authentication\\2.2.0\\microsoft.aspnetcore.authentication.2.2.0.nupkg.sha512",
     "C:\\Users\\rusma\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.2.0\\microsoft.aspnetcore.authentication.abstractions.2.2.0.nupkg.sha512",
@@ -54,6 +55,7 @@
     "C:\\Users\\rusma\\.nuget\\packages\\microsoft.netcore.platforms\\2.0.0\\microsoft.netcore.platforms.2.0.0.nupkg.sha512",
     "C:\\Users\\rusma\\.nuget\\packages\\microsoft.win32.registry\\4.5.0\\microsoft.win32.registry.4.5.0.nupkg.sha512",
     "C:\\Users\\rusma\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
+    "C:\\Users\\rusma\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
     "C:\\Users\\rusma\\.nuget\\packages\\npgsql\\8.0.2\\npgsql.8.0.2.nupkg.sha512",
     "C:\\Users\\rusma\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\8.0.2\\npgsql.entityframeworkcore.postgresql.8.0.2.nupkg.sha512",
     "C:\\Users\\rusma\\.nuget\\packages\\rabbitmq.client\\6.8.1\\rabbitmq.client.6.8.1.nupkg.sha512",

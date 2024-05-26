@@ -29,12 +29,13 @@
     <div class="row mt-4">
         <div class="col-md-6 mx-auto">
             <form id="formImport" asp-action="ImportInformation" asp-controller="Imports" method="post" class="mt-2">
-                <select asp-for="Filter.Types" class="form-control w-100 border p-1" name="Types" id="Types" multiple>
+                <select asp-for="Filter.Types" class="form-control w-100 border p-1" name="Types" id="Types">
                     <option value="Programs">Программы</option>
                     <option value="Faculties">Факультеты</option>
                     <option value="EducationLevels">Документы об образовании</option>
                     <option value="DocumentTypes">Документы</option>
                 </select>
+                <button type="button" onclick="importData()" class="btn btn-danger mt-2">Импортировать</button>
             </form>
 
         </div>

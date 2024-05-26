@@ -54,7 +54,7 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 throw new BadRequestException("Server response is bad, server problems. Oops!");
             }
             var educationInfo = await _bus.Rpc.RequestAsync<Guid, GetEducationInformationDTO>(Guid.Parse(userId), x => x.WithQueueName("application_educationInfo"));
-            if(educationInfo == null)
+            if (educationInfo == null)
             {
                 throw new BadRequestException("You dont have education document!");
             }
@@ -98,17 +98,24 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 }
                 var documentTypes = await _bus.Rpc.RequestAsync<Guid, List<GetDocumentTypesDTO>>(Guid.Parse(userId), x => x.WithQueueName("application_facultyDocuments"));
                 var programsWithPagination = await _bus.Rpc.RequestAsync<Guid, GetQuerybleProgramsDTO>(Guid.Parse(userId), x => x.WithQueueName("application_facultyPrograms"));
-               
+
                 var nextEducationLevels = documentTypes
                     .Where(dt => dt.educationLevel.id == educationInfo.educationId)
                     .Select(dt => dt.nextEducationLevels)
                     .FirstOrDefault();
+                var usedPriorities = new HashSet<int>();
                 foreach (var program in createApplicationDTO.ProgramsPriority)
                 {
                     if (program.Priority < 1 || program.Priority > createApplicationDTO.ProgramsPriority.Count())
                     {
-                        throw new BadRequestException("You cant put priority less than 1, and more than count of your choosen programs");
+                        throw new BadRequestException("You cant put priority less than 1, and more than count of your chosen programs");
                     }
+                    if (usedPriorities.Contains(program.Priority))
+                    {
+                        throw new BadRequestException("You cannot use the same priority for multiple programs!");
+                    }
+                    usedPriorities.Add(program.Priority);
+
                     if (programsWithPagination != null)
                     {
                         var programs = programsWithPagination.Programs;
@@ -139,11 +146,12 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                             throw new BadRequestException("This program not found!");
                         }
                     }
-                    await _entranceDBContext.SaveChangesAsync();
-                    await AddUserRole(Guid.Parse(userId));
                 }
+                await _entranceDBContext.SaveChangesAsync();
+                await AddUserRole(Guid.Parse(userId));
             }
         }
+
 
         private async Task AddUserRole(Guid userId)
         {

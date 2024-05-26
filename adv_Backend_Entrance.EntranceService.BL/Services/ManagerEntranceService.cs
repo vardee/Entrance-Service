@@ -2,6 +2,7 @@
 using adv_Backend_Entrance.Common.DTO.EntranceService.Applicant;
 using adv_Backend_Entrance.Common.DTO.EntranceService.Manager;
 using adv_Backend_Entrance.Common.DTO.FacultyService;
+using adv_Backend_Entrance.Common.DTO.NotificationService;
 using adv_Backend_Entrance.Common.DTO.UserService;
 using adv_Backend_Entrance.Common.Enums;
 using adv_Backend_Entrance.Common.Helpers;
@@ -10,12 +11,14 @@ using adv_Backend_Entrance.Common.Middlewares;
 using adv_Backend_Entrance.EntranceService.DAL.Data;
 using adv_Backend_Entrance.EntranceService.DAL.Data.Models;
 using adv_Backend_Entrance.UserService.DAL.Data;
+using EasyNetQ;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace adv_Backend_Entrance.EntranceService.BL.Services
@@ -24,10 +27,12 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
     {
         private readonly EntranceDBContext _entranceDBContext;
         private readonly TokenHelper _tokenHelper;
+        private readonly IBus _bus;
         public ManagerEntranceService(EntranceDBContext entranceDBContext, TokenHelper tokenHelper)
         {
             _entranceDBContext = entranceDBContext;
             _tokenHelper = tokenHelper;
+            _bus = RabbitHutch.CreateBus("host=localhost");
         }
 
         public async Task TakeApplication(TakeApplicationDTO takeApplicationDTO, Guid userId)
@@ -221,6 +226,14 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
             }
             application.ApplicationStatus = changeApplicationStatusDTO.Status;
             await _entranceDBContext.SaveChangesAsync();
+            var applicant = await _entranceDBContext.Applicants.FirstOrDefaultAsync(aP => aP.Id == application.ApplicantId);
+            var userInfo = await _bus.Rpc.RequestAsync<Guid, UserGetProfileDTO>(applicant.UserId, x => x.WithQueueName("getProfileFromEntrance"));
+            var mail = new SendNotificationDTO
+            {
+                Message = $"Статус вашей заявки изменен {changeApplicationStatusDTO.Status}!",
+                SendTo = userInfo.Email,
+            };
+            await SendNotification(mail);
         }
 
         public async Task<GetApplicationsDTO> GetApplicantion(GetApplicantDTO getApplicantDTO)
@@ -295,8 +308,24 @@ namespace adv_Backend_Entrance.EntranceService.BL.Services
                 currentApplication.ApplicationStatus = EntranceApplicationStatus.UnderConsideration;
                 await _entranceDBContext.SaveChangesAsync();
             }
+            var applicant = await _entranceDBContext.Applicants.FirstOrDefaultAsync(aP => aP.Id == currentApplication.ApplicantId);
+            var userInfo = await _bus.Rpc.RequestAsync<Guid, UserGetProfileDTO>(applicant.UserId, x => x.WithQueueName("getProfileFromEntrance"));
+            var mail = new SendNotificationDTO
+            {
+                Message = $"Ваш новый менеджер {currentManager.Email}!",
+                SendTo = userInfo.Email,
+            };
+            await SendNotification(mail);
         }
-
+        private async Task SendNotification(SendNotificationDTO sendNotification)
+        {
+            var message = new SendNotificationDTO
+            {
+                Message = sendNotification.Message,
+                SendTo = sendNotification.SendTo,
+            };
+            await _bus.PubSub.PublishAsync(message, "notification_send_queue");
+        }
         public async Task<GetAllQuerybleManagersDTO> GetManagers(int size, int page, string? name, RoleType? roleType)
         {
             if (page <= 0)
