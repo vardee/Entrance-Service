@@ -54,6 +54,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                 LastName = response.lastname,
                 Patronymic = response.patronymic,
                 Phone = response.Phone,
+                Gender = response.Gender,
             };
             return View(viewModel);
         }
@@ -115,7 +116,8 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     Patronymic = model.Patronymic,
                     BirthDate = DateTime.SpecifyKind(model.BirthDate, DateTimeKind.Utc),
                     Phone = model.Phone,
-                    Email = model.Email
+                    Email = model.Email,
+                    Gender = model.Gender,
                 };
                 var request = new GetUserProfileMVCDTO
                 {
@@ -131,6 +133,7 @@ namespace adv_Backend_Entrance.AdminPanel.Controllers
                     LastName = response.lastname,
                     Patronymic = response.patronymic,
                     Phone = response.Phone,
+                    Gender=response.Gender,
                 };
                 return View(viewModel);
             }

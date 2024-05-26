@@ -1,4 +1,5 @@
-﻿@model EditProfileModel
+﻿﻿@using adv_Backend_Entrance.Common.Enums
+@model EditProfileModel
 
 @{
     ViewBag.Title = "Редактировать профиль";
@@ -49,8 +50,8 @@
                             <label asp-for="Gender" class="form-label">Пол</label>
                             <select asp-for="Gender" class="form-select">
                                 <option value="">Выбрать пол</option>
-                                <option value="male">Мужчина</option>
-                                <option value="female">Женщина</option>
+                                <option value="Male" id="Male" name="Male">Мужчина</option>
+                                <option value="Female" id="Female" name="Female">Женщина</option>
                             </select>
                             <span asp-validation-for="Gender" class="text-danger"></span>
                         </div>

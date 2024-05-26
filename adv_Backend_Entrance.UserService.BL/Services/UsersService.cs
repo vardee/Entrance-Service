@@ -383,8 +383,6 @@ namespace adv_Backend_Entrance.UserService.BL.Services
             var message = new EditApplicantProfileInformationDTO
             {
                 Email = editApplicantProfile.Email,
-                BirthDate = editApplicantProfile.BirthDate,
-                Phone = editApplicantProfile.Phone,
                 FirstName = editApplicantProfile.FirstName,
                 LastName = editApplicantProfile.LastName,
                 Patronymic = editApplicantProfile.Patronymic,
